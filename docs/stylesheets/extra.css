@@ -1,0 +1,151 @@
+/* ============================================================
+   14thSecretary · 站点样式微调
+   深色为主，黑白灰底 + 单一暖金强调色
+   ============================================================ */
+
+:root {
+  --md-accent-fg-color: #b08d4f;
+  --md-typeset-a-color: #8a6f3c;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-accent-fg-color: #d8b878;
+  --md-typeset-a-color: #c9a86a;
+}
+
+/* ---------- 标题用衬线 ---------- */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3 {
+  font-family: "Songti SC", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  letter-spacing: .02em;
+}
+
+.md-typeset h1 { font-weight: 500; }
+.md-typeset h2 {
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  padding-bottom: .3rem;
+}
+
+/* ---------- 秘语方格 ---------- */
+.secret-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 8px;
+  margin: 1.4rem 0;
+}
+
+.secret-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 6px 10px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  background-color: var(--md-code-bg-color);
+}
+
+.secret-glyph {
+  font-family: var(--md-code-font-family);
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--md-accent-fg-color);
+}
+
+.secret-glyph.lg {
+  font-family: "Songti SC", "Noto Serif SC", "SimSun", serif;
+  font-size: 21px;
+}
+
+.secret-name {
+  font-size: .72rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.secret-sub {
+  font-size: .6rem;
+  letter-spacing: .06em;
+  color: var(--md-default-fg-color--lighter);
+}
+
+/* ---------- 赐名流程 ---------- */
+.ritual-flow {
+  display: grid;
+  gap: 10px;
+  margin: 1.4rem 0;
+}
+
+.ritual-step {
+  border-left: 2px solid var(--md-accent-fg-color);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 16px;
+  background-color: var(--md-code-bg-color);
+}
+
+.ritual-step .ritual-no {
+  display: block;
+  font-family: var(--md-code-font-family);
+  font-size: .68rem;
+  letter-spacing: .16em;
+  color: var(--md-accent-fg-color);
+}
+
+.ritual-step b {
+  display: block;
+  margin: 2px 0 4px;
+  font-size: .95rem;
+  font-family: "Songti SC", "Noto Serif SC", "SimSun", serif;
+}
+
+.ritual-step p {
+  margin: 0;
+  font-size: .76rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* ---------- 怪物条目页头 ---------- */
+.entry-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 1.6rem;
+  padding: 22px 16px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  background-color: var(--md-code-bg-color);
+}
+
+.entry-seal {
+  font-family: var(--md-code-font-family);
+  font-size: .78rem;
+  letter-spacing: .3em;
+  text-indent: .3em;
+  color: var(--md-accent-fg-color);
+}
+
+.entry-name {
+  font-family: "Songti SC", "Noto Serif SC", "SimSun", serif;
+  font-size: 1.9rem;
+  letter-spacing: .24em;
+  text-indent: .24em;
+}
+
+/* ---------- 内嵌工具 ---------- */
+.demo-frame {
+  width: 100%;
+  height: min(78vh, 860px);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  background-color: #08090b;
+}
+
+/* ---------- 表格紧凑一点 ---------- */
+.md-typeset table:not([class]) {
+  font-size: .74rem;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-code-bg-color);
+}

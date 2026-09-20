@@ -1,0 +1,115 @@
+site_name: 14thSecretary · 设定集
+site_description: 秘语体系 / 赐名怪物 / 世界设定总集
+site_author: 14thSecretary
+
+site_url: https://YOURNAME.github.io/14thSecretary/
+repo_url: https://github.com/YOURNAME/14thSecretary
+repo_name: YOURNAME/14thSecretary
+edit_uri: edit/main/docs/
+
+copyright: 14thSecretary · 内部设定资料
+
+theme:
+  name: material
+  language: zh
+  logo: assets/sigil.svg
+  favicon: assets/sigil.svg
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.tabs.link
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: 切换到深色
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: 切换到浅色
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+  - tags
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/YOURNAME/14thSecretary
+      name: 14thSecretary on GitHub
+
+nav:
+  - 首页: index.md
+  - 设定:
+      - canon/index.md
+      - 秘语体系: canon/secrets.md
+      - 四段式真名: canon/true-name.md
+      - 赐名流程: canon/ritual.md
+  - 图鉴:
+      - bestiary/index.md
+      - 001 灰烬中的某物: bestiary/001-ash.md
+      - 002 静水之下: bestiary/002-stillwater.md
+      - 003 第八次雷暴: bestiary/003-thunder.md
+      - 004 巡礼者的残响: bestiary/004-pilgrim.md
+  - 工具:
+      - tools/index.md
+      - 测名台: tools/naming-demo.md
+  - 编辑:
+      - meta/style-guide.md
+      - 条目模板: meta/templates.md

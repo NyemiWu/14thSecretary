@@ -1,0 +1,23 @@
+# 构建产物
+site/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# MkDocs 缓存
+.cache/
+
+# 临时日志
+*.log
+_*
