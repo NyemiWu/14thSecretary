@@ -2,6 +2,11 @@ name: Deploy site
 
 # 每次 main 有提交就重建并发布。
 # 成员通过 /editor/ 提交的稿件走的就是这条路 —— 不需要任何人在本地跑命令。
+#
+# 【一次性前置】仓库 Settings → Pages → Source 必须选 "GitHub Actions"。
+# 这一步无法自动化：创建 Pages 站点需要仓库 admin 权限，
+# 工作流的 GITHUB_TOKEN（即使给了 pages: write）不够，会报
+# "Resource not accessible by integration"。所以只能手动开一次，之后永久生效。
 on:
   push:
     branches: [main]
@@ -23,13 +28,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # enablement: true 会用工作流自带的 GITHUB_TOKEN（已授予 pages: write）
-      # 自动把仓库的 Pages 建起来，省掉去 Settings → Pages 手点那一步。
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Setup Python
         uses: actions/setup-python@v5
