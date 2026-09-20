@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>COC7 战图工具 — KP端</title>
+<style>
+:root{--bg:#1a1a2e;--bg2:#16213e;--bg3:#0f3460;--accent:#e94560;--purple:#533483;--text:#eee;--muted:#888;--grid:#2a2a4e;--border:#3a3a5e;--cell:32px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI','Microsoft YaHei',sans-serif;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+
+/* ===== 顶部栏 ===== */
+#topBar{display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;z-index:10}
+#topBar .logo{font-size:16px;font-weight:700;color:var(--accent);white-space:nowrap}
+#mapNameInput{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:4px;font-size:14px;width:200px}
+#mapNameInput:focus{outline:none;border-color:var(--accent)}
+.top-btn{background:var(--purple);color:#fff;border:none;padding:5px 14px;border-radius:4px;cursor:pointer;font-size:13px;white-space:nowrap;transition:background .2s}
+.top-btn:hover{background:var(--accent)}
+.top-sep{width:1px;height:24px;background:var(--border)}
+#mapNameHint{color:var(--muted);font-size:12px}
+
+/* ===== 主体布局 ===== */
+#mainBody{display:flex;flex:1;overflow:hidden}
+
+/* 左侧尺寸面板 */
+#leftPanel{width:140px;background:var(--bg2);border-right:1px solid var(--border);padding:12px;flex-shrink:0;display:flex;flex-direction:column;gap:12px}
+.panel-title{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.size-group{display:flex;flex-direction:column;gap:8px}
+.size-item{display:flex;flex-direction:column;gap:2px}
+.size-item label{font-size:11px;color:var(--muted)}
+.size-item input{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;font-size:13px;width:100%}
+.size-item input:focus{outline:none;border-color:var(--accent)}
+.size-btn{background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:5px;border-radius:3px;cursor:pointer;font-size:12px;text-align:center;transition:all .2s}
+.size-btn:hover{border-color:var(--accent);color:var(--accent)}
+.map-info{font-size:11px;color:var(--muted);line-height:1.6}
+.map-info span{color:var(--text)}
+
+/* 中间网格区域 */
+#gridContainer{flex:1;overflow:auto;padding:16px;display:flex;align-items:flex-start;justify-content:center}
+#gridWrapper{position:relative;display:inline-block}
+#gridView{display:grid;gap:0;border:2px solid var(--grid);background:var(--bg)}
+.cell{width:var(--cell);height:var(--cell);border:1px solid var(--grid);position:relative;cursor:pointer;transition:background .1s}
+.cell:hover{outline:2px solid var(--accent);outline-offset:-2px;z-index:2}
+.cell.border-cell{background:rgba(83,52,131,0.15);border-color:var(--purple)}
+.cell.border-cell:hover{outline-color:var(--purple)}
+.cell.selected-preview{outline:2px solid #ff0;outline-offset:-2px}
+
+/* 格子类型样式 */
+.cell[data-type="wall1"]{background:#4a4a5e}
+.cell[data-type="wall2"]{background:#5a5a6e;opacity:.85}
+.cell[data-type="wall2"]::after{content:'';position:absolute;inset:30%;border:1px dashed #888}
+.cell[data-type="wall3"]{background:#5e4a4a;position:relative}
+.cell[data-type="wall3"]::after{content:'┃';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px}
+.cell[data-type="wall4"]{background:rgba(60,100,60,.5);position:relative}
+.cell[data-type="wall4"]::after{content:'╋';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(100,160,100,.8);font-size:14px}
+.cell[data-type="door"]{background:#6b4e2e;position:relative}
+.cell[data-type="door"]::after{content:'🚪';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.cell[data-type="door"].open{background:rgba(107,78,46,.3)}
+.cell[data-type="chest"]{background:#5e5020;position:relative}
+.cell[data-type="chest"]::after{content:'📦';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.cell[data-type="item"]{background:rgba(30,80,130,.4);position:relative}
+.cell[data-type="item"]::after{content:'📜';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.cell[data-type="monster"]{background:rgba(130,30,30,.4);position:relative}
+.cell[data-type="monster"]::after{content:'👹';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.cell[data-type="spawn"]{background:rgba(30,130,60,.3);position:relative}
+.cell[data-type="spawn"]::after{content:'△';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#4f4;font-size:20px;font-weight:700}
+.cell[data-type="event"]{background:rgba(100,30,130,.3);position:relative}
+.cell[data-type="event"]::after{content:'⚡';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.cell[data-type="portal"]{background:rgba(30,130,130,.3);position:relative}
+.cell[data-type="portal"]::after{content:'◉';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#0ff;font-size:20px;font-weight:700}
+
+/* 右侧工具栏 */
+#rightPanel{width:160px;background:var(--bg2);border-left:1px solid var(--border);padding:8px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;transition:width .2s}
+#rightPanel.collapsed{width:40px}
+#rightPanel.collapsed .tool-label{display:none}
+#rightPanel.collapsed .confirm-bar{display:none}
+.tool-toggle{background:none;border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;margin-bottom:8px;align-self:flex-end}
+.tool-toggle:hover{border-color:var(--accent)}
+.tool-list{display:flex;flex-direction:column;gap:3px;flex:1}
+.tool-btn{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:12px;border:1px solid transparent;transition:all .15s;background:var(--bg3)}
+.tool-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tool-btn.active{border-color:var(--accent);background:rgba(233,69,96,.15);color:var(--accent)}
+.tool-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.tool-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.confirm-bar{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.confirm-bar button{flex:1;padding:8px;border:none;border-radius:4px;cursor:pointer;font-size:16px;font-weight:700;transition:all .2s}
+#btnConfirm{background:#2a6;color:#fff}
+#btnConfirm:hover{background:#3b7}
+#btnCancel{background:#a33;color:#fff}
+#btnCancel:hover{background:#c44}
+
+/* ===== 模态框 ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;max-width:520px;width:90%;max-height:80vh;overflow-y:auto;position:relative}
+.modal h3{color:var(--accent);font-size:16px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:6px}
+.modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.modal-close:hover{color:var(--accent)}
+.modal label{display:block;font-size:12px;color:var(--muted);margin:8px 0 2px}
+.modal input,.modal textarea,.modal select{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:13px}
+.modal input:focus,.modal textarea:focus,.modal select:focus{outline:none;border-color:var(--accent)}
+.modal textarea{resize:vertical;min-height:50px}
+.modal-row{display:flex;gap:8px;align-items:center}
+.modal-row>*{flex:1}
+.modal-row label{margin:0}
+.modal-btn{background:var(--purple);color:#fff;border:none;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:13px;margin-top:10px}
+.modal-btn:hover{background:var(--accent)}
+.modal-btn.danger{background:#a33}
+.modal-btn.danger:hover{background:#c44}
+.modal-btn.secondary{background:var(--bg3);border:1px solid var(--border)}
+.skill-check-row{display:flex;gap:6px;align-items:flex-end;margin-bottom:4px}
+.skill-check-row input{flex:2}
+.skill-check-row select{flex:1}
+.skill-check-row .sc-diff{flex:1}
+.remove-sc{background:none;border:none;color:#a33;cursor:pointer;font-size:16px;padding:0 4px}
+.add-sc{background:none;border:none;color:var(--accent);cursor:pointer;font-size:13px;margin-top:4px}
+
+/* 怪物选择面板 */
+.monster-cats{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.monster-cat-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:3px 10px;border-radius:12px;cursor:pointer;font-size:11px;transition:all .15s}
+.monster-cat-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(233,69,96,.1)}
+.monster-list{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:4px}
+.monster-item{padding:6px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);transition:background .1s}
+.monster-item:hover{background:var(--bg3)}
+.monster-item.selected{background:rgba(233,69,96,.15);color:var(--accent)}
+.monster-item .m-name{font-weight:600}
+.monster-item .m-desc{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 物品选择面板 */
+.item-list{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:4px}
+.item-pick{padding:6px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);transition:background .1s}
+.item-pick:hover{background:var(--bg3)}
+.item-pick.selected{background:rgba(233,69,96,.15);color:var(--accent)}
+
+/* 备用物品管理 */
+.spare-items-panel{margin-top:8px}
+.spare-item-row{display:flex;align-items:center;gap:6px;padding:4px 8px;border-bottom:1px solid var(--border);font-size:12px}
+.spare-item-row .si-icon{font-size:14px}
+.spare-item-row .si-name{flex:1}
+.spare-item-row .si-del{background:none;border:none;color:#a33;cursor:pointer;font-size:14px}
+
+/* 格子信息提示 */
+.cell-tooltip{position:fixed;background:var(--bg2);border:1px solid var(--accent);border-radius:4px;padding:8px 12px;font-size:12px;z-index:50;pointer-events:none;max-width:220px;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+.cell-tooltip .tt-type{color:var(--accent);font-weight:600;margin-bottom:4px}
+.cell-tooltip .tt-detail{color:var(--muted);line-height:1.5}
+
+/* 怪物详情 */
+.monster-detail{font-size:12px;line-height:1.6;margin-top:8px;padding:8px;background:var(--bg3);border-radius:4px}
+.monster-detail .md-row{display:flex;gap:8px}
+.monster-detail .md-label{color:var(--muted);width:60px;flex-shrink:0}
+.monster-detail .md-val{color:var(--text)}
+
+/* 导入导出区域 */
+.io-area{margin-top:12px}
+.io-area textarea{width:100%;min-height:80px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:11px;font-family:monospace;resize:vertical}
+.io-area textarea:focus{outline:none;border-color:var(--accent)}
+.io-btns{display:flex;gap:6px;margin-top:6px}
+.effect-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;padding:6px 8px;background:var(--bg3);border-radius:6px;}
+.effect-row select,.effect-row input{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:4px 6px;border-radius:4px;font-size:12px;}
+.effect-row select{flex:1;min-width:80px;}
+.effect-row input{flex:1;min-width:60px;}
+.effect-row .effect-remove{background:none;border:none;color:#a33;cursor:pointer;font-size:16px;padding:0 4px;}
+.effect-row .effect-remove:hover{color:#c44;}
+#itemEffectsArea{margin-top:8px;margin-bottom:12px;}
+#itemEffectsArea label{color:var(--muted);font-size:12px;margin-bottom:4px;display:block;}
+</style>
+</head>
+<body>
+
+<!-- 顶部栏 -->
+<div id="topBar">
+  <span class="logo">🏰 COC7 战图 KP端</span>
+  <div class="top-sep"></div>
+  <input type="text" id="mapNameInput" placeholder="地图名称" value="未命名地图">
+  <span id="mapNameHint"></span>
+  <div style="flex:1"></div>
+  <button class="top-btn" onclick="openImportModal()">📥 导入SEAB码</button>
+  <button class="top-btn" onclick="exportMap()">📤 导出SEAB码</button>
+</div>
+
+<!-- 主体 -->
+<div id="mainBody">
+  <!-- 左侧尺寸面板 -->
+  <div id="leftPanel">
+    <div>
+      <div class="panel-title">📐 地图尺寸</div>
+      <div class="size-group">
+        <div class="size-item"><label>行数</label><input type="number" id="rowsInput" value="20" min="5" max="60"></div>
+        <div class="size-item"><label>列数</label><input type="number" id="colsInput" value="20" min="5" max="60"></div>
+        <div class="size-item"><label>格子大小(px)</label><input type="number" id="cellSizeInput" value="32" min="16" max="64" step="4"></div>
+        <button class="size-btn" onclick="applySize()">应用尺寸</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel-title">ℹ️ 地图信息</div>
+      <div class="map-info" id="mapInfo">
+        格子总数: <span id="infoTotal">400</span><br>
+        已使用: <span id="infoUsed">0</span><br>
+        接口数: <span id="infoPortals">0</span>
+      </div>
+    </div>
+    <div>
+      <div class="panel-title">🔗 快捷操作</div>
+      <button class="size-btn" style="margin-bottom:4px" onclick="clearAllCells()">🗑️ 清空地图</button>
+      <button class="size-btn" onclick="fillBorderWalls()">🧱 边框填墙</button>
+    </div>
+  </div>
+
+  <!-- 中间网格 -->
+  <div id="gridContainer">
+    <div id="gridWrapper">
+      <div id="gridView"></div>
+    </div>
+  </div>
+
+  <!-- 右侧工具栏 -->
+  <div id="rightPanel">
+    <button class="tool-toggle" onclick="toggleRightPanel()" title="折叠/展开">☰</button>
+    <div class="tool-list" id="toolList">
+      <div class="tool-btn" data-tool="wall1" onclick="selectTool('wall1')"><span class="tool-icon">▣</span><span class="tool-label">墙体1</span></div>
+      <div class="tool-btn" data-tool="wall2" onclick="selectTool('wall2')"><span class="tool-icon">◫</span><span class="tool-label">墙体2</span></div>
+      <div class="tool-btn" data-tool="wall3" onclick="selectTool('wall3')"><span class="tool-icon">▤</span><span class="tool-label">墙体3</span></div>
+      <div class="tool-btn" data-tool="wall4" onclick="selectTool('wall4')"><span class="tool-icon">▧</span><span class="tool-label">墙体4</span></div>
+      <div class="tool-btn" data-tool="door" onclick="selectTool('door')"><span class="tool-icon">🚪</span><span class="tool-label">门</span></div>
+      <div class="tool-btn" data-tool="chest" onclick="selectTool('chest')"><span class="tool-icon">📦</span><span class="tool-label">箱子</span></div>
+      <div class="tool-btn" data-tool="item" onclick="selectTool('item')"><span class="tool-icon">📜</span><span class="tool-label">物品/线索</span></div>
+      <div class="tool-btn" data-tool="monster" onclick="selectTool('monster')"><span class="tool-icon">👹</span><span class="tool-label">怪物</span></div>
+      <div class="tool-btn" data-tool="spawn" onclick="selectTool('spawn')"><span class="tool-icon">△</span><span class="tool-label">出生点</span></div>
+      <div class="tool-btn" data-tool="event" onclick="selectTool('event')"><span class="tool-icon">⚡</span><span class="tool-label">自定义事件</span></div>
+      <div class="tool-btn" data-tool="spare" onclick="openSpareItemsPanel()"><span class="tool-icon">🎒</span><span class="tool-label">备用物品</span></div>
+      <div class="tool-btn" data-tool="eraser" onclick="selectTool('eraser')"><span class="tool-icon">🧹</span><span class="tool-label">橡皮擦</span></div>
+    </div>
+    <div class="confirm-bar">
+      <button id="btnConfirm" onclick="confirmEdit()" title="保存编辑">✓</button>
+      <button id="btnCancel" onclick="cancelEdit()" title="取消编辑">✗</button>
+    </div>
+  </div>
+</div>
+
+<!-- 提示框 -->
+<div class="cell-tooltip" id="cellTooltip" style="display:none"></div>
+
+<!-- 门创建模态框 -->
+<div class="modal-overlay" id="doorModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('doorModal')">✕</button>
+    <h3>🚪 创建门</h3>
+    <label>门名称</label><input type="text" id="doorName" placeholder="如：铁门、木门">
+    <label>开门难度（技能值，0=无需检定）</label><input type="number" id="doorDiff" value="50" min="0" max="99">
+    <label style="display:flex;align-items:center;gap:6px;margin-top:8px"><input type="checkbox" id="doorNeedKey"> 需要钥匙（钥匙将自动加入备用物品）</label>
+    <button class="modal-btn" onclick="saveDoor()">确认创建</button>
+  </div>
+</div>
+
+<!-- 箱子创建模态框 -->
+<div class="modal-overlay" id="chestModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('chestModal')">✕</button>
+    <h3>📦 创建/编辑箱子</h3>
+    <label>箱子名称</label><input type="text" id="chestName" placeholder="如：木箱、保险柜">
+    <label>开箱难度（技能值，0=无需检定）</label><input type="number" id="chestDiff" value="50" min="0" max="99">
+    <label style="display:flex;align-items:center;gap:6px;margin-top:8px"><input type="checkbox" id="chestNeedKey"> 需要钥匙（钥匙将自动加入备用物品）</label>
+    <label style="margin-top:10px">放入物品（从备用物品表中选择，可留空）</label>
+    <select id="chestItemSelect"><option value="">-- 请选择 --</option></select>
+    <button class="modal-btn" onclick="saveChest()">确认创建</button>
+  </div>
+</div>
+
+<!-- 物品/线索创建模态框 -->
+<div class="modal-overlay" id="itemModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('itemModal')">✕</button>
+    <h3>📜 创建物品/线索</h3>
+    <label>技能难度（最多5个）</label>
+    <div id="itemSkillChecks"></div>
+    <button class="add-sc" onclick="addSkillCheck('itemSkillChecks')">+ 添加技能难度</button>
+    <label style="margin-top:10px">选择物品（从备用物品表）</label>
+    <select id="itemSelect"><option value="">-- 请选择 --</option></select>
+    <button class="modal-btn" onclick="saveItemCell()">确认创建</button>
+  </div>
+</div>
+
+<!-- 怪物创建模态框 -->
+<div class="modal-overlay" id="monsterModal">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeModal('monsterModal')">✕</button>
+    <h3>👹 创建怪物格子</h3>
+    <label>技能难度（最多5个）</label>
+    <div id="monsterSkillChecks"></div>
+    <button class="add-sc" onclick="addSkillCheck('monsterSkillChecks')">+ 添加技能难度</button>
+    <label style="margin-top:10px">选择怪物</label>
+    <div class="monster-cats" id="monsterCatTabs"></div>
+    <input type="text" id="monsterSearchInput" placeholder="🔍 搜索怪物..." oninput="filterMonsterPresets()">
+    <div class="monster-list" id="monsterPresetList"></div>
+    <div class="monster-detail" id="monsterDetail" style="display:none"></div>
+    <label style="margin-top:10px">或者 <button class="add-sc" onclick="showCustomMonsterForm()">自定义怪物</button></label>
+    <div id="customMonsterForm" style="display:none;margin-top:8px">
+      <label>怪物名称</label><input type="text" id="cmName">
+      <div class="modal-row"><div><label>STR</label><input type="number" id="cmSTR" value="50"></div><div><label>CON</label><input type="number" id="cmCON" value="50"></div><div><label>SIZ</label><input type="number" id="cmSIZ" value="50"></div><div><label>DEX</label><input type="number" id="cmDEX" value="50"></div></div>
+      <div class="modal-row"><div><label>APP</label><input type="number" id="cmAPP" value="50"></div><div><label>INT</label><input type="number" id="cmINT" value="50"></div><div><label>POW</label><input type="number" id="cmPOW" value="50"></div><div><label>EDU</label><input type="number" id="cmEDU" value="50"></div></div>
+      <div class="modal-row"><div><label>HP</label><input type="number" id="cmHP" value="10"></div><div><label>MP</label><input type="number" id="cmMP" value="10"></div><div><label>护甲</label><input type="number" id="cmArmor" value="0"></div><div><label>MOV</label><input type="number" id="cmMov" value="8"></div></div>
+      <div class="modal-row"><div><label>DB</label><input type="text" id="cmDB" value="+0"></div><div><label>体格</label><input type="number" id="cmBuild" value="0"></div><div><label>SAN损失</label><input type="text" id="cmSanLoss" value="1/1d4"></div></div>
+      <label>攻击方式（每行一个：名称,技能值,伤害骰,射程）</label><textarea id="cmAttacks" rows="3" placeholder="爪击,60,1d6+db,触摸&#10;撕咬,40,1d8,触摸"></textarea>
+      <label>描述</label><textarea id="cmDesc" rows="2"></textarea>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button class="modal-btn" onclick="saveMonsterCell()">确认创建</button>
+      <button class="modal-btn secondary" onclick="importMonsterSeab()">📥 导入怪物SEAB码</button>
+      <button class="modal-btn secondary" onclick="exportSelectedMonster()">📤 导出怪物SEAB码</button>
+    </div>
+  </div>
+</div>
+
+<!-- 自定义事件创建模态框 -->
+<div class="modal-overlay" id="eventModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('eventModal')">✕</button>
+    <h3>⚡ 创建自定义事件</h3>
+    <label>技能难度（最多5个）</label>
+    <div id="eventSkillChecks"></div>
+    <button class="add-sc" onclick="addSkillCheck('eventSkillChecks')">+ 添加技能难度</button>
+    <label style="margin-top:10px">弹窗文字内容</label><textarea id="eventPopupText" rows="3" placeholder="触发事件时显示的文字..."></textarea>
+    <label style="margin-top:8px">奖励类型</label>
+    <select id="eventRewardType" onchange="toggleEventReward()">
+      <option value="">无奖励</option>
+      <option value="item">物品</option>
+      <option value="monster">怪物</option>
+    </select>
+    <div id="eventRewardItem" style="display:none;margin-top:6px">
+      <label>选择物品</label>
+      <select id="eventItemSelect"><option value="">-- 请选择 --</option></select>
+    </div>
+    <div id="eventRewardMonster" style="display:none;margin-top:6px">
+      <label>选择怪物</label>
+      <select id="eventMonsterSelect"><option value="">-- 请选择 --</option></select>
+    </div>
+    <button class="modal-btn" onclick="saveEventCell()">确认创建</button>
+  </div>
+</div>
+
+<!-- 传送门创建模态框 -->
+<div class="modal-overlay" id="portalModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('portalModal')">✕</button>
+    <h3>🔗 创建传送门</h3>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:10px">在地图边缘创建通往其他地图的接口</p>
+    <label>传送门名称</label><input type="text" id="portalName" placeholder="如：通往地下室">
+    <label>目标地图SEAB码</label><textarea id="portalTarget" rows="2" placeholder="粘贴目标地图的SEAB码..."></textarea>
+    <label>门描述（触发时显示）</label><textarea id="portalDesc" rows="2" placeholder="门的描述文字..."></textarea>
+    <button class="modal-btn" onclick="savePortal()">确认创建</button>
+  </div>
+</div>
+
+<!-- 格子详情模态框 -->
+<div class="modal-overlay" id="cellDetailModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('cellDetailModal')">✕</button>
+    <h3 id="cellDetailTitle">格子详情</h3>
+    <div id="cellDetailContent"></div>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button class="modal-btn" onclick="editCurrentCell()">✏️ 编辑</button>
+      <button class="modal-btn danger" onclick="deleteCurrentCell()">🗑️ 删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 备用物品面板模态框 -->
+<div class="modal-overlay" id="spareItemsModal">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeModal('spareItemsModal')">✕</button>
+    <h3>🎒 备用物品管理</h3>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:8px">此表中的物品可在创建物品/线索和自定义事件时选择</p>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button class="modal-btn" onclick="addSpareCustom()">+ 自定义物品</button>
+      <button class="modal-btn" onclick="addSparePreset()">+ 预设武器</button>
+      <button class="modal-btn secondary" onclick="addSpareRandom()">🎲 随机盲盒</button>
+    </div>
+    <div class="spare-items-panel" id="spareItemsList"></div>
+  </div>
+</div>
+
+<!-- 预设武器选择模态框 -->
+<div class="modal-overlay" id="weaponPickerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('weaponPickerModal')">✕</button>
+    <h3>🗡️ 选择预设武器</h3>
+    <div id="weaponPickerList" style="max-height:300px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- 自定义物品模态框 -->
+<div class="modal-overlay" id="customItemModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('customItemModal')">✕</button>
+    <h3>⭐ 添加自定义物品</h3>
+    <label>物品类别</label>
+    <select id="ciCategory" onchange="updateCustomItemFields()">
+      <option value="clue">线索/证据 📜</option>
+      <option value="prop">道具 💊</option>
+      <option value="weapon">武器 🗡</option>
+      <option value="misc">杂物 🔧</option>
+      <option value="custom">自定义 ⭐</option>
+    </select>
+    <div id="ciFields"></div>
+    <button class="modal-btn" onclick="saveCustomItem()">确认添加</button>
+  </div>
+</div>
+
+<!-- 导入模态框 -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('importModal')">✕</button>
+    <h3>📥 导入地图SEAB码</h3>
+    <div class="io-area">
+      <textarea id="importInput" placeholder="粘贴哦齁- 或 SEAB- 格式的地图码..."></textarea>
+      <div class="io-btns"><button class="modal-btn" onclick="importMap()">导入</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 导出模态框 -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('exportModal')">✕</button>
+    <h3>📤 导出地图SEAB码</h3>
+    <div class="io-area">
+      <textarea id="exportOutput" readonly></textarea>
+      <div class="io-btns">
+        <button class="modal-btn" onclick="copyExport()">📋 复制</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 怪物SEAB导入模态框 -->
+<div class="modal-overlay" id="monsterImportModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('monsterImportModal')">✕</button>
+    <h3>📥 导入怪物SEAB码</h3>
+    <textarea id="monsterImportInput" placeholder="粘贴怪物SEAB码..." rows="4" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:11px;font-family:monospace"></textarea>
+    <button class="modal-btn" onclick="doImportMonsterSeab()" style="margin-top:8px">导入</button>
+  </div>
+</div>
+
+<!-- 怪物SEAB导出模态框 -->
+<div class="modal-overlay" id="monsterExportModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('monsterExportModal')">✕</button>
+    <h3>📤 导出怪物SEAB码</h3>
+    <textarea id="monsterExportOutput" readonly rows="4" style="width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:4px;font-size:11px;font-family:monospace"></textarea>
+    <div style="margin-top:6px"><button class="modal-btn" onclick="copyMonsterExport()">📋 复制</button></div>
+  </div>
+</div>
+
+<script>
+// ===================== SEAB ENCODING =====================
+const B64_CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const ONMO_CHARS='啊叮呼噜呜嗷嘎叽咕哼唧嘤啪嗒啦嘻哈喔咿呀嘞嘣嗖呃咦嘁呲唰嗤嘘嗄噗咻嗳嘌唏嗔啧嗝嗐嗬哎噢嗗嘟铛~!@#$%^&*()_+-|[]<';
+const ONMO_PREFIX='哦齁-';
+
+function encodeOnmo(b64){let r='';for(let i=0;i<b64.length;i++){const idx=B64_CHARS.indexOf(b64[i]);r+=idx===-1?b64[i]:ONMO_CHARS[idx];}return ONMO_PREFIX+r;}
+function decodeOnmo(s){if(!s.startsWith(ONMO_PREFIX))return null;const body=s.slice(ONMO_PREFIX.length);let r='';for(let i=0;i<body.length;i++){const idx=ONMO_CHARS.indexOf(body[i]);r+=idx===-1?body[i]:B64_CHARS[idx];}return r;}
+function decodeSeab(code){let b64;if(code.startsWith(ONMO_PREFIX)){b64=decodeOnmo(code);if(!b64)throw new Error('SEAB码解析失败');}else if(code.startsWith('SEAB-')){b64=code.slice(5);}else if(code.startsWith('呜噜-')){throw new Error('旧版拟声格式（呜噜-）已不支持');}else throw new Error('无效的SEAB码（需以哦齁- 或 SEAB- 开头）');return JSON.parse(decodeURIComponent(escape(atob(b64))));}
+function encodeSeab(obj){const b64=btoa(unescape(encodeURIComponent(JSON.stringify(obj))));return encodeOnmo(b64);}
+
+// ===================== WEAPON PRESETS =====================
+const WEAPON_PRESETS=[
+  {name:"斗殴(拳脚)",skill:"格斗(斗殴)",dice:"1d3",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"徒手攻击",effect:"近战伤害"},
+  {name:"匕首",skill:"格斗(斗殴)",dice:"1d4+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"短刃近战武器",effect:"近战伤害"},
+  {name:"斧头",skill:"格斗(斧)",dice:"1d8+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"伐木斧",effect:"近战伤害"},
+  {name:"棒球棍",skill:"格斗(斗殴)",dice:"1d8",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"木制球棒",effect:"近战伤害"},
+  {name:"链条",skill:"格斗(斗殴)",dice:"1d6",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"铁链缠绕攻击",effect:"近战伤害"},
+  {name:"大锤",skill:"格斗(斗殴)",dice:"2d6+4",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"重型锤击武器，先攻-50",effect:"近战伤害"},
+  {name:"刀剑",skill:"格斗(剑)",dice:"1d8+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"长剑或军刀",effect:"近战伤害"},
+  {name:"长矛",skill:"格斗(矛)",dice:"1d8+1",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"长柄穿刺武器",effect:"近战伤害"},
+  {name:"刺刀",skill:"格斗(斗殴)",dice:"1d6+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"安装在步枪上的刺刀",effect:"近战伤害"},
+  {name:".22手枪",skill:"射击(手枪)",dice:"1d8",range:"15",counter:8,maxCounter:8,indestructible:false,malfunction:95,desc:"轻型手枪",effect:"射击伤害"},
+  {name:".38左轮手枪",skill:"射击(手枪)",dice:"1d8",range:"15",counter:6,maxCounter:6,indestructible:false,malfunction:98,desc:"警用左轮",effect:"射击伤害"},
+  {name:".45手枪",skill:"射击(手枪)",dice:"1d10+2",range:"15",counter:7,maxCounter:7,indestructible:false,malfunction:96,desc:"大口径手枪",effect:"射击伤害"},
+  {name:"霰弹枪",skill:"射击(霰弹枪)",dice:"2d6+4",range:"15",counter:2,maxCounter:2,indestructible:false,malfunction:98,desc:"近距离威力巨大",effect:"射击伤害"},
+  {name:"步枪",skill:"射击(步枪)",dice:"1d10+2",range:"110",counter:5,maxCounter:5,indestructible:false,malfunction:99,desc:"标准步枪",effect:"射击伤害"},
+  {name:"猎枪",skill:"射击(霰弹枪)",dice:"2d6+4",range:"15",counter:2,maxCounter:2,indestructible:false,malfunction:98,desc:"双管猎枪",effect:"射击伤害"},
+  {name:"汤普森冲锋枪",skill:"射击(冲锋枪)",dice:"1d10",range:"15",counter:20,maxCounter:50,indestructible:false,malfunction:96,desc:"弹鼓50发",effect:"射击伤害"},
+  {name:"弓",skill:"射击(弓)",dice:"1d6+1",range:"45",counter:12,maxCounter:12,indestructible:false,malfunction:99,desc:"弓箭",effect:"射击伤害"},
+  {name:"飞刀",skill:"投掷",dice:"1d4+2",range:"5",counter:3,maxCounter:3,indestructible:false,malfunction:0,desc:"可投掷短刀",effect:"投掷伤害"},
+  {name:"长弓",skill:"射击(弓)",dice:"1d8+1",range:"55",counter:12,maxCounter:12,indestructible:false,malfunction:99,desc:"英式长弓",effect:"射击伤害"},
+  {name:"火焰瓶",skill:"投掷",dice:"1d6",range:"5",counter:1,maxCounter:1,indestructible:false,malfunction:0,desc:"简易燃烧瓶",effect:"投掷伤害"}
+];
+
+// ===================== ITEM CATEGORIES =====================
+const ITEM_CATEGORIES={
+  clue:{label:"线索/证据",icon:"📜",fields:["name","content","desc"],template:{category:"clue",name:"",content:"",desc:"",locked:false,effects:[]}},
+  prop:{label:"道具",icon:"💊",fields:["name","effect","dice","desc","counter","maxCounter","indestructible","uses","effects"],template:{category:"prop",name:"",effect:"",dice:"",desc:"",counter:1,maxCounter:1,indestructible:false,uses:0,locked:false,effects:[]}},
+  weapon:{label:"武器",icon:"🗡",fields:["name","effect","dice","desc","counter","maxCounter","indestructible","skill","range","malfunction","effects"],template:{category:"weapon",name:"",effect:"",dice:"",desc:"",counter:1,maxCounter:1,indestructible:false,skill:"",range:"",malfunction:0,locked:false,effects:[]}},
+  misc:{label:"杂物",icon:"🔧",fields:["name","desc","counter"],template:{category:"misc",name:"",desc:"",counter:1,locked:false,effects:[]}},
+  custom:{label:"自定义",icon:"⭐",fields:["name","desc","dice","counter","maxCounter","indestructible","effects"],template:{category:"custom",name:"",desc:"",dice:"",counter:1,maxCounter:0,indestructible:false,locked:false,effects:[]}}
+};
+
+// ===================== BLIND BOX =====================
+const BLIND_BOX={
+  clue:{names:["古老手稿","神秘照片","失踪信件","诡异日记","密码便条","血迹地图","图书馆借阅卡","可疑名片","教堂烛台下的纸条","旧报纸剪报"],contents:["记录了一个不可名状的仪式步骤","拍到了不应存在的身影","提到了一个被遗忘的地名","用密文写成，需要解密","上面只有一个电话号码","标注了某栋建筑的地下室入口","记录了某人的异常行踪","暗示了某个组织的存在","描述了一种未知生物的特征","引用了《死灵之书》的片段"],descs:["泛黄的纸张上布满了难以辨认的字迹","边缘烧焦，似乎有人试图销毁它","被小心翼翼地折叠保存","上面有暗色污渍","藏在不可能的地方被发现"]},
+  prop:{names:["镇定剂","急救包","圣水","古旧护符","神秘药水","显影液","镇静催眠药","止痛片","照相机闪光粉","迷迭香束"],effects:["恢复1d3点SAN","恢复1点HP","恢复1d3点MP","对目标造成1d4伤害","下一检定获得+10%加值"],dice:["1d3","1d4","1d6"],countRange:[1,3]},
+  weapon:{pool:"presets"},
+  misc:{names:["火柴盒","手电筒","绳索(15m)","撬棍","铁丝","口粮(3日份)","水壶","毛毯","蜡烛(一打)","墨水与钢笔","地图","指南针","望远镜","放大镜","医药箱","锁具工具","煤油灯"],countRange:[1,5]},
+  custom:{names:["奇怪的水晶","不明液体瓶","祭祀匕首","被封印的书","异星金属碎片","古老符文石","机械装置","会发光的矿石"],dice:["1d4","1d6","1d8","1d10","1d100"],countRange:[1,1]}
+};
+
+// ===================== ITEM EFFECTS =====================
+const EFFECT_TARGETS=['HP','MP','SAN','幸运','STR','CON','SIZ','DEX','APP','INT','POW','EDU','STR+1d6','CON+1d6','宝物'];
+const EFFECT_OPS=[{v:'add',label:'增加(+)'},{v:'sub',label:'减少(-)'},{v:'set',label:'设置(=)'}];
+
+function addItemEffectRow(target='',op='add',value=''){
+  const area=document.getElementById('itemEffectsArea');
+  if(!area)return;
+  const div=document.createElement('div');
+  div.className='effect-row';
+  div.innerHTML=`
+    <select onchange="this.parentElement.dataset.target=this.value">
+      <option value="">-- 目标 --</option>
+      ${EFFECT_TARGETS.map(t=>`<option value="${t}" ${t===target?'selected':''}>${t}</option>`).join('')}
+    </select>
+    <select onchange="this.parentElement.dataset.op=this.value">
+      ${EFFECT_OPS.map(o=>`<option value="${o.v}" ${o.v===op?'selected':''}>${o.label}</option>`).join('')}
+    </select>
+    <input type="text" value="${escHtml(String(value||''))}" onchange="this.parentElement.dataset.value=this.value" placeholder="数值/公式" style="flex:1">
+    <button class="effect-remove" onclick="this.parentElement.remove()" title="删除">✕</button>
+  `;
+  // Set initial dataset
+  div.dataset.target=target;
+  div.dataset.op=op;
+  div.dataset.value=value;
+  area.appendChild(div);
+}
+
+function collectItemEffects(){
+  const area=document.getElementById('itemEffectsArea');
+  if(!area)return [];
+  const effects=[];
+  area.querySelectorAll('.effect-row').forEach(row=>{
+    const target=row.dataset.target;
+    const op=row.dataset.op;
+    const value=row.dataset.value;
+    if(target&&value){
+      effects.push({target,op,dice:value});
+    }
+  });
+  return effects;
+}
+
+function renderItemEffects(effects){
+  const area=document.getElementById('itemEffectsArea');
+  if(!area)return;
+  area.innerHTML='';
+  if(!effects||!effects.length){
+    addItemEffectRow();
+    return;
+  }
+  effects.forEach(e=>addItemEffectRow(e.target,e.op,e.dice||''));
+}
+
+// ===================== MONSTER PRESETS =====================
+const MONSTER_CATS=[
+  {key:"mythos",label:"神话生物",icon:"🐙"},
+  {key:"undead",label:"不死/异变",icon:"💀"},
+  {key:"animal",label:"动物",icon:"🐻"},
+  {key:"human",label:"人类",icon:"👤"},
+  {key:"custom",label:"自定义",icon:"⭐"}
+];
+
+// [STR,CON,SIZ,DEX,APP,INT,POW,EDU]
+const MONSTER_PRESETS=[
+  // ===== 神话生物 =====
+  {name:"克苏鲁星之眷族",cat:"mythos",attrs:[90,90,100,70,40,70,90,60],hp:19,mp:18,db:"+2d6",build:4,mov:8,armor:4,attacks:[{name:"爪击×2",skill:70,dice:"1d10+db",range:"触摸"},{name:"触手碾压",skill:60,dice:"1d6+db",range:"触摸"}],sanLoss:"1d10/1d100",spells:[],desc:"克苏鲁的眷族，章鱼头人形身躯，黏滑的鳞片覆盖全身"},
+  {name:"深潜者",cat:"mythos",attrs:[75,80,70,60,40,60,70,50],hp:15,mp:14,db:"+1d4",build:1,mov:8,armor:2,attacks:[{name:"爪击",skill:60,dice:"1d6+db",range:"触摸"},{name:"鱼叉",skill:40,dice:"1d8+2",range:"5"}],sanLoss:"1/1d10",spells:[],desc:"鱼头人身的水陆两栖生物，在沿海地区建立社区"},
+  {name:"米·戈",cat:"mythos",attrs:[85,80,50,90,10,80,75,60],hp:13,mp:15,db:"+1d6",build:2,mov:10,armor:5,attacks:[{name:"钳击",skill:65,dice:"1d8+db",range:"触摸"},{name:"电击枪",skill:55,dice:"2d6",range:"15"}],sanLoss:"1/1d10",spells:[],desc:"来自犹格星的甲壳类真菌生物，擅长科学和外科手术"},
+  {name:"拜亚基",cat:"mythos",attrs:[80,70,60,90,10,50,80,30],hp:13,mp:16,db:"+1d6",build:2,mov:10,armor:3,attacks:[{name:"爪击",skill:70,dice:"1d6+db",range:"触摸"},{name:"拥抱",skill:55,dice:"1d8+db",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"巨大的黑色飞行生物，星际坐骑"},
+  {name:"夜魇",cat:"mythos",attrs:[50,40,30,90,10,50,50,20],hp:7,mp:10,db:"+1d4",build:1,mov:10,armor:0,attacks:[{name:"挠抓",skill:55,dice:"1d4+db",range:"触摸"},{name:"抓取",skill:50,dice:"-",range:"触摸"}],sanLoss:"1/1d4",spells:[],desc:"无面的黑色飞行生物，光滑如橡皮"},
+  {name:"暗黑幼体",cat:"mythos",attrs:[90,90,100,60,10,60,90,30],hp:19,mp:18,db:"+2d6",build:4,mov:8,armor:6,attacks:[{name:"触手×3",skill:70,dice:"1d6+db",range:"触摸"},{name:"踩踏",skill:50,dice:"2d6+db",range:"触摸"}],sanLoss:"1d6/1d20",spells:[],desc:"舒伯-尼古拉斯的子嗣，巨大触手树状生物"},
+  {name:"猎恐",cat:"mythos",attrs:[80,60,40,80,10,60,80,30],hp:12,mp:16,db:"+1d6",build:2,mov:10,armor:2,attacks:[{name:"撕咬",skill:75,dice:"1d8+db",range:"触摸"},{name:"尾击",skill:60,dice:"1d6",range:"触摸"}],sanLoss:"1/1d8",spells:[],desc:"奈亚拉特霍特的猎犬，蛇形恐怖飞行体"},
+  {name:"星之吸血鬼",cat:"mythos",attrs:[70,60,30,80,10,70,70,30],hp:9,mp:14,db:"+1d4",build:1,mov:10,armor:0,attacks:[{name:"吸取",skill:65,dice:"1d8+db",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"隐形的吸血生物，只有进食后才可见"},
+  {name:"火焰吸血鬼",cat:"mythos",attrs:[70,50,30,90,10,60,70,30],hp:8,mp:14,db:"+1d4",build:1,mov:10,armor:0,attacks:[{name:"灼烧触碰",skill:65,dice:"2d6",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"弗塔古亚的火焰仆从，全身燃烧的类人形"},
+  {name:"廷达罗斯猎犬",cat:"mythos",attrs:[90,80,60,80,10,70,90,30],hp:14,mp:18,db:"+1d6",build:2,mov:10,armor:4,attacks:[{name:"撕咬",skill:80,dice:"1d10+db",range:"触摸"},{name:"舔舐",skill:70,dice:"1d6",range:"触摸"}],sanLoss:"1d6/1d20",spells:[],desc:"来自时间的生物，可从任何角度出现"},
+  {name:"外神仆从",cat:"mythos",attrs:[80,80,80,70,10,60,80,30],hp:16,mp:16,db:"+1d6",build:2,mov:8,armor:4,attacks:[{name:"爪击",skill:70,dice:"1d8+db",range:"触摸"},{name:"号叫",skill:60,dice:"-",range:"特殊"}],sanLoss:"1/1d10",spells:[],desc:"阿撒托斯的笛手，管状身躯的弹跳生物"},
+  {name:"修格斯",cat:"mythos",attrs:[100,100,100,50,10,40,80,20],hp:20,mp:16,db:"+3d6",build:5,mov:8,armor:6,attacks:[{name:"吞噬",skill:70,dice:"2d6+db",range:"触摸"},{name:"碾压",skill:50,dice:"3d6",range:"触摸"}],sanLoss:"1d10/1d100",spells:[],desc:"远古种族制造的原生质奴隶，可变形的黑色黏液团"},
+  {name:"远古种族",cat:"mythos",attrs:[80,70,70,70,60,90,70,80],hp:14,mp:14,db:"+1d4",build:1,mov:8,armor:2,attacks:[{name:"撕咬",skill:60,dice:"1d6+db",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"史前文明种族，椭圆形身体和五瓣海星状头部"},
+  {name:"蛇人",cat:"mythos",attrs:[70,60,50,80,50,90,80,70],hp:11,mp:16,db:"+1d4",build:1,mov:8,armor:2,attacks:[{name:"撕咬",skill:65,dice:"1d6+毒",range:"触摸"},{name:"剑击",skill:60,dice:"1d8+2",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"古老的爬行类人种族，精通魔法和科学"},
+  {name:"伊塔库亚",cat:"mythos",attrs:[100,100,100,80,10,80,100,50],hp:20,mp:20,db:"+3d6",build:5,mov:12,armor:8,attacks:[{name:"践踏",skill:80,dice:"3d6",range:"触摸"},{name:"冰风",skill:70,dice:"2d6",range:"特殊"}],sanLoss:"1d10/1d100",spells:[],desc:"风行者，温迪戈的化身，巨大的人形黑影"},
+  {name:"格哈恩",cat:"mythos",attrs:[80,80,70,70,10,60,70,40],hp:15,mp:14,db:"+1d6",build:2,mov:8,armor:4,attacks:[{name:"撕咬",skill:70,dice:"1d8+db",range:"触摸"},{name:"尾扫",skill:60,dice:"1d6",range:"触摸"}],sanLoss:"1/1d10",spells:[],desc:"两足蜥蜴形怪物，罗伊格尔的仆从"},
+  {name:"扎尔之影",cat:"mythos",attrs:[70,60,40,90,10,70,80,30],hp:10,mp:16,db:"+1d4",build:1,mov:10,armor:0,attacks:[{name:"冷焰",skill:65,dice:"1d8",range:"10"}],sanLoss:"1/1d6",spells:[],desc:"扎尔的仆从，薄如纸的暗影生物"},
+  {name:"黑法老化身",cat:"mythos",attrs:[90,80,80,80,60,90,90,70],hp:16,mp:18,db:"+1d6",build:2,mov:9,armor:4,attacks:[{name:"爪击",skill:80,dice:"1d8+db",range:"触摸"},{name:"吸血",skill:70,dice:"1d10",range:"触摸"}],sanLoss:"1d6/1d20",spells:["枯萎术","支配术","精神冲击"],desc:"奈亚拉特霍特的化身之一，高大黑人形态"},
+  {name:"诺登斯化身",cat:"mythos",attrs:[100,90,90,90,70,90,100,70],hp:18,mp:20,db:"+2d6",build:4,mov:12,armor:6,attacks:[{name:"三叉戟",skill:90,dice:"2d8+db",range:"触摸"},{name:"海浪冲击",skill:80,dice:"3d6",range:"特殊"}],sanLoss:"1/1d10",spells:[],desc:"深海之主，古老的地球神祇"},
+  {name:"空鬼",cat:"mythos",attrs:[70,70,50,80,10,50,60,30],hp:12,mp:12,db:"+1d4",build:1,mov:10,armor:2,attacks:[{name:"爪击",skill:65,dice:"1d6+db",range:"触摸"},{name:"抓取",skill:60,dice:"-",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"维度穿梭者，可将猎物带入异次元"},
+
+  // ===== 不死/异变 =====
+  {name:"僵尸",cat:"undead",attrs:[60,60,60,30,10,10,0,10],hp:12,mp:0,db:"+1d4",build:1,mov:6,armor:0,attacks:[{name:"撕咬",skill:40,dice:"1d6",range:"触摸"},{name:"爪击",skill:45,dice:"1d4",range:"触摸"}],sanLoss:"1/1d4",spells:[],desc:"被黑暗力量复活的尸体，行动迟缓"},
+  {name:"食尸鬼",cat:"undead",attrs:[70,70,70,60,10,50,50,30],hp:14,mp:10,db:"+1d4",build:1,mov:8,armor:2,attacks:[{name:"爪击",skill:60,dice:"1d6+db",range:"触摸"},{name:"撕咬",skill:55,dice:"1d8",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"食尸的地下生物，犬面人形"},
+  {name:"木乃伊",cat:"undead",attrs:[80,80,90,30,10,50,70,50],hp:17,mp:14,db:"+1d6",build:2,mov:6,armor:4,attacks:[{name:"干枯之手",skill:60,dice:"1d8+db",range:"触摸"},{name:"窒息",skill:50,dice:"1d6/轮",range:"触摸"}],sanLoss:"1/1d8",spells:[],desc:"被防腐保存的古代死者，缠绕绷带"},
+  {name:"骷髅",cat:"undead",attrs:[40,40,40,40,10,20,30,10],hp:8,mp:0,db:"+0",build:0,mov:7,armor:0,attacks:[{name:"骨爪",skill:40,dice:"1d4",range:"触摸"},{name:"武器攻击",skill:35,dice:"1d6",range:"触摸"}],sanLoss:"0/1d3",spells:[],desc:"由魔法驱动的骸骨战士"},
+  {name:"幽灵",cat:"undead",attrs:[0,0,0,80,0,70,80,50],hp:0,mp:16,db:"+0",build:0,mov:10,armor:0,attacks:[{name:"寒触",skill:60,dice:"1d8",range:"触摸"},{name:"精神侵蚀",skill:50,dice:"1d6(SAN)",range:"触摸"}],sanLoss:"1/1d6",spells:[],desc:"死者的怨灵，可穿透物质，免疫普通武器"},
+  {name:"吸血鬼",cat:"undead",attrs:[90,80,80,80,80,80,80,70],hp:16,mp:16,db:"+1d6",build:2,mov:9,armor:3,attacks:[{name:"爪击",skill:75,dice:"1d6+db",range:"触摸"},{name:"吸血",skill:70,dice:"1d10(恢复HP)",range:"触摸"}],sanLoss:"1/1d8",spells:[],desc:"不死血族，惧怕阳光和圣物"},
+  {name:"温迪戈",cat:"undead",attrs:[90,90,100,70,10,70,80,40],hp:19,mp:16,db:"+2d6",build:4,mov:10,armor:5,attacks:[{name:"爪击",skill:75,dice:"1d10+db",range:"触摸"},{name:"吞噬",skill:65,dice:"2d6+db",range:"触摸"}],sanLoss:"1d6/1d20",spells:[],desc:"食人的雪怪，极地恐怖生物"},
+  {name:"尸鬼",cat:"undead",attrs:[60,60,60,40,10,30,40,20],hp:12,mp:8,db:"+1d4",build:1,mov:7,armor:1,attacks:[{name:"撕咬",skill:50,dice:"1d6",range:"触摸"},{name:"抓挠",skill:50,dice:"1d4+db",range:"触摸"}],sanLoss:"1/1d4",spells:[],desc:"腐烂程度不一的不死生物，比僵尸更强"},
+
+  // ===== 动物 =====
+  {name:"黑熊",cat:"animal",attrs:[70,70,80,40,20,20,20,10],hp:15,mp:4,db:"+1d6",build:2,mov:8,armor:2,attacks:[{name:"爪击×2",skill:50,dice:"1d6+db",range:"触摸"},{name:"撕咬",skill:40,dice:"1d8",range:"触摸"}],sanLoss:"0/1d3",spells:[],desc:"体型较大的熊类，领地意识强"},
+  {name:"灰狼",cat:"animal",attrs:[50,50,40,60,10,30,20,10],hp:9,mp:4,db:"+1d4",build:1,mov:10,armor:0,attacks:[{name:"撕咬",skill:55,dice:"1d6+db",range:"触摸"}],sanLoss:"0/1d3",spells:[],desc:"群居的掠食者，夜间狩猎"},
+  {name:"大型犬",cat:"animal",attrs:[40,40,30,55,30,30,20,10],hp:7,mp:4,db:"+0",build:0,mov:9,armor:0,attacks:[{name:"撕咬",skill:50,dice:"1d6",range:"触摸"}],sanLoss:"0/1",spells:[],desc:"猛犬，忠诚的守卫"},
+  {name:"狮子",cat:"animal",attrs:[80,70,80,55,10,30,20,10],hp:15,mp:4,db:"+1d6",build:2,mov:10,armor:1,attacks:[{name:"爪击×2",skill:55,dice:"1d6+db",range:"触摸"},{name:"撕咬",skill:50,dice:"1d10",range:"触摸"}],sanLoss:"0/1d4",spells:[],desc:"草原之王，强大的掠食者"},
+  {name:"老虎",cat:"animal",attrs:[90,80,90,55,10,30,20,10],hp:17,mp:4,db:"+1d6",build:2,mov:10,armor:1,attacks:[{name:"爪击×2",skill:60,dice:"1d8+db",range:"触摸"},{name:"撕咬",skill:55,dice:"1d10",range:"触摸"}],sanLoss:"0/1d4",spells:[],desc:"最大的猫科动物，独居猎手"},
+  {name:"大象",cat:"animal",attrs:[100,90,100,30,30,30,20,10],hp:19,mp:4,db:"+2d6",build:4,mov:8,armor:3,attacks:[{name:"践踏",skill:50,dice:"2d6+db",range:"触摸"},{name:"象牙",skill:45,dice:"1d10+db",range:"触摸"}],sanLoss:"0/1d4",spells:[],desc:"体型巨大的陆地动物"},
+  {name:"巨蛇",cat:"animal",attrs:[50,50,40,60,10,30,20,10],hp:9,mp:4,db:"+1d4",build:1,mov:7,armor:1,attacks:[{name:"撕咬",skill:55,dice:"1d6",range:"触摸"},{name:"缠绕",skill:50,dice:"1d6/轮",range:"触摸"}],sanLoss:"0/1d3",spells:[],desc:"大型蛇类，有的带毒"},
+  {name:"鳄鱼",cat:"animal",attrs:[80,80,90,40,10,20,20,10],hp:17,mp:4,db:"+1d6",build:2,mov:6,armor:5,attacks:[{name:"撕咬",skill:55,dice:"1d10+db",range:"触摸"},{name:"死亡翻滚",skill:50,dice:"2d6",range:"触摸"}],sanLoss:"0/1d3",spells:[],desc:"水陆两栖的远古掠食者"},
+  {name:"鲨鱼",cat:"animal",attrs:[80,70,80,60,10,20,20,10],hp:15,mp:4,db:"+1d6",build:2,mov:10,armor:3,attacks:[{name:"撕咬",skill:60,dice:"1d10+db",range:"触摸"}],sanLoss:"0/1d4",spells:[],desc:"海洋中的顶级掠食者"},
+  {name:"大猩猩",cat:"animal",attrs:[90,80,90,40,30,30,20,10],hp:17,mp:4,db:"+1d6",build:2,mov:8,armor:2,attacks:[{name:"重拳",skill:55,dice:"1d8+db",range:"触摸"},{name:"抓投",skill:45,dice:"1d6",range:"触摸"}],sanLoss:"0/1d3",spells:[],desc:"强壮的灵长类动物"},
+  {name:"老鹰",cat:"animal",attrs:[30,30,10,70,10,30,20,10],hp:4,mp:4,db:"+0",build:0,mov:8,armor:0,attacks:[{name:"利爪",skill:55,dice:"1d4",range:"触摸"},{name:"啄击",skill:50,dice:"1d3",range:"触摸"}],sanLoss:"0/1",spells:[],desc:"猛禽，空中猎手"},
+  {name:"野猪",cat:"animal",attrs:[60,60,60,40,10,20,20,10],hp:12,mp:4,db:"+1d4",build:1,mov:8,armor:1,attacks:[{name:"獠牙",skill:50,dice:"1d6+db",range:"触摸"}],sanLoss:"0/1d3",spells:[],desc:"凶猛的野猪，冲锋力强"},
+
+  // ===== 人类 =====
+  {name:"暴徒",cat:"human",attrs:[60,50,50,55,50,40,40,30],hp:10,mp:8,db:"+0",build:0,mov:8,armor:0,attacks:[{name:"拳头",skill:55,dice:"1d3",range:"触摸"},{name:"刀刺",skill:45,dice:"1d4+2",range:"触摸"}],sanLoss:"0/1",spells:[],desc:"街头暴徒，善于斗殴"},
+  {name:"邪教徒",cat:"human",attrs:[50,50,50,50,50,60,70,50],hp:10,mp:14,db:"+0",build:0,mov:8,armor:0,attacks:[{name:"仪式匕首",skill:40,dice:"1d4+2",range:"触摸"},{name:"手枪",skill:35,dice:"1d8",range:"15"}],sanLoss:"0/1d3",spells:[],desc:"狂热的邪教成员，可能知晓法术"},
+  {name:"疯子",cat:"human",attrs:[50,50,50,50,30,30,30,20],hp:10,mp:6,db:"+0",build:0,mov:8,armor:0,attacks:[{name:"疯狂攻击",skill:45,dice:"1d6",range:"触摸"}],sanLoss:"1/1d4",spells:[],desc:"精神崩溃的人，行为不可预测"},
+  {name:"警卫",cat:"human",attrs:[60,60,60,50,50,40,40,40],hp:12,mp:8,db:"+0",build:0,mov:8,armor:1,attacks:[{name:"警棍",skill:50,dice:"1d6",range:"触摸"},{name:"手枪",skill:45,dice:"1d8",range:"15"}],sanLoss:"0/1",spells:[],desc:"受过训练的保安人员"},
+  {name:"士兵",cat:"human",attrs:[70,60,60,55,50,40,40,40],hp:12,mp:8,db:"+0",build:0,mov:9,armor:2,attacks:[{name:"步枪",skill:55,dice:"1d10+2",range:"110"},{name:"刺刀",skill:50,dice:"1d6+2",range:"触摸"}],sanLoss:"0/1",spells:[],desc:"训练有素的军事人员"},
+  {name:"刺客",cat:"human",attrs:[50,50,40,80,60,70,50,50],hp:9,mp:10,db:"+0",build:0,mov:9,armor:0,attacks:[{name:"匕首",skill:65,dice:"1d4+2",range:"触摸"},{name:"飞刀",skill:55,dice:"1d4+2",range:"5"}],sanLoss:"0/1",spells:[],desc:"擅长潜行和近战的杀手"},
+  {name:"巫师",cat:"human",attrs:[40,50,50,50,50,80,90,70],hp:10,mp:18,db:"+0",build:0,mov:8,armor:0,attacks:[{name:"仪式匕首",skill:40,dice:"1d4+2",range:"触摸"},{name:"魔法攻击",skill:60,dice:"1d10",range:"特殊"}],sanLoss:"1/1d6",spells:["枯萎术","支配术"],desc:"精通黑暗魔法的施法者"},
+  {name:"武术家",cat:"human",attrs:[60,60,50,80,50,60,50,40],hp:11,mp:10,db:"+1d4",build:1,mov:9,armor:0,attacks:[{name:"拳脚",skill:70,dice:"1d6+db",range:"触摸"},{name:"擒拿",skill:60,dice:"-",range:"触摸"}],sanLoss:"0/1",spells:[],desc:"精通武术的格斗家"}
+];
+
+// ===================== CELL TYPE INFO =====================
+const CELL_INFO={
+  empty:{label:"空地",icon:"",color:"transparent",passable:true,destructible:false,transparent:true,interactive:false},
+  wall1:{label:"墙体1(不透明)",icon:"▣",color:"#4a4a5e",passable:false,destructible:false,transparent:false,interactive:false},
+  wall2:{label:"墙体2(透明)",icon:"◫",color:"#5a5a6e",passable:false,destructible:false,transparent:true,interactive:false},
+  wall3:{label:"墙体3(可破坏/不透明)",icon:"▤",color:"#5e4a4a",passable:false,destructible:true,transparent:false,interactive:false},
+  wall4:{label:"墙体4(可破坏/透明)",icon:"▧",color:"rgba(60,100,60,.5)",passable:false,destructible:true,transparent:true,interactive:false},
+  door:{label:"门",icon:"🚪",color:"#6b4e2e",passable:false,destructible:true,transparent:true,interactive:true},
+  chest:{label:"箱子",icon:"📦",color:"#5e5020",passable:true,destructible:true,transparent:true,interactive:true},
+  item:{label:"物品/线索",icon:"📜",color:"rgba(30,80,130,.4)",passable:true,destructible:true,transparent:true,interactive:true},
+  monster:{label:"怪物",icon:"👹",color:"rgba(130,30,30,.4)",passable:true,destructible:true,transparent:true,interactive:true},
+  spawn:{label:"出生点",icon:"△",color:"rgba(30,130,60,.3)",passable:true,destructible:true,transparent:true,interactive:false},
+  event:{label:"自定义事件",icon:"⚡",color:"rgba(100,30,130,.3)",passable:true,destructible:true,transparent:true,interactive:true},
+  portal:{label:"传送门",icon:"◉",color:"rgba(30,130,130,.3)",passable:true,destructible:true,transparent:true,interactive:true}
+};
+
+// ===================== SKILL LIST (for skill checks) =====================
+const SKILL_LIST=["侦查","聆听","图书馆使用","克苏鲁神话","人际交往","说服","恐吓","心理学","精神分析","语言学","自然科学","医学","法律","人类学","考古学","计算机使用","电子学","机械维修","驾驶(汽车)","驾驶(其他)","驾驶(飞行器)","射击(手枪)","射击(步枪)","射击(霰弹枪)","射击(弓)","格斗(斗殴)","格斗(剑)","格斗(斧)","格斗(矛)","投掷","闪避","潜行","隐藏","锁具","乔装","追踪","生存","游泳","攀爬","跳跃","神秘学","艺术/手艺"];
+
+// ===================== GLOBAL STATE =====================
+let mapState={
+  name:"未命名地图",
+  rows:20,
+  cols:20,
+  cellSize:32,
+  cells:{},       // "r,c" -> cellData
+  spareItems:[],  // 备用物品列表
+  monsters:[],    // 怪物列表
+  portals:[]      // 传送门列表
+};
+let savedSnapshot=null;  // 深拷贝快照，用于取消回滚
+let currentTool=null;
+let selectedMonster=null; // {source:'preset'|'custom', idx:number}
+let currentCellDetail=null; // {r,c} for detail modal
+let pendingCellPos=null;    // {r,c} for creation modal
+
+// ===================== UTILITY =====================
+function uid(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);}
+function escHtml(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function deepClone(obj){return JSON.parse(JSON.stringify(obj));}
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function randPick(arr){return arr[randInt(0,arr.length-1)];}
+
+// ===================== MODAL =====================
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ===================== GRID RENDERING =====================
+function renderGrid(){
+  const grid=document.getElementById('gridView');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns=`repeat(${mapState.cols},var(--cell))`;
+  grid.style.setProperty('--cell',mapState.cellSize+'px');
+  for(let r=0;r<mapState.rows;r++){
+    for(let c=0;c<mapState.cols;c++){
+      const cell=document.createElement('div');
+      cell.className='cell';
+      cell.dataset.row=r;
+      cell.dataset.col=c;
+      const isBorder=(r===0||r===mapState.rows-1||c===0||c===mapState.cols-1);
+      if(isBorder)cell.classList.add('border-cell');
+      const key=r+','+c;
+      const cd=mapState.cells[key];
+      if(cd&&cd.type!=='empty'){
+        cell.dataset.type=cd.type;
+        if(cd.type==='door'&&cd.open)cell.classList.add('open');
+      }
+      cell.addEventListener('click',()=>onCellClick(r,c));
+      cell.addEventListener('contextmenu',(e)=>{e.preventDefault();showCellDetail(r,c);});
+      cell.addEventListener('mouseenter',(e)=>showCellTooltip(r,c,e));
+      cell.addEventListener('mouseleave',hideCellTooltip);
+      grid.appendChild(cell);
+    }
+  }
+  updateMapInfo();
+}
+
+function updateMapInfo(){
+  let used=0,portalCount=0;
+  for(const k in mapState.cells){
+    if(mapState.cells[k].type&&mapState.cells[k].type!=='empty'){used++;if(mapState.cells[k].type==='portal')portalCount++;}
+  }
+  document.getElementById('infoTotal').textContent=mapState.rows*mapState.cols;
+  document.getElementById('infoUsed').textContent=used;
+  document.getElementById('infoPortals').textContent=portalCount;
+}
+
+function refreshCell(r,c){
+  const grid=document.getElementById('gridView');
+  const idx=r*mapState.cols+c;
+  const cell=grid.children[idx];
+  if(!cell)return;
+  const key=r+','+c;
+  const cd=mapState.cells[key];
+  if(cd&&cd.type!=='empty'){
+    cell.dataset.type=cd.type;
+    if(cd.type==='door'&&cd.open)cell.classList.add('open');
+  }else{
+    delete cell.dataset.type;
+    cell.classList.remove('open');
+  }
+}
+
+// ===================== SIZE CONTROL =====================
+function applySize(){
+  const rows=parseInt(document.getElementById('rowsInput').value)||20;
+  const cols=parseInt(document.getElementById('colsInput').value)||20;
+  const cs=parseInt(document.getElementById('cellSizeInput').value)||32;
+  // Remove cells outside new bounds
+  const newCells={};
+  for(const k in mapState.cells){
+    const [r,c]=k.split(',').map(Number);
+    if(r<rows&&c<cols)newCells[k]=mapState.cells[k];
+  }
+  mapState.rows=Math.max(5,Math.min(60,rows));
+  mapState.cols=Math.max(5,Math.min(60,cols));
+  mapState.cellSize=Math.max(16,Math.min(64,cs));
+  mapState.cells=newCells;
+  document.getElementById('rowsInput').value=mapState.rows;
+  document.getElementById('colsInput').value=mapState.cols;
+  document.getElementById('cellSizeInput').value=mapState.cellSize;
+  renderGrid();
+}
+
+// ===================== TOOL SELECTION =====================
+function selectTool(tool){
+  currentTool=tool;
+  document.querySelectorAll('.tool-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.tool===tool);
+  });
+}
+
+function toggleRightPanel(){
+  document.getElementById('rightPanel').classList.toggle('collapsed');
+}
+
+// ===================== CELL CLICK =====================
+function onCellClick(r,c){
+  const isBorder=(r===0||r===mapState.rows-1||c===0||c===mapState.cols-1);
+  if(isBorder&&!mapState.cells[r+','+c]){
+    // 外围一圈 → 传送门
+    pendingCellPos={r,c};
+    openModal('portalModal');
+    return;
+  }
+  if(!currentTool){showCellDetail(r,c);return;}
+  if(currentTool==='eraser'){
+    delete mapState.cells[r+','+c];
+    refreshCell(r,c);
+    updateMapInfo();
+    return;
+  }
+  // 简单工具直接填充
+  if(['wall1','wall2','wall3','wall4','spawn'].includes(currentTool)){
+    mapState.cells[r+','+c]={type:currentTool};
+    refreshCell(r,c);
+    updateMapInfo();
+    return;
+  }
+  // 可交互工具 → 弹出表单
+  if(['door','chest','item','monster','event'].includes(currentTool)){
+    pendingCellPos={r,c};
+    if(currentTool==='door'){document.getElementById('doorName').value='';document.getElementById('doorDiff').value=50;document.getElementById('doorNeedKey').checked=false;openModal('doorModal');}
+    else if(currentTool==='chest'){document.getElementById('chestName').value='';document.getElementById('chestDiff').value=50;document.getElementById('chestNeedKey').checked=false;refreshItemSelect('chestItemSelect',null);openModal('chestModal');}
+    else if(currentTool==='item'){document.getElementById('itemSkillChecks').innerHTML='';refreshItemSelect('itemSelect');openModal('itemModal');}
+    else if(currentTool==='monster'){selectedMonster=null;document.getElementById('monsterSearchInput').value='';document.getElementById('customMonsterForm').style.display='none';document.getElementById('monsterDetail').style.display='none';document.getElementById('monsterSkillChecks').innerHTML='';renderMonsterCats();renderMonsterPresets();openModal('monsterModal');}
+    else if(currentTool==='event'){document.getElementById('eventSkillChecks').innerHTML='';document.getElementById('eventPopupText').value='';document.getElementById('eventRewardType').value='';toggleEventReward();openModal('eventModal');}
+    return;
+  }
+}
+
+// ===================== TOOLTIP =====================
+function showCellTooltip(r,c,e){
+  const key=r+','+c;
+  const cd=mapState.cells[key];
+  if(!cd||cd.type==='empty'){hideCellTooltip();return;}
+  const info=CELL_INFO[cd.type]||{};
+  let html=`<div class="tt-type">${info.icon||''} ${info.label||cd.type}</div>`;
+  html+=`<div class="tt-detail">位置: (${r},${c})`;
+  if(cd.name)html+=`<br>名称: ${escHtml(cd.name)}`;
+  if(cd.difficulty)html+=`<br>难度: ${cd.difficulty}%`;
+  if(cd.needKey)html+=`<br>🔑 需要钥匙`;
+  html+=`</div>`;
+  const tt=document.getElementById('cellTooltip');
+  tt.innerHTML=html;
+  tt.style.display='block';
+  tt.style.left=(e.clientX+12)+'px';
+  tt.style.top=(e.clientY+12)+'px';
+}
+function hideCellTooltip(){document.getElementById('cellTooltip').style.display='none';}
+
+// ===================== CELL DETAIL =====================
+function showCellDetail(r,c){
+  const key=r+','+c;
+  const cd=mapState.cells[key];
+  if(!cd||cd.type==='empty')return;
+  currentCellDetail={r,c};
+  const info=CELL_INFO[cd.type]||{};
+  let html=`<div style="font-size:14px;margin-bottom:8px">${info.icon||''} <strong>${escHtml(cd.name||info.label||cd.type)}</strong></div>`;
+  html+=`<div style="font-size:12px;color:var(--muted);line-height:1.8">`;
+  html+=`位置: (${r},${c})<br>`;
+  html+=`可穿过: ${info.passable?'✓':'✗'} | 可破坏: ${info.destructible?'✓':'✗'} | 透明: ${info.transparent?'✓':'✗'}<br>`;
+  if(cd.difficulty)html+=`难度: ${cd.difficulty}%<br>`;
+  if(cd.needKey)html+=`🔑 需要钥匙<br>`;
+  if(cd.open!==undefined)html+=`状态: ${cd.open?'已开启':'已关闭'}<br>`;
+  if(cd.skillChecks&&cd.skillChecks.length){
+    html+=`技能难度:<br>`;
+    cd.skillChecks.forEach(sc=>html+=`&nbsp;&nbsp;${escHtml(sc.skill)}: ${sc.difficulty}%<br>`);
+  }
+  if(cd.popupText)html+=`弹窗文字: ${escHtml(cd.popupText)}<br>`;
+  if(cd.itemId){
+    const item=mapState.spareItems.find(it=>it.id===cd.itemId);
+    if(item)html+=`物品: ${escHtml(item.name)}<br>`;
+  }
+  if(cd.monsterId){
+    const mon=mapState.monsters?mapState.monsters.find(m=>m.id===cd.monsterId):null;
+    if(mon)html+=`怪物: ${escHtml(mon.name)}<br>`;
+  }
+  if(cd.targetCode)html+=`传送目标: [SEAB码]<br>`;
+  if(cd.portalDesc)html+=`描述: ${escHtml(cd.portalDesc)}<br>`;
+  html+=`</div>`;
+  document.getElementById('cellDetailTitle').textContent=info.label||'格子详情';
+  document.getElementById('cellDetailContent').innerHTML=html;
+  openModal('cellDetailModal');
+}
+
+function editCurrentCell(){
+  if(!currentCellDetail)return;
+  closeModal('cellDetailModal');
+  const{r,c}=currentCellDetail;
+  const key=r+','+c;
+  const cd=mapState.cells[key];
+  if(!cd)return;
+  pendingCellPos={r,c};
+  if(cd.type==='door'){
+    document.getElementById('doorName').value=cd.name||'';
+    document.getElementById('doorDiff').value=cd.difficulty||50;
+    document.getElementById('doorNeedKey').checked=!!cd.needKey;
+    openModal('doorModal');
+  }else if(cd.type==='chest'){
+    document.getElementById('chestName').value=cd.name||'';
+    document.getElementById('chestDiff').value=cd.difficulty||50;
+    document.getElementById('chestNeedKey').checked=!!cd.needKey;
+    refreshItemSelect('chestItemSelect', cd.itemId||null);
+    openModal('chestModal');
+  }else if(cd.type==='item'){
+    document.getElementById('itemSkillChecks').innerHTML='';
+    if(cd.skillChecks)cd.skillChecks.forEach(sc=>addSkillCheck('itemSkillChecks',sc));
+    refreshItemSelect('itemSelect',cd.itemId);
+    openModal('itemModal');
+  }else if(cd.type==='monster'){
+    document.getElementById('monsterSkillChecks').innerHTML='';
+    if(cd.skillChecks)cd.skillChecks.forEach(sc=>addSkillCheck('monsterSkillChecks',sc));
+    renderMonsterCats();renderMonsterPresets();
+    // Try to find and select the monster
+    if(cd.monsterId&&mapState.monsters){
+      const mon=mapState.monsters.find(m=>m.id===cd.monsterId);
+      if(mon){
+        const idx=mapState.monsters.indexOf(mon);
+        selectedMonster={source:'custom',idx};
+        document.getElementById('monsterDetail').style.display='block';
+        document.getElementById('monsterDetail').innerHTML=renderMonsterDetailHTML(mon)+`<div style="margin-top:8px;text-align:right"><button class="modal-btn danger" style="font-size:11px;padding:3px 10px" onclick="deleteCustomMonsterEntry(${idx})">🗑️ 从自定义列表移除</button></div>`;
+        filterMonsterCat('custom');
+      }
+    }
+    openModal('monsterModal');
+  }else if(cd.type==='event'){
+    document.getElementById('eventSkillChecks').innerHTML='';
+    if(cd.skillChecks)cd.skillChecks.forEach(sc=>addSkillCheck('eventSkillChecks',sc));
+    document.getElementById('eventPopupText').value=cd.popupText||'';
+    document.getElementById('eventRewardType').value=cd.rewardType||'';
+    toggleEventReward();
+    openModal('eventModal');
+  }else if(cd.type==='portal'){
+    document.getElementById('portalName').value=cd.name||'';
+    document.getElementById('portalTarget').value=cd.targetCode||'';
+    document.getElementById('portalDesc').value=cd.portalDesc||'';
+    openModal('portalModal');
+  }
+}
+
+function deleteCurrentCell(){
+  if(!currentCellDetail)return;
+  const{r,c}=currentCellDetail;
+  delete mapState.cells[r+','+c];
+  closeModal('cellDetailModal');
+  refreshCell(r,c);
+  updateMapInfo();
+}
+
+// ===================== DOOR =====================
+function saveDoor(){
+  if(!pendingCellPos)return;
+  const name=document.getElementById('doorName').value.trim()||'门';
+  const difficulty=parseInt(document.getElementById('doorDiff').value)||0;
+  const needKey=document.getElementById('doorNeedKey').checked;
+  let keyId=null;
+  if(needKey){
+    keyId=uid('key');
+    mapState.spareItems.push({id:keyId,category:"misc",name:name+'的钥匙',desc:'打开"'+name+'"所需的钥匙',counter:1,locked:false});
+  }
+  mapState.cells[pendingCellPos.r+','+pendingCellPos.c]={type:'door',name,difficulty,needKey,keyId,open:false};
+  refreshCell(pendingCellPos.r,pendingCellPos.c);
+  updateMapInfo();
+  closeModal('doorModal');
+  pendingCellPos=null;
+}
+
+// ===================== CHEST =====================
+function saveChest(){
+  if(!pendingCellPos)return;
+  var name=document.getElementById('chestName').value.trim()||'箱子';
+  var difficulty=parseInt(document.getElementById('chestDiff').value)||0;
+  var needKey=document.getElementById('chestNeedKey').checked;
+  var itemId=document.getElementById('chestItemSelect').value||null;
+  var keyId=null;
+  if(needKey){
+    keyId=uid('key');
+    mapState.spareItems.push({id:keyId,category:"misc",name:name+'的钥匙',desc:'打开"'+name+'"所需的钥匙',counter:1,locked:false});
+  }
+  mapState.cells[pendingCellPos.r+','+pendingCellPos.c]={type:'chest',name,difficulty,needKey,keyId,itemId,opened:false};
+  refreshCell(pendingCellPos.r,pendingCellPos.c);
+  updateMapInfo();
+  closeModal('chestModal');
+  pendingCellPos=null;
+}
+
+// ===================== SKILL CHECKS =====================
+function addSkillCheck(containerId,preset){
+  const container=document.getElementById(containerId);
+  if(container.children.length>=5){alert('最多5个技能难度');return;}
+  const row=document.createElement('div');
+  row.className='skill-check-row';
+  row.innerHTML=`<select class="sc-skill">${SKILL_LIST.map(s=>`<option value="${s}"${preset&&preset.skill===s?' selected':''}>${s}</option>`).join('')}</select><input type="number" class="sc-diff" value="${preset?preset.difficulty:50}" min="0" max="99"><button class="remove-sc" onclick="this.parentElement.remove()">✕</button>`;
+  container.appendChild(row);
+}
+function collectSkillChecks(containerId){
+  const rows=document.getElementById(containerId).children;
+  const checks=[];
+  for(let i=0;i<rows.length;i++){
+    const skill=rows[i].querySelector('.sc-skill').value;
+    const difficulty=parseInt(rows[i].querySelector('.sc-diff').value)||50;
+    checks.push({skill,difficulty});
+  }
+  return checks;
+}
+
+// ===================== ITEM CELL =====================
+function saveItemCell(){
+  if(!pendingCellPos)return;
+  const skillChecks=collectSkillChecks('itemSkillChecks');
+  const itemId=document.getElementById('itemSelect').value||null;
+  mapState.cells[pendingCellPos.r+','+pendingCellPos.c]={type:'item',skillChecks,itemId};
+  refreshCell(pendingCellPos.r,pendingCellPos.c);
+  updateMapInfo();
+  closeModal('itemModal');
+  pendingCellPos=null;
+}
+
+// ===================== MONSTER CELL =====================
+function renderMonsterCats(){
+  const tabs=document.getElementById('monsterCatTabs');
+  tabs.innerHTML=MONSTER_CATS.map(c=>`<div class="monster-cat-btn" data-cat="${c.key}" onclick="filterMonsterCat('${c.key}')">${c.icon} ${c.label}</div>`).join('');
+}
+function filterMonsterCat(cat){
+  document.querySelectorAll('.monster-cat-btn').forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
+  renderMonsterPresets(cat);
+}
+function renderMonsterPresets(catFilter){
+  const list=document.getElementById('monsterPresetList');
+  const search=(document.getElementById('monsterSearchInput').value||'').toLowerCase();
+  let html='';
+  if(catFilter==='custom'){
+    // 自定义标签：显示 mapState.monsters 中的条目
+    const customs=(mapState.monsters||[]);
+    let filtered=search?customs.filter(m=>m.name.toLowerCase().includes(search)):customs;
+    if(!filtered.length){
+      html='<div style="padding:10px;color:var(--muted);text-align:center">暂无自定义怪物<br><span style="font-size:11px">通过SEAB码导入或填写自定义表单创建</span></div>';
+    }else{
+      html=filtered.map((m,i)=>{
+        const realIdx=(mapState.monsters||[]).indexOf(m);
+        const sel=selectedMonster&&selectedMonster.source==='custom'&&selectedMonster.idx===realIdx;
+        return`<div class="monster-item${sel?' selected':''}" data-source="custom" data-idx="${realIdx}" onclick="selectCustomMonster(${realIdx})"><div class="m-name">${escHtml(m.name)} <span style="color:var(--accent);font-size:10px">⭐${MONSTER_CATS.find(c=>c.key===m.cat)?MONSTER_CATS.find(c=>c.key===m.cat).label:'自定义'}</span></div><div class="m-desc">${escHtml(m.desc||'').substring(0,40)}</div></div>`;
+      }).join('');
+    }
+  }else if(catFilter){
+    // 内置预设标签（有具体分类）
+    let filtered=MONSTER_PRESETS.filter(m=>m.cat===catFilter);
+    if(search)filtered=filtered.filter(m=>m.name.toLowerCase().includes(search));
+    if(!filtered.length){
+      html='<div style="padding:10px;color:var(--muted);text-align:center">无匹配结果</div>';
+    }else{
+      html=filtered.map((m,i)=>{
+        const realIdx=MONSTER_PRESETS.indexOf(m);
+        const sel=selectedMonster&&selectedMonster.source==='preset'&&selectedMonster.idx===realIdx;
+        return`<div class="monster-item${sel?' selected':''}" data-source="preset" data-idx="${realIdx}" onclick="selectMonsterPreset(${realIdx})"><div class="m-name">${escHtml(m.name)}</div><div class="m-desc">${escHtml(m.desc).substring(0,40)}...</div></div>`;
+      }).join('');
+    }
+  }else{
+    // 无分类筛选：同时显示预设和自定义
+    let allItems=[];
+    MONSTER_PRESETS.forEach((m,i)=>allItems.push({source:'preset',idx:i,name:m.name,desc:m.desc,data:m}));
+    (mapState.monsters||[]).forEach((m,i)=>allItems.push({source:'custom',idx:i,name:m.name,desc:m.desc||'',data:m}));
+    if(search)allItems=allItems.filter(m=>m.name.toLowerCase().includes(search));
+    if(!allItems.length){
+      html='<div style="padding:10px;color:var(--muted);text-align:center">无匹配结果</div>';
+    }else{
+      html=allItems.map(item=>{
+        const sel=selectedMonster&&selectedMonster.source===item.source&&selectedMonster.idx===item.idx;
+        const tag=item.source==='custom'?' <span style="color:var(--accent);font-size:10px">⭐自定义</span>':'';
+        const onclick=item.source==='preset'?`selectMonsterPreset(${item.idx})`:`selectCustomMonster(${item.idx})`;
+        return`<div class="monster-item${sel?' selected':''}" data-source="${item.source}" data-idx="${item.idx}" onclick="${onclick}"><div class="m-name">${escHtml(item.name)}${tag}</div><div class="m-desc">${escHtml(item.desc).substring(0,40)}</div></div>`;
+      }).join('');
+    }
+  }
+  list.innerHTML=html;
+}
+function filterMonsterPresets(){
+  const activeCat=document.querySelector('.monster-cat-btn.active');
+  renderMonsterPresets(activeCat?activeCat.dataset.cat:null);
+}
+function selectMonsterPreset(idx){
+  selectedMonster={source:'preset',idx};
+  const m=MONSTER_PRESETS[idx];
+  document.getElementById('customMonsterForm').style.display='none';
+  renderMonsterPresets(); // re-render to show selected
+  // Show detail
+  const detail=document.getElementById('monsterDetail');
+  detail.style.display='block';
+  detail.innerHTML=renderMonsterDetailHTML(m);
+}
+function selectCustomMonster(idx){
+  selectedMonster={source:'custom',idx};
+  const m=mapState.monsters[idx];
+  document.getElementById('customMonsterForm').style.display='none';
+  renderMonsterPresets(); // re-render to show selected
+  // Show detail
+  const detail=document.getElementById('monsterDetail');
+  detail.style.display='block';
+  detail.innerHTML=renderMonsterDetailHTML(m);
+  // Add delete button for custom monsters
+  detail.innerHTML+=`<div style="margin-top:8px;text-align:right"><button class="modal-btn danger" style="font-size:11px;padding:3px 10px" onclick="deleteCustomMonsterEntry(${idx})">🗑️ 从自定义列表移除</button></div>`;
+}
+function deleteCustomMonsterEntry(idx){
+  if(!mapState.monsters||idx<0||idx>=mapState.monsters.length)return;
+  const name=mapState.monsters[idx].name;
+  if(!confirm('确定从自定义列表中移除"'+name+'"？\n（已放置在地图上的同类怪物不受影响）'))return;
+  mapState.monsters.splice(idx,1);
+  selectedMonster=null;
+  document.getElementById('monsterDetail').style.display='none';
+  renderMonsterPresets();
+}
+function renderMonsterDetailHTML(m){
+  const attrNames=['STR','CON','SIZ','DEX','APP','INT','POW','EDU'];
+  let html=`<div class="md-row"><span class="md-label">名称</span><span class="md-val">${escHtml(m.name)}</span></div>`;
+  html+=`<div class="md-row"><span class="md-label">属性</span><span class="md-val">${attrNames.map((n,i)=>n+':'+(m.attrs[i]||0)).join(' ')}</span></div>`;
+  html+=`<div class="md-row"><span class="md-label">HP/MP</span><span class="md-val">${m.hp}/${m.mp}</span></div>`;
+  html+=`<div class="md-row"><span class="md-label">DB/体格</span><span class="md-val">${m.db}/${m.build}</span></div>`;
+  html+=`<div class="md-row"><span class="md-label">护甲/MOV</span><span class="md-val">${m.armor}/${m.mov}</span></div>`;
+  html+=`<div class="md-row"><span class="md-label">SAN损失</span><span class="md-val">${m.sanLoss}</span></div>`;
+  if(m.attacks&&m.attacks.length){
+    html+=`<div class="md-row"><span class="md-label">攻击</span><span class="md-val">${m.attacks.map(a=>a.name+'('+a.dice+')').join(', ')}</span></div>`;
+  }
+  html+=`<div style="margin-top:4px;color:var(--muted);font-size:11px">${escHtml(m.desc||'暂无描述')}</div>`;
+  return html;
+}
+
+function showCustomMonsterForm(){
+  document.getElementById('customMonsterForm').style.display='block';
+  selectedMonster=null;
+  document.getElementById('monsterDetail').style.display='none';
+  renderMonsterPresets();
+}
+function saveMonsterCell(){
+  if(!pendingCellPos)return;
+  const skillChecks=collectSkillChecks('monsterSkillChecks');
+  let monsterId=null;
+  if(selectedMonster&&selectedMonster.source==='preset'){
+    // Use preset
+    const preset=MONSTER_PRESETS[selectedMonster.idx];
+    if(!mapState.monsters)mapState.monsters=[];
+    const existing=mapState.monsters.find(m=>m.name===preset.name&&m.cat===preset.cat);
+    if(existing){monsterId=existing.id;}
+    else{
+      const mon={...deepClone(preset),id:uid('mon')};
+      mapState.monsters.push(mon);
+      monsterId=mon.id;
+    }
+  }else if(selectedMonster&&selectedMonster.source==='custom'){
+    // Use custom monster from list
+    const mon=mapState.monsters[selectedMonster.idx];
+    if(mon)monsterId=mon.id;
+  }else if(document.getElementById('customMonsterForm').style.display!=='none'){
+    // Custom monster
+    const mon={
+      id:uid('mon'),
+      name:document.getElementById('cmName').value.trim()||'自定义怪物',
+      cat:'custom',
+      attrs:[
+        parseInt(document.getElementById('cmSTR').value)||50,
+        parseInt(document.getElementById('cmCON').value)||50,
+        parseInt(document.getElementById('cmSIZ').value)||50,
+        parseInt(document.getElementById('cmDEX').value)||50,
+        parseInt(document.getElementById('cmAPP').value)||50,
+        parseInt(document.getElementById('cmINT').value)||50,
+        parseInt(document.getElementById('cmPOW').value)||50,
+        parseInt(document.getElementById('cmEDU').value)||50
+      ],
+      hp:parseInt(document.getElementById('cmHP').value)||10,
+      mp:parseInt(document.getElementById('cmMP').value)||10,
+      db:document.getElementById('cmDB').value||'+0',
+      build:parseInt(document.getElementById('cmBuild').value)||0,
+      mov:parseInt(document.getElementById('cmMov').value)||8,
+      armor:parseInt(document.getElementById('cmArmor').value)||0,
+      sanLoss:document.getElementById('cmSanLoss').value||'1/1d4',
+      attacks:parseCustomAttacks(document.getElementById('cmAttacks').value),
+      spells:[],
+      desc:document.getElementById('cmDesc').value.trim()
+    };
+    if(!mapState.monsters)mapState.monsters=[];
+    mapState.monsters.push(mon);
+    monsterId=mon.id;
+  }
+  mapState.cells[pendingCellPos.r+','+pendingCellPos.c]={type:'monster',skillChecks,monsterId};
+  refreshCell(pendingCellPos.r,pendingCellPos.c);
+  updateMapInfo();
+  closeModal('monsterModal');
+  pendingCellPos=null;
+}
+function parseCustomAttacks(text){
+  if(!text.trim())return[];
+  return text.trim().split('\n').filter(l=>l.trim()).map(line=>{
+    const parts=line.split(',').map(s=>s.trim());
+    return{name:parts[0]||'攻击',skill:parseInt(parts[1])||50,dice:parts[2]||'1d6',range:parts[3]||'触摸'};
+  });
+}
+
+// Monster SEAB import/export
+function importMonsterSeab(){openModal('monsterImportModal');}
+function doImportMonsterSeab(){
+  const raw=document.getElementById('monsterImportInput').value.trim();
+  if(!raw){alert('请粘贴怪物SEAB码');return;}
+  try{
+    const d=decodeSeab(raw);
+    if(d.v!=='monster')throw new Error('非怪物SEAB码');
+    const mon={...d,id:uid('mon')};
+    if(!mapState.monsters)mapState.monsters=[];
+    // Check for duplicate by name
+    const existing=mapState.monsters.find(m=>m.name===mon.name);
+    if(existing){
+      // Update existing entry with new data
+      Object.assign(existing,deepClone(d),{id:existing.id});
+      mon.id=existing.id;
+      const idx=mapState.monsters.indexOf(existing);
+      selectedMonster={source:'custom',idx};
+      alert('怪物"'+mon.name+'"已更新（同名覆盖）');
+    }else{
+      mapState.monsters.push(mon);
+      selectedMonster={source:'custom',idx:mapState.monsters.length-1};
+      alert('怪物"'+mon.name+'"已导入到自定义列表');
+    }
+    closeModal('monsterImportModal');
+    document.getElementById('customMonsterForm').style.display='none';
+    // Show detail of imported monster
+    const detail=document.getElementById('monsterDetail');
+    detail.style.display='block';
+    detail.innerHTML=renderMonsterDetailHTML(mon)+`<div style="margin-top:8px;text-align:right"><button class="modal-btn danger" style="font-size:11px;padding:3px 10px" onclick="deleteCustomMonsterEntry(${mapState.monsters.indexOf(mon)})">🗑️ 从自定义列表移除</button></div>`;
+    // Switch to custom tab and refresh list
+    filterMonsterCat('custom');
+  }catch(e){alert('导入失败: '+e.message);}
+}
+function exportSelectedMonster(){
+  let mon=null;
+  if(selectedMonster&&selectedMonster.source==='preset'){mon=MONSTER_PRESETS[selectedMonster.idx];}
+  else if(selectedMonster&&selectedMonster.source==='custom'){mon=mapState.monsters[selectedMonster.idx];}
+  else{
+    // Try custom form
+    if(document.getElementById('customMonsterForm').style.display!=='none'){
+      mon={
+        v:'monster',
+        name:document.getElementById('cmName').value.trim()||'自定义怪物',
+        cat:'custom',
+        attrs:[
+          parseInt(document.getElementById('cmSTR').value)||50,
+          parseInt(document.getElementById('cmCON').value)||50,
+          parseInt(document.getElementById('cmSIZ').value)||50,
+          parseInt(document.getElementById('cmDEX').value)||50,
+          parseInt(document.getElementById('cmAPP').value)||50,
+          parseInt(document.getElementById('cmINT').value)||50,
+          parseInt(document.getElementById('cmPOW').value)||50,
+          parseInt(document.getElementById('cmEDU').value)||50
+        ],
+        hp:parseInt(document.getElementById('cmHP').value)||10,
+        mp:parseInt(document.getElementById('cmMP').value)||10,
+        db:document.getElementById('cmDB').value||'+0',
+        build:parseInt(document.getElementById('cmBuild').value)||0,
+        mov:parseInt(document.getElementById('cmMov').value)||8,
+        armor:parseInt(document.getElementById('cmArmor').value)||0,
+        sanLoss:document.getElementById('cmSanLoss').value||'1/1d4',
+        attacks:parseCustomAttacks(document.getElementById('cmAttacks').value),
+        spells:[],
+        desc:document.getElementById('cmDesc').value.trim()
+      };
+    }
+  }
+  if(!mon){alert('请先选择一个怪物');return;}
+  const exportData={...deepClone(mon),v:'monster'};
+  delete exportData.id;
+  const code=encodeSeab(exportData);
+  document.getElementById('monsterExportOutput').value=code;
+  openModal('monsterExportModal');
+}
+function copyMonsterExport(){
+  const ta=document.getElementById('monsterExportOutput');
+  ta.select();document.execCommand('copy');
+  alert('已复制到剪贴板');
+}
+
+// ===================== EVENT CELL =====================
+function toggleEventReward(){
+  const type=document.getElementById('eventRewardType').value;
+  document.getElementById('eventRewardItem').style.display=type==='item'?'block':'none';
+  document.getElementById('eventRewardMonster').style.display=type==='monster'?'block':'none';
+  if(type==='item')refreshItemSelect('eventItemSelect');
+  if(type==='monster')refreshMonsterSelect('eventMonsterSelect');
+}
+function saveEventCell(){
+  if(!pendingCellPos)return;
+  const skillChecks=collectSkillChecks('eventSkillChecks');
+  const popupText=document.getElementById('eventPopupText').value.trim();
+  const rewardType=document.getElementById('eventRewardType').value;
+  let rewardId=null;
+  if(rewardType==='item')rewardId=document.getElementById('eventItemSelect').value||null;
+  else if(rewardType==='monster')rewardId=document.getElementById('eventMonsterSelect').value||null;
+  mapState.cells[pendingCellPos.r+','+pendingCellPos.c]={type:'event',skillChecks,popupText,rewardType,rewardId};
+  refreshCell(pendingCellPos.r,pendingCellPos.c);
+  updateMapInfo();
+  closeModal('eventModal');
+  pendingCellPos=null;
+}
+
+// ===================== PORTAL =====================
+function savePortal(){
+  if(!pendingCellPos)return;
+  const name=document.getElementById('portalName').value.trim()||'传送门';
+  const targetCode=document.getElementById('portalTarget').value.trim();
+  const portalDesc=document.getElementById('portalDesc').value.trim();
+  mapState.cells[pendingCellPos.r+','+pendingCellPos.c]={type:'portal',name,targetCode,portalDesc};
+  refreshCell(pendingCellPos.r,pendingCellPos.c);
+  updateMapInfo();
+  closeModal('portalModal');
+  pendingCellPos=null;
+}
+
+// ===================== SPARE ITEMS =====================
+function openSpareItemsPanel(){
+  renderSpareItems();
+  openModal('spareItemsModal');
+}
+function renderSpareItems(){
+  const list=document.getElementById('spareItemsList');
+  if(!mapState.spareItems.length){list.innerHTML='<div style="padding:12px;color:var(--muted);text-align:center">暂无备用物品</div>';return;}
+  list.innerHTML=mapState.spareItems.map((item,i)=>{
+    const cat=ITEM_CATEGORIES[item.category]||ITEM_CATEGORIES.custom;
+    return`<div class="spare-item-row"><span class="si-icon">${cat.icon}</span><span class="si-name">${escHtml(item.name)}</span><span style="color:var(--muted);font-size:11px">${cat.label}</span><button class="si-del" onclick="removeSpareItem(${i})">✕</button></div>`;
+  }).join('');
+}
+function removeSpareItem(idx){
+  mapState.spareItems.splice(idx,1);
+  renderSpareItems();
+}
+function addSpareCustom(){openModal('customItemModal');document.getElementById('ciCategory').value='custom';updateCustomItemFields();}
+function addSparePreset(){renderWeaponPicker();openModal('weaponPickerModal');}
+function addSpareRandom(){
+  const cats=Object.keys(BLIND_BOX).filter(k=>k!=='weapon');
+  const cat=randPick(cats);
+  const bd=BLIND_BOX[cat];
+  const template=deepClone(ITEM_CATEGORIES[cat].template);
+  if(cat==='clue'){
+    template.name=randPick(bd.names);
+    template.content=randPick(bd.contents);
+    template.desc=randPick(bd.descs);
+  }else if(cat==='prop'){
+    template.name=randPick(bd.names);
+    template.effect=randPick(bd.effects);
+    template.dice=randPick(bd.dice);
+    template.counter=randInt(bd.countRange[0],bd.countRange[1]);
+    template.maxCounter=template.counter;
+  }else if(cat==='misc'){
+    template.name=randPick(bd.names);
+    template.counter=randInt(bd.countRange[0],bd.countRange[1]);
+  }else if(cat==='custom'){
+    template.name=randPick(bd.names);
+    template.dice=randPick(bd.dice);
+    template.counter=randInt(bd.countRange[0],bd.countRange[1]);
+  }
+  template.id=uid('item');
+  mapState.spareItems.push(template);
+  renderSpareItems();
+}
+
+function renderWeaponPicker(){
+  const list=document.getElementById('weaponPickerList');
+  list.innerHTML=WEAPON_PRESETS.map((w,i)=>`<div class="item-pick" onclick="pickWeaponPreset(${i})"><strong>${escHtml(w.name)}</strong> <span style="color:var(--muted)">${w.dice} ${w.range?'射程:'+w.range:''}</span></div>`).join('');
+}
+function pickWeaponPreset(idx){
+  const w=WEAPON_PRESETS[idx];
+  const item={...deepClone(w),id:uid('item'),category:'weapon',locked:false};
+  mapState.spareItems.push(item);
+  closeModal('weaponPickerModal');
+  renderSpareItems();
+}
+
+function updateCustomItemFields(){
+  const cat=document.getElementById('ciCategory').value;
+  const ci=ITEM_CATEGORIES[cat];
+  const fields=ci.fields;
+  let html='';
+  fields.forEach(f=>{
+    const labelMap={name:'名称',content:'内容',desc:'描述',effect:'效果',dice:'骰子',counter:'数量',maxCounter:'最大数量',indestructible:'不可破坏',uses:'使用次数',skill:'关联技能',range:'射程',malfunction:'卡壳值',locked:'锁定'};
+    if(f==='indestructible'||f==='locked'){
+      html+=`<label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="ci_${f}"> ${labelMap[f]||f}</label>`;
+    }else{
+      html+=`<label>${labelMap[f]||f}</label><input type="text" id="ci_${f}" value="">`;
+    }
+  });
+  // Effects (for prop, weapon, custom)
+  if(cat==='prop'||cat==='weapon'||cat==='custom'){
+    html+=`<div id="itemEffectsArea" style="margin-top:8px"><label>物品效果（使用时的属性/状态变化）</label></div>`;
+    html+=`<button class="add-sc" onclick="addItemEffectRow()">＋ 添加效果</button>`;
+  }
+  document.getElementById('ciFields').innerHTML=html;
+}
+function saveCustomItem(){
+  const cat=document.getElementById('ciCategory').value;
+  const ci=ITEM_CATEGORIES[cat];
+  const item={...deepClone(ci.template),id:uid('item')};
+  ci.fields.forEach(f=>{
+    const el=document.getElementById('ci_'+f);
+    if(!el)return;
+    if(el.type==='checkbox')item[f]=el.checked;
+    else if(el.type==='number')item[f]=parseInt(el.value)||0;
+    else item[f]=el.value;
+  });
+  // Collect effects
+  item.effects=collectItemEffects();
+  mapState.spareItems.push(item);
+  closeModal('customItemModal');
+  renderSpareItems();
+}
+
+// Refresh item <select> elements
+function refreshItemSelect(selectId,selectedId){
+  const sel=document.getElementById(selectId);
+  sel.innerHTML='<option value="">-- 请选择 --</option>';
+  mapState.spareItems.forEach(item=>{
+    const cat=ITEM_CATEGORIES[item.category]||ITEM_CATEGORIES.custom;
+    const opt=document.createElement('option');
+    opt.value=item.id;
+    opt.textContent=cat.icon+' '+item.name;
+    if(item.id===selectedId)opt.selected=true;
+    sel.appendChild(opt);
+  });
+}
+function refreshMonsterSelect(selectId){
+  const sel=document.getElementById(selectId);
+  sel.innerHTML='<option value="">-- 请选择 --</option>';
+  if(!mapState.monsters)return;
+  mapState.monsters.forEach(mon=>{
+    const opt=document.createElement('option');
+    opt.value=mon.id;
+    opt.textContent='👹 '+mon.name;
+    sel.appendChild(opt);
+  });
+}
+
+// ===================== CONFIRM / CANCEL =====================
+function confirmEdit(){
+  savedSnapshot=deepClone(mapState);
+  // Just save - state is already in mapState
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  currentTool=null;
+}
+function cancelEdit(){
+  if(savedSnapshot){mapState=deepClone(savedSnapshot);renderGrid();}
+  document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+  currentTool=null;
+}
+
+// ===================== QUICK ACTIONS =====================
+function clearAllCells(){
+  if(!confirm('确定清空所有格子？此操作不可撤销。'))return;
+  mapState.cells={};
+  renderGrid();
+}
+function fillBorderWalls(){
+  for(let r=0;r<mapState.rows;r++){
+    for(let c=0;c<mapState.cols;c++){
+      if(r===0||r===mapState.rows-1||c===0||c===mapState.cols-1){
+        const key=r+','+c;
+        if(!mapState.cells[key])mapState.cells[key]={type:'wall1'};
+      }
+    }
+  }
+  renderGrid();
+}
+
+// ===================== MAP SEAB IMPORT/EXPORT =====================
+function exportMap(){
+  mapState.name=document.getElementById('mapNameInput').value.trim()||'未命名地图';
+  const payload={
+    v:'map',
+    name:mapState.name,
+    rows:mapState.rows,
+    cols:mapState.cols,
+    cellSize:mapState.cellSize,
+    cells:mapState.cells,
+    spareItems:mapState.spareItems||[],
+    monsters:mapState.monsters||[],
+    portals:mapState.portals||[]
+  };
+  const code=encodeSeab(payload);
+  document.getElementById('exportOutput').value=code;
+  openModal('exportModal');
+}
+function copyExport(){
+  const ta=document.getElementById('exportOutput');
+  ta.select();document.execCommand('copy');
+  alert('已复制到剪贴板');
+}
+function openImportModal(){openModal('importModal');}
+function importMap(){
+  const raw=document.getElementById('importInput').value.trim();
+  if(!raw){alert('请粘贴SEAB码');return;}
+  try{
+    const d=decodeSeab(raw);
+    if(d.v!=='map')throw new Error('非地图SEAB码（v字段应为"map"）');
+    mapState={
+      name:d.name||'未命名地图',
+      rows:d.rows||20,
+      cols:d.cols||20,
+      cellSize:d.cellSize||32,
+      cells:d.cells||{},
+      spareItems:d.spareItems||[],
+      monsters:d.monsters||[],
+      portals:d.portals||[]
+    };
+    document.getElementById('mapNameInput').value=mapState.name;
+    document.getElementById('rowsInput').value=mapState.rows;
+    document.getElementById('colsInput').value=mapState.cols;
+    document.getElementById('cellSizeInput').value=mapState.cellSize;
+    savedSnapshot=deepClone(mapState);
+    renderGrid();
+    closeModal('importModal');
+    alert('地图导入成功！');
+  }catch(e){alert('导入失败: '+e.message);}
+}
+
+// ===================== INIT =====================
+savedSnapshot=deepClone(mapState);
+renderGrid();
+</script>
+</body>
+</html>

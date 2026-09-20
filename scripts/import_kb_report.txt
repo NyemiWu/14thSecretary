@@ -1,0 +1,130 @@
+OK     世界观\世界观阐释Ver2.docx                             -> docs\text/worldview\世界观阐释Ver2.md
+OK     世界观\仿生人.docx                                   -> docs\text/worldview\仿生人.md
+OK     世界观\回环书-世界观底层叙事.docx                           -> docs\text/worldview\回环书-世界观底层叙事.md
+TODO(.doc 老格式，需单独提取) 世界观\意识交互方法集.doc
+OK     世界观\意识工学技术.docx                                -> docs\text/worldview\意识工学技术.md
+OK     世界观\意识模型建构笔记.docx                              -> docs\text/worldview\意识模型建构笔记.md
+OK     世界观\意识污染.docx                                  -> docs\text/worldview\意识污染.md
+OK     世界观\智械：意识作战中的意识交互规则.docx                       -> docs\text/worldview\智械-意识作战中的意识交互规则.md
+OK     世界观\规则律.docx                                   -> docs\text/worldview\规则律.md
+OK     世界观\识子论.docx                                   -> docs\text/worldview\识子论.md
+OK     人物角色相关\亚尔伯特·珂博奥（正太）设定.docx                     -> docs\text/characters\亚尔伯特·珂博奥（正太）设定.md
+TODO(.doc 老格式，需单独提取) 人物角色相关\人物角色名单（过期）.doc
+OK     人物角色相关\人物角色设定卡.docx                            -> docs\text/characters\人物角色设定卡.md
+OK     人物角色相关\六号设定.docx                               -> docs\text/characters\六号设定.md
+OK     人物角色相关\塔洛玛蒂.md                                 -> docs\text/characters\塔洛玛蒂.md
+TODO(.doc 老格式，需单独提取) 人物角色相关\女二设定.doc
+OK     人物角色相关\琳设定.docx                                -> docs\text/characters\琳设定.md
+OK     人物角色相关\风蕊设定.docx                               -> docs\text/characters\风蕊设定.md
+OK     前传\DS_剧本续写与策划0130.docx                         -> docs\text/prequel\DS_剧本续写与策划0130.md
+OK     前传\DS_医疗知识.docx                                -> docs\text/prequel\DS_医疗知识.md
+OK     前传\DS_技术工具0201.docx                            -> docs\text/prequel\DS_技术工具0201.md
+OK     前传\DS_策划案参考.docx                               -> docs\text/prequel\DS_策划案参考.md
+OK     前传\WeChat_20250203164446.mp4                   -> docs\text/prequel\WeChat_20250203164446.mp4
+OK     前传\剧本.docx                                     -> docs\text/prequel\剧本.md
+OK     前传\音乐音效.docx                                   -> docs\text/prequel\音乐音效.md
+OK     前传\项目游戏策划案.docx                                -> docs\text/prequel\项目游戏策划案.md
+OK     剧情\凯瑟琳线剧情.docx                                 -> docs\text/story\凯瑟琳线剧情.md
+OK     剧情\十三号城剧情.docx                                 -> docs\text/story\十三号城剧情.md
+OK     剧情\时雨蝉个人剧情.docx                                -> docs\text/story\时雨蝉个人剧情.md
+OK     剧情\河管办线剧情.docx                                 -> docs\text/story\河管办线剧情.md
+OK     剧情\海蒂&卡洛儿剧情《炽热的颂歌Inferno Carol》.docx           -> docs\text/story\海蒂-卡洛儿剧情《炽热的颂歌Inferno-Carol》.md
+OK     剧情\穆颖恒个人篇章剧情.docx                              -> docs\text/story\穆颖恒个人篇章剧情.md
+OK     剧情\西伯利亚穹顶城剧情.docx                              -> docs\text/story\西伯利亚穹顶城剧情.md
+OK     剧情/主线-琳&芊\主线_第一部_序章.docx                       -> docs\text/story\main\主线_第一部_序章.md
+OK     剧情/主线-琳&芊\女二剧情-未竟.docx                         -> docs\text/story\main\女二剧情-未竟.md
+OK     剧情/主线-琳&芊\女二学校篇剧情-虹金试炼.docx                    -> docs\text/story\main\女二学校篇剧情-虹金试炼.md
+OK     剧情/主线-琳&芊\情景集.docx                             -> docs\text/story\main\情景集.md
+OK     剧情/主线-琳&芊\拉斐尔.docx                             -> docs\text/story\main\拉斐尔.md
+OK     剧情/主线-琳&芊\昆山杀手剧情.docx                          -> docs\text/story\main\昆山杀手剧情.md
+OK     剧情/主线-琳&芊\琳&女二主线剧情.docx                        -> docs\text/story\main\琳-女二主线剧情.md
+OK     剧情/主线-琳&芊\琳&女二主线章节《罪愆》.docx                    -> docs\text/story\main\琳-女二主线章节《罪愆》.md
+OK     剧情/主线-琳&芊\琳&女二剧情-闫洇浮章节末章.docx                  -> docs\text/story\main\琳-女二剧情-闫洇浮章节末章.md
+OK     剧情/主线-琳&芊\琳&女二剧情：烂尾楼调查.docx                    -> docs\text/story\main\琳-女二剧情-烂尾楼调查.md
+OK     剧情/主线-琳&芊\穆父线.docx                             -> docs\text/story\main\穆父线.md
+OK     剧情/主线-琳&芊\闫洇浮个人篇章剧情.docx                       -> docs\text/story\main\闫洇浮个人篇章剧情.md
+OK     剧情/其他文本\《铁砧》.docx                              -> docs\text/story\misc\《铁砧》.md
+OK     剧情/其他文本\《雨声之地》.docx                            -> docs\text/story\misc\《雨声之地》.md
+OK     剧情/其他文本\《风铃花》.docx                             -> docs\text/story\misc\《风铃花》.md
+OK     剧情/其他文本\【常】-文本.docx                            -> docs\text/story\misc\【常】-文本.md
+OK     剧情/其他文本\寻乡人.docx                               -> docs\text/story\misc\寻乡人.md
+OK     剧情/其他文本\常思将军.docx                              -> docs\text/story\misc\常思将军.md
+TODO(.doc 老格式，需单独提取) 剧情/其他文本\环状雨楼群.doc
+OK     剧情/其他文本\雨楼-牧马人.docx                            -> docs\text/story\misc\雨楼-牧马人.md
+OK     剧情/北岸篇\复仇.docx                                 -> docs\text/story\northbank\复仇.md
+OK     剧情/北岸篇\奥博连斯基.docx                              -> docs\text/story\northbank\奥博连斯基.md
+OK     剧情/北岸篇\野狗-鸦巢的对峙.docx                           -> docs\text/story\northbank\野狗-鸦巢的对峙.md
+OK     剧情/北岸篇\长岛狛鸣剧情.docx                             -> docs\text/story\northbank\长岛狛鸣剧情.md
+OK     剧情/北岸篇\鸦巢剧情-交涉.docx                            -> docs\text/story\northbank\鸦巢剧情-交涉.md
+SKIP(另行处理) 图库\0912.jpg
+SKIP(另行处理) 图库\0917.png
+SKIP(另行处理) 图库\1736577766739.png
+SKIP(另行处理) 图库\38196ed06149489a9c9f8233ff67542.png
+SKIP(另行处理) 图库\4e665bc3de5b2a39843c132c26fced7.png
+SKIP(另行处理) 图库\9ac35ddc25d8eb201c17d26e202c7e8.jpg
+SKIP(另行处理) 图库\Vayu.png
+SKIP(另行处理) 图库\b89c8a215de2543556c45bf4d6569e1.png
+SKIP(另行处理) 图库\c1a9f037b4e1bc1c58c3cc8c4442c30.png
+SKIP(另行处理) 图库\世界地图.jfif
+SKIP(另行处理) 图库\人设半身-牙.png
+SKIP(另行处理) 图库\十四号城地图.png
+SKIP(另行处理) 图库\卡缇娜.png
+SKIP(另行处理) 图库\双子姐姐20240302.png
+SKIP(另行处理) 图库\塔洛玛蒂.png
+SKIP(另行处理) 图库\天琴.png
+SKIP(另行处理) 图库\女二（12岁）.png
+SKIP(另行处理) 图库\战车.jpg
+SKIP(另行处理) 图库\方槊boss.png
+SKIP(另行处理) 图库\方槊角色设计240118.png
+SKIP(另行处理) 图库\晴云.png
+SKIP(另行处理) 图库\模块机器人0.png
+SKIP(另行处理) 图库\模块机器人1.png
+SKIP(另行处理) 图库\模块机器人2.png
+SKIP(另行处理) 图库\烛铭.png
+SKIP(另行处理) 图库\琳-概念设定.jpg
+SKIP(另行处理) 图库\盲女仆角色设计.jpg
+SKIP(另行处理) 图库\穹底之城.jpg
+SKIP(另行处理) 图库\练习0113.jpg
+SKIP(另行处理) 图库\练习1230.png
+SKIP(另行处理) 图库\编年史20250402.png
+SKIP(另行处理) 图库\肃正者.png
+SKIP(另行处理) 图库\萨莉伽.png
+SKIP(另行处理) 图库\角色设计1219.jpg
+SKIP(另行处理) 图库\音符.png
+OK     外城与城际\世界穹顶城概述.docx                             -> docs\text/regions/outer\世界穹顶城概述.md
+OK     外城与城际\西伯利亚穹顶城.docx                             -> docs\text/regions/outer\西伯利亚穹顶城.md
+OK     外城与城际/十三号城\十三号城编年史与重要文本.docx                   -> docs\text/regions/outer\13th\十三号城编年史与重要文本.md
+OK     外城与城际/十三号城\十三号城角色名单.docx                       -> docs\text/regions/outer\13th\十三号城角色名单.md
+OK     外城与城际/十三号城\十三号城设定.docx                         -> docs\text/regions/outer\13th\十三号城设定.md
+SKIP(另行处理) 工具\COC7版战图工具-KP端.html
+SKIP(另行处理) 工具\COC7版战图工具-玩家端.html
+SKIP(另行处理) 工具\COC7版车卡工具.html
+OK     生物设定/人工智能\塞壬.docx                              -> docs\text/bestiary\ai\塞壬.md
+OK     生物设定/意识生物\意识生物图鉴.docx                          -> docs\text/bestiary\conscious\意识生物图鉴.md
+OK     生物设定/意识生物\温迪戈.docx                             -> docs\text/bestiary\conscious\温迪戈.md
+OK     生物设定/意识生物\黑神.docx                              -> docs\text/bestiary\conscious\黑神.md
+OK     社会结构与体制\关于十四号城的社会状况.docx                       -> docs\text/society\关于十四号城的社会状况.md
+OK     社会结构与体制\关于戍卫军团.docx                            -> docs\text/society\关于戍卫军团.md
+OK     社会结构与体制\关于第三次世界大战.docx                         -> docs\text/society\关于第三次世界大战.md
+OK     社会结构与体制\北岸区.docx                               -> docs\text/society\北岸区.md
+OK     社会结构与体制\十四号城意识形态全集.docx                        -> docs\text/society\十四号城意识形态全集.md
+OK     社会结构与体制\塔罗牌.docx                               -> docs\text/society\塔罗牌.md
+OK     社会结构与体制/片区规划\片区规划.docx                         -> docs\text/society\districts\片区规划.md
+OK     社会结构与体制/片区规划/穹顶城内\地下城.docx                     -> docs\text/society\districts/inside\地下城.md
+OK     社会结构与体制/片区规划/穹顶城内\津渡区.docx                     -> docs\text/society\districts/inside\津渡区.md
+OK     社会结构与体制/片区规划/穹顶城外\挽子坡.docx                     -> docs\text/society\districts/outside\挽子坡.md
+OK     编年史\完整编年史.html                                 -> docs\text/chronicle\完整编年史.md
+OK     编年史\编年史简述（2023—2058）.docx                      -> docs\text/chronicle\编年史简述（2023—2058）.md
+OK     阵营势力\仿研所.docx                                  -> docs\text/factions\仿研所.md
+OK     阵营势力\十四号城联合科学院.docx                            -> docs\text/factions\十四号城联合科学院.md
+OK     阵营势力\商会.docx                                   -> docs\text/factions\商会.md
+OK     阵营势力\圣莱山德医院.md                                 -> docs\text/factions\圣莱山德医院.md
+OK     阵营势力\星枢学会.md                                   -> docs\text/factions\星枢学会.md
+OK     阵营势力\穹顶政联.docx                                 -> docs\text/factions\穹顶政联.md
+OK     阵营势力\至高联合.docx                                 -> docs\text/factions\至高联合.md
+OK     阵营势力\至高肃正.docx                                 -> docs\text/factions\至高肃正.md
+OK     阵营势力\蓝山事务所.docx                                -> docs\text/factions\蓝山事务所.md
+OK     项目管理\第一阶段目标.docx                               -> docs\text/project\第一阶段目标.md
+OK     食品\十四号城食品.docx                                 -> docs\text/society\十四号城食品.md
+
+统计: {'docx': 81, 'doc': 4, 'md': 3, 'html': 1, 'asset': 1, 'skip': 7}

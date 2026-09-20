@@ -1,0 +1,4 @@
+OK     意识交互方法集.doc                                5048 字 -> docs\text/worldview\意识交互方法集.md
+OK     女二设定.doc                                   2799 字 -> docs\text/characters\女二设定.md
+OK     人物角色名单（过期）.doc                             4005 字 -> docs\text/characters\人物角色名单（过期）.md
+OK     环状雨楼群.doc                                  1022 字 -> docs\text/story/misc\环状雨楼群.md

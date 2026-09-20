@@ -4,7 +4,7 @@ title: 文本分区
 
 # 文本分区
 
-纯阅读内容。世界观、规则、条目 —— 一切"读"的部分。
+纯阅读内容。世界观、设定、剧情、图鉴 —— 一切「读」的部分。
 
 !!! warning "这里只放已放行的内容"
     任何新稿子先进 [缓冲分区](../buffer/index.md)，由管理者标记通过并走完公示才并入这里。
@@ -12,43 +12,103 @@ title: 文本分区
 
 ---
 
-## 已有板块
-
 <div class="grid cards" markdown>
 
--   :material-book-cipher:{ .lg .middle } __设定__
+-   __设定__（3）
 
     ---
 
-    规则与体系。秘语体系、四段式真名、赐名流程都在这里。
+    秘语体系、四段式真名、赐名流程 —— 整套赐名机制的规则部分。
 
     [:octicons-arrow-right-24: 进入](canon/index.md)
 
--   :material-book-open-page-variant:{ .lg .middle } __图鉴__
+-   __世界观__（10）
 
     ---
 
-    已归档的赐名怪物条目，一只一页。
+    意识、意识海、仿生人、识子论、意识工学……这个世界运转的底层规则。
+
+    [:octicons-arrow-right-24: 进入](worldview/index.md)
+
+-   __社会结构与体制__（8）
+
+    ---
+
+    十四号城的社会状况、意识形态全集、片区规划、戍卫军团。
+
+    [:octicons-arrow-right-24: 进入](society/index.md)
+
+-   __地区__（2）
+
+    ---
+
+    穹顶城内外、十三号城、西伯利亚穹顶城。
+
+    [:octicons-arrow-right-24: 进入](regions/index.md)
+
+-   __阵营势力__（9）
+
+    ---
+
+    仿研所、穹顶政联、至高联合、商会、星枢学会……
+
+    [:octicons-arrow-right-24: 进入](factions/index.md)
+
+-   __人物角色__（8）
+
+    ---
+
+    角色设定与设定卡。
+
+    [:octicons-arrow-right-24: 进入](characters/index.md)
+
+-   __图鉴__（8）
+
+    ---
+
+    赐名怪物、意识生物、人工智能。
 
     [:octicons-arrow-right-24: 进入](bestiary/index.md)
 
+-   __编年史__（2）
+
+    ---
+
+    从市元前到 2058 年的时间线。
+
+    [:octicons-arrow-right-24: 进入](chronicle/index.md)
+
+-   __前传__（7）
+
+    ---
+
+    前传游戏的策划案、剧本、医疗与技术文档。
+
+    [:octicons-arrow-right-24: 进入](prequel/index.md)
+
+-   __剧情__（32）
+
+    ---
+
+    主线、支线与个人篇章的剧本文本。
+
+    [:octicons-arrow-right-24: 进入](story/index.md)
+
+-   __图库__（0）
+
+    ---
+
+    概念设定、角色设计、地图。
+
+    [:octicons-arrow-right-24: 进入](gallery/index.md)
+
+-   __项目管理__（1）
+
+    ---
+
+    项目内部的目标与排期。
+
+    [:octicons-arrow-right-24: 进入](project/index.md)
+
 </div>
 
----
-
-## 后续下分
-
-下面这些板块按需开，不要提前建空目录。开之前先读 [编辑规范](../buffer/style-guide.md)。
-
-| 板块 | 建议路径 | 内容 | 状态 |
-|---|---|---|---|
-| 世界与地理 | `text/world/` | 区域、地形、气候、地理关系 | 待开 |
-| 势力与组织 | `text/factions/` | 阵营、教团、机构、血脉 | 待开 |
-| 人物 | `text/characters/` | 有名有姓的个体 | 待开 |
-| 编年与事件 | `text/history/` | 时间线、重大事件 | 待开 |
-| 术语表 | `text/glossary.md` | 专有名词统一解释 | 待开 |
-| 物与器 | `text/items/` | 器物、材料、道具 | 待开 |
-
-!!! tip "什么时候该开新板块"
-    同类条目超过 **5 条**再开目录。3 条以下先并进 `canon/` 里当小节，
-    否则侧栏会长出一堆只有一个子项的节点。

@@ -1,0 +1,11 @@
+nav:
+  - index.md
+  - 缓冲流程: rules.md
+  - 内容后台: editor.md
+  - 编辑规范: style-guide.md
+  - 条目模板: entries.md
+
+# 待审稿与公示稿不进导航：pending 不发布，public 靠看板直链进
+ignore:
+  - pending
+  - public

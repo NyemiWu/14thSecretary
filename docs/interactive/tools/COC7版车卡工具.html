@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COC 7版 车卡内容生成工具</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#1a1a2e;color:#e0e0e0;line-height:1.6;padding:20px;}
+h1{text-align:center;color:#e94560;font-size:24px;margin-bottom:5px;}
+.subtitle{text-align:center;color:#888;font-size:13px;margin-bottom:20px;}
+.container{max-width:960px;margin:0 auto;}
+.step{background:#16213e;border-radius:10px;padding:20px;margin-bottom:16px;border:1px solid #0f3460;display:none;}
+.step.active{display:block;}
+.step-header{display:flex;align-items:center;margin-bottom:15px;}
+.step-num{background:#e94560;color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;margin-right:12px;font-size:14px;}
+.step-title{font-size:16px;color:#e94560;font-weight:bold;}
+label{display:block;font-size:13px;color:#aaa;margin-bottom:4px;}
+select,input[type=text],input[type=number]{background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px 12px;font-size:14px;width:100%;outline:none;}
+select:focus,input:focus{border-color:#e94560;}
+input[readonly]{background:#0a1628;border-color:#1a1a3e;color:#888;cursor:default;}
+select{cursor:pointer;}
+.row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.col{flex:1;min-width:140px;}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:bold;transition:all .2s;}
+.btn-primary{background:#e94560;color:#fff;}
+.btn-primary:hover{background:#c73652;}
+.btn-secondary{background:#533483;color:#fff;}
+.btn-secondary:hover{background:#6b44a0;}
+.btn-ghost{background:transparent;border:1px solid #533483;color:#aaa;}
+.btn-ghost:hover{border-color:#e94560;color:#e94560;}
+.btn-copy{background:#27ae60;color:#fff;font-size:16px;padding:12px 32px;}
+.btn-copy:hover{background:#219a52;}
+.btn-copy.copied{background:#2ecc71;}
+.table-wrap{overflow-x:auto;margin:12px 0;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#0f3460;color:#e94560;padding:8px 6px;text-align:center;font-weight:bold;white-space:nowrap;position:sticky;top:0;}
+td{padding:6px;border-bottom:1px solid #1a1a3e;text-align:center;}
+tr:hover td{background:rgba(233,69,96,0.08);}
+td input,td select{padding:4px 6px;font-size:13px;text-align:center;}
+.occ-tag{display:inline-block;background:#533483;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;margin:2px;}
+.occ-tag.selected{background:#e94560;}
+.skill-lock{opacity:.35;pointer-events:none;}
+.err-msg{color:#e94560;font-size:12px;margin-top:4px;}
+.info-box{background:rgba(83,52,131,0.2);border-left:3px solid #533483;padding:10px 14px;margin:10px 0;border-radius:0 6px 6px 0;font-size:13px;}
+.info-box.warning{border-left-color:#e94560;background:rgba(233,69,96,0.1);}
+.point-bar{display:flex;align-items:center;gap:8px;margin:8px 0;}
+.point-bar .label{font-size:13px;color:#aaa;min-width:100px;}
+.point-bar .val{font-size:14px;font-weight:bold;color:#e94560;}
+.point-bar .bar-bg{flex:1;height:8px;background:#0f3460;border-radius:4px;overflow:hidden;}
+.point-bar .bar-fill{height:100%;background:#e94560;border-radius:4px;transition:width .3s;}
+.point-bar.over .val{color:#c0392b;}
+.point-bar.over .bar-fill{background:#c0392b;}
+.progress-bar{display:flex;gap:4px;margin:10px 0;}
+.progress-dot{width:12px;height:12px;border-radius:50%;background:#0f3460;}
+.progress-dot.done{background:#533483;}
+.progress-dot.current{background:#e94560;}
+.progress-dot.future{background:#333;}
+.tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+.tab{padding:6px 14px;border-radius:6px;background:#0f3460;color:#aaa;cursor:pointer;font-size:13px;border:none;}
+.tab.active{background:#e94560;color:#fff;}
+.output-area{background:#0d1b2a;border:1px solid #1a1a3e;border-radius:8px;padding:16px;margin:12px 0;white-space:pre-wrap;font-family:"Consolas","Microsoft YaHei",monospace;font-size:13px;line-height:1.7;color:#ccc;max-height:600px;overflow-y:auto;}
+.cat-header{background:rgba(233,69,96,0.1);color:#e94560;padding:8px 12px;font-weight:bold;font-size:14px;border-radius:6px 6px 0 0;border:1px solid #0f3460;border-bottom:none;}
+.cat-body{border:1px solid #0f3460;border-top:none;border-radius:0 0 6px 6px;padding:4px 0;}
+.attr-display{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:14px;}
+.attr-name{width:50px;color:#aaa;text-align:right;}
+.attr-val{font-weight:bold;color:#e94560;min-width:40px;text-align:center;}
+.attr-formula{color:#666;font-size:11px;}
+.divider{border:none;border-top:1px solid #1a1a3e;margin:12px 0;}
+@media(max-width:600px){.row{flex-direction:column;}.col{min-width:100%;}}
+/* Cover styles */
+.cover-title{font-size:36px;color:#e94560;text-align:center;margin:30px 0 8px;font-weight:bold;text-shadow:0 0 30px rgba(233,69,96,0.3);letter-spacing:2px;}
+.cover-subtitle{font-size:14px;color:#888;text-align:center;margin-bottom:36px;}
+.cover-cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:40px;}
+.cover-card{background:linear-gradient(145deg,#16213e,#1a1a3e);border:2px solid #0f3460;border-radius:16px;padding:30px 28px;width:260px;cursor:pointer;transition:all .3s;text-align:center;position:relative;overflow:hidden;}
+.cover-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:#e94560;transform:scaleX(0);transition:transform .3s;}
+.cover-card:hover{border-color:#e94560;transform:translateY(-4px);box-shadow:0 8px 30px rgba(233,69,96,0.2);}
+.cover-card:hover::before{transform:scaleX(1);}
+.cover-card .card-icon{font-size:48px;margin-bottom:16px;display:block;}
+.cover-card .card-title{font-size:18px;color:#e94560;font-weight:bold;margin-bottom:8px;}
+.cover-card .card-desc{font-size:13px;color:#aaa;line-height:1.6;}
+#seabInputSection{display:none;background:#16213e;border:1px solid #0f3460;border-radius:10px;padding:20px;margin-top:20px;}
+#seabInputSection textarea{width:100%;background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:10px;font-size:13px;font-family:monospace;resize:vertical;min-height:80px;}
+#seabInputSection .btn-row{margin-top:12px;}
+/* Backpack / Items */
+.bp-section{background:#0d1b2a;border:1px solid #1a1a3e;border-radius:8px;margin-top:16px;overflow:hidden;}
+.bp-header{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(233,69,96,0.08);border-bottom:1px solid #1a1a3e;cursor:pointer;user-select:none;}
+.bp-header:hover{background:rgba(233,69,96,0.14);}
+.bp-header .bp-icon{font-size:18px;}
+.bp-header .bp-title{font-size:14px;color:#e94560;font-weight:bold;flex:1;}
+.bp-header .bp-count{font-size:11px;color:#888;background:#16213e;padding:2px 8px;border-radius:10px;}
+.bp-header .bp-toggle{color:#666;font-size:12px;transition:transform .2s;}
+.bp-content{padding:12px 16px;display:none;}
+.bp-content.open{display:block;}
+.bp-item{display:flex;align-items:center;gap:8px;background:#0f3460;border-radius:6px;padding:8px 12px;margin-bottom:6px;transition:background .2s;}
+.bp-item:hover{background:#16213e;}
+.bp-item .bp-item-icon{font-size:16px;min-width:22px;text-align:center;}
+.bp-item .bp-item-name{flex:1;font-size:13px;color:#e0e0e0;}
+.bp-item .bp-item-sub{font-size:11px;color:#888;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bp-item .bp-item-counter{font-size:11px;color:#aaa;background:#16213e;padding:1px 6px;border-radius:8px;}
+.bp-item .bp-item-btn{font-size:13px;color:#555;cursor:pointer;padding:0 4px;border:none;background:none;}
+.bp-item .bp-item-btn:hover{color:#e94560;}
+.bp-item .bp-item-btn.edit-btn:hover{color:#533483;}
+.bp-empty{color:#555;font-size:13px;font-style:italic;text-align:center;padding:12px 0;}
+.bp-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+/* Item modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#16213e;border:1px solid #533483;border-radius:12px;padding:24px;max-width:520px;width:90%;max-height:85vh;overflow-y:auto;position:relative;}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:#888;font-size:20px;cursor:pointer;}
+.modal-close:hover{color:#e94560;}
+.modal h2{color:#e94560;font-size:18px;margin:0 0 16px;}
+.item-cat-picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.item-cat-picker button{padding:6px 14px;border-radius:6px;border:1px solid #533483;background:#0f3460;color:#e0e0e0;cursor:pointer;font-size:13px;transition:all .2s;}
+.item-cat-picker button:hover,.item-cat-picker button.active{border-color:#e94560;color:#e94560;background:#1a1a3e;}
+.preset-list{max-height:300px;overflow-y:auto;}
+.preset-list-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:6px;cursor:pointer;transition:background .15s;margin-bottom:2px;}
+.preset-list-item:hover{background:#0f3460;}
+.preset-list-item .pname{font-size:13px;color:#e0e0e0;}
+.preset-list-item .pdice{font-size:12px;color:#e94560;}
+/* Item Effects */
+.effect-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;padding:6px 8px;background:#0f3460;border-radius:6px;}
+.effect-row select,.effect-row input{background:#16213e;border:1px solid #533483;color:#e0e0e0;border-radius:4px;padding:4px 6px;font-size:12px;}
+.effect-row select{flex:1;min-width:80px;}
+.effect-row input{flex:1;min-width:60px;}
+.effect-row .effect-remove{background:none;border:none;color:#e94560;cursor:pointer;font-size:16px;padding:0 4px;}
+.effect-row .effect-remove:hover{color:#ff6b6b;}
+#itemEffectsArea{margin-top:8px;margin-bottom:12px;}
+#itemEffectsArea label{color:#aaa;font-size:12px;margin-bottom:4px;display:block;}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- STEP 0: Cover -->
+<div class="step active" id="step0">
+<div class="cover-title">COC 7版 车卡工具</div>
+<div class="cover-subtitle">克苏鲁的呼唤 第七版 调查员角色卡生成器</div>
+<div class="cover-cards">
+  <div class="cover-card" onclick="startNew()">
+    <span class="card-icon">📝</span>
+    <div class="card-title">新建角色</div>
+    <div class="card-desc">从零开始，逐步选择时代、职业、属性、技能，生成一张完整的调查员角色卡。</div>
+  </div>
+  <div class="cover-card" onclick="showSeabInput()">
+    <span class="card-icon">📥</span>
+    <div class="card-title">读取角色</div>
+    <div class="card-desc">输入 SEAB 角色码，自动还原已有角色的全部数据，可直接查看或修改。</div>
+  </div>
+  <div class="cover-card" onclick="startRandom()">
+    <span class="card-icon">🎲</span>
+    <div class="card-title">随机角色</div>
+    <div class="card-desc">全部随机生成——时代、职业、属性、技能一键骰定，跳转到背景设定微调即可使用。</div>
+  </div>
+</div>
+<div id="seabInputSection">
+  <label style="font-size:14px;color:#e94560;font-weight:bold;margin-bottom:8px;display:block">粘贴角色码</label>
+  <textarea id="seabImportInput" rows="4" placeholder="哦齁-啊叮呼噜呜嗷… 或 SEAB-eyJ2IjoxLCJ0eXBlIjoiUEMiLC…"></textarea>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="importSeabAndGo()">读取并填充</button>
+    <button class="btn btn-ghost" onclick="hideSeabInput()">取消</button>
+  </div>
+</div>
+</div>
+
+<!-- STEP 1: Era -->
+<div class="step" id="step1">
+<div class="step-header"><div class="step-num">1</div><div class="step-title">选择时代</div></div>
+<div class="info-box">不同时代会影响可选职业和部分技能（如计算机使用仅限现代）。</div>
+<div class="row"><div class="col"><label>选择游戏时代</label><select id="eraSelect" onchange="onEraChange()"><option value="1920s">1920s 美国（经典时代）</option><option value="gaslight">1890s 维多利亚/煤气灯</option><option value="modern">现代（2000s+）</option><option value="invictus">罗马时代</option><option value="darkages">黑暗时代</option></select></div><div class="col"><label>游戏风格</label><select id="styleSelect"><option value="standard">标准COC</option><option value="pulp">传奇COC (Pulp)</option></select></div></div>
+</div>
+
+<!-- STEP 2: Occupation -->
+<div class="step" id="step2">
+<div class="step-header"><div class="step-num">2</div><div class="step-title">选择职业</div></div>
+<div class="info-box">选择职业后，本职技能列表会自动列出。职业技能点公式由职业决定。</div>
+<div class="row"><div class="col" style="flex:2"><label>搜索/选择职业</label><input type="text" id="occSearch" placeholder="输入关键词筛选..." oninput="filterOcc()"><select id="occSelect" style="margin-top:6px" onchange="onOccChange()"></select></div><div class="col" style="flex:1"><label>职业信息</label><div id="occInfo" style="background:#0f3460;padding:12px;border-radius:8px;font-size:13px;min-height:100px;color:#aaa;">请先选择职业</div></div></div>
+</div>
+
+<!-- STEP 3: Attributes -->
+<div class="step" id="step3">
+<div class="step-header"><div class="step-num">3</div><div class="step-title">分配属性</div></div>
+
+<div class="row" style="margin-bottom:12px">
+<div class="col" style="min-width:200px;max-width:280px"><label>调查员年龄</label><input type="number" id="ageInput" min="15" max="89" value="25" onchange="onAgeChange()" style="width:100px;display:inline-block"> <span style="font-size:12px;color:#aaa">岁</span></div>
+<div class="col"><div id="ageInfo" class="info-box" style="margin:0;font-size:12px">标准成年阶段，1次EDU增强检定</div></div>
+</div>
+
+<div class="tabs"><button class="tab active" onclick="setAttrMode('buy')" id="tabBuy">购点法</button><button class="tab" onclick="setAttrMode('dice')" id="tabDice">骰点法</button></div>
+
+<div id="buyMode">
+<div class="point-bar"><span class="label">可用属性点</span><span class="val" id="buyPointsLeft">460</span><div class="bar-bg"><div class="bar-fill" id="buyBar" style="width:100%"></div></div></div>
+<div class="info-box">购点法：从460点总预算中分配给8大属性。每项属性最低20，最高99。也可用KP允许的随机/自定义值。</div>
+<div class="table-wrap"><table><thead><tr><th>属性</th><th>数值</th><th>半值</th><th>1/5值</th><th>公式提示</th></tr></thead><tbody id="buyTable"></tbody></table></div>
+<button class="btn btn-ghost" onclick="randomBuy()" style="margin-top:8px">随机分配</button>
+</div>
+
+<div id="diceMode" style="display:none">
+<div class="info-box">标准骰点法：STR/CON/DEX/APP/POW = 3d6×5；SIZ/INT/EDU = (2d6+6)×5</div>
+<div class="btn-row"><button class="btn btn-primary" onclick="rollAllDice()">全部骰点</button><button class="btn btn-ghost" onclick="reRollSingle(-1)">重骰全部</button></div>
+<div class="table-wrap"><table><thead><tr><th>属性</th><th>数值</th><th>半值</th><th>1/5值</th><th>骰点公式</th><th></th></tr></thead><tbody id="diceTable"></tbody></table></div>
+</div>
+
+<div id="ageModSection" style="display:none;margin-top:12px">
+<div style="background:rgba(233,69,96,0.08);border:1px solid #0f3460;border-radius:8px;padding:14px">
+<div style="font-weight:bold;color:#e94560;margin-bottom:8px">📐 年龄补正</div>
+<div id="ageModContent"></div>
+<div id="eduRollSection" style="display:none;margin-top:10px">
+<div style="font-size:13px;color:#aaa;margin-bottom:6px">EDU增强检定：掷百分位骰，若结果 > 当前EDU则 +1d10</div>
+<div id="eduRolls"></div>
+<button class="btn btn-primary" onclick="rollEduImprovement()" style="margin-top:6px;padding:6px 16px;font-size:13px">🎲 进行EDU增强检定</button>
+</div>
+<div id="attrPenaltyInfo" style="margin-top:8px;font-size:13px;color:#aaa"></div>
+</div>
+</div>
+
+<div style="margin-top:12px"><label>幸运值 LUK (3d6×5)</label><input type="number" id="luckVal" value="50" min="5" max="99" style="width:120px"><button class="btn btn-ghost" onclick="rollLuck()" style="margin-left:6px;padding:6px 12px;font-size:12px">骰幸运</button></div>
+</div>
+
+<!-- STEP 4: Skills -->
+<div class="step" id="step4">
+<div class="step-header"><div class="step-num">4</div><div class="step-title">分配技能点</div></div>
+<div class="point-bar" id="occBar"><span class="label">职业技能点</span><span class="val" id="occLeft">0/0</span><div class="bar-bg"><div class="bar-fill" id="occFill"></div></div></div>
+<div class="point-bar" id="intBar"><span class="label">兴趣技能点</span><span class="val" id="intLeft">0/0</span><div class="bar-bg"><div class="bar-fill" id="intFill"></div></div></div>
+<div class="info-box">规则限制：单项技能最高 80%（建卡阶段），低于职业最低信用评级的技能最多到 80%。职业技能点只能投到本职技能上，未用完的点数自动消失。兴趣技能点可投入任意技能。标注 <span style="color:#e94560">🔒锁定</span> 的技能在当前时代不可用。</div>
+
+<div class="tabs" id="skillTabs"><button class="tab active" onclick="showSkillCat('all')">全部</button><button class="tab" onclick="showSkillCat('occ')">仅本职</button><button class="tab" onclick="showSkillCat('combat')">战斗</button><button class="tab" onclick="showSkillCat('social')">社交</button><button class="tab" onclick="showSkillCat('academic')">学术</button><button class="tab" onclick="showSkillCat('physical')">体能</button><button class="tab" onclick="showSkillCat('tech')">技术</button></div>
+
+<div class="table-wrap" style="max-height:500px;overflow-y:auto"><table><thead><tr><th>技能</th><th>基础值</th><th>类型</th><th>职业+</th><th>兴趣+</th><th>总计</th><th>半值</th><th>1/5</th></tr></thead><tbody id="skillTable"></tbody></table></div>
+</div>
+
+<!-- STEP 5: Background -->
+<div class="step" id="step5">
+<div class="step-header"><div class="step-num">5</div><div class="step-title">填写背景设定</div></div>
+<div class="info-box">以下内容已根据你的角色属性、职业和年龄<b>自动生成初稿</b>。你可以直接修改，或点击「重新生成」重骰一套描述。<span style="color:#e94560">这些内容将填入最终角色卡的【背景与经历】区。</span></div>
+<div class="btn-row" style="margin-bottom:16px">
+  <button class="btn btn-secondary" onclick="autoFillBackground()">🎲 重新生成描述</button>
+  <button class="btn btn-ghost" onclick="clearBackground()">清空全部</button>
+</div>
+
+<!-- 外貌 & 身材 -->
+<div class="row">
+  <div class="col" style="flex:1">
+    <label>外貌描述 <span style="font-size:11px;color:#666">（APP: <span id="bgAppVal">--</span>）</span>
+      <button class="btn btn-ghost" onclick="regenField('appearance')" style="float:right;padding:2px 10px;font-size:11px;margin-top:-2px">重骰</button>
+    </label>
+    <textarea id="bgAppearance" rows="3" style="width:100%;background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px;font-size:13px;resize:vertical;font-family:inherit" placeholder="五官、发色、肤色等外貌特征…"></textarea>
+  </div>
+  <div class="col" style="flex:1">
+    <label>身材特征 <span style="font-size:11px;color:#666">（STR: <span id="bgStrVal">--</span> / SIZ: <span id="bgSizVal">--</span>）</span>
+      <button class="btn btn-ghost" onclick="regenField('physique')" style="float:right;padding:2px 10px;font-size:11px;margin-top:-2px">重骰</button>
+    </label>
+    <textarea id="bgPhysique" rows="3" style="width:100%;background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px;font-size:13px;resize:vertical;font-family:inherit" placeholder="体型、体格、身材描述…"></textarea>
+  </div>
+</div>
+
+<!-- 性格特质关键词 -->
+<div style="margin-bottom:12px">
+  <label>性格特质关键词 <span style="font-size:11px;color:#666">（3~5个词）</span>
+    <button class="btn btn-ghost" onclick="regenField('traits')" style="float:right;padding:2px 10px;font-size:11px;margin-top:-2px">重骰</button>
+  </label>
+  <div id="bgTraitsChips" style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px"></div>
+  <input type="text" id="bgTraits" style="width:100%" placeholder="点击上方词条可删除，也可在此直接输入（用 / 分隔）">
+</div>
+
+<!-- 背景故事 -->
+<div style="margin-bottom:12px">
+  <label>背景故事 <span style="font-size:11px;color:#666">（职业: <span id="bgOccLabel">--</span>）</span>
+    <button class="btn btn-ghost" onclick="regenField('background')" style="float:right;padding:2px 10px;font-size:11px;margin-top:-2px">重骰</button>
+  </label>
+  <textarea id="bgBackground" rows="4" style="width:100%;background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px;font-size:13px;resize:vertical;font-family:inherit" placeholder="简短的角色来历、经历与动机…"></textarea>
+</div>
+
+<!-- 其余字段两列 -->
+<div class="row">
+  <div class="col" style="flex:1">
+    <label>理想 / 信念</label>
+    <input type="text" id="bgBelief" placeholder="角色所坚守的信念或理想…">
+  </div>
+  <div class="col" style="flex:1">
+    <label>重要之人</label>
+    <input type="text" id="bgImportantPerson" placeholder="对角色最重要的人…">
+  </div>
+</div>
+<div class="row">
+  <div class="col" style="flex:1">
+    <label>意义之地</label>
+    <input type="text" id="bgImportantPlace" placeholder="对角色有特殊意义的地点…">
+  </div>
+  <div class="col" style="flex:1">
+    <label>宝贵之物</label>
+    <input type="text" id="bgTreasure" placeholder="角色随身携带的珍贵物品…">
+  </div>
+</div>
+<div style="margin-bottom:8px">
+  <label>特质 / 习惯</label>
+  <input type="text" id="bgHabit" placeholder="角色的独特小癖好或行为习惯…">
+</div>
+
+<!-- 背包 / 随身物品 -->
+<div class="bp-section" id="bpSection">
+  <div class="bp-header" onclick="toggleBackpack()">
+    <span class="bp-icon">🎒</span>
+    <span class="bp-title">背包 / 随身物品</span>
+    <span class="bp-count" id="bpCount">0</span>
+    <span class="bp-toggle" id="bpToggleLabel">展开 ▾</span>
+  </div>
+  <div class="bp-content" id="bpContent">
+    <div id="bpItemList"></div>
+    <div class="bp-actions">
+      <button class="btn btn-secondary" onclick="showItemCreator()" style="font-size:13px;padding:6px 14px">➕ 添加物品</button>
+      <button class="btn btn-ghost" onclick="addWeaponPreset()" style="font-size:13px;padding:6px 14px">🗡 武器预设</button>
+    </div>
+    <div style="font-size:11px;color:#555;margin-top:8px">物品会随 SEAB 码一起保存和读取</div>
+  </div>
+</div>
+</div>
+
+<!-- STEP 6: Output -->
+<div class="step" id="step6">
+<div class="step-header"><div class="step-num">6</div><div class="step-title">输出角色卡</div></div>
+<div class="info-box">填写下方信息后点击「填充到预览」，内容将自动填入角色卡预览的对应位置。<span style="color:#e94560">请先检查是否有技能点未分配完毕！</span></div>
+<div id="outputWarn" class="info-box warning" style="display:none"></div>
+<!-- 输入区域 -->
+<div style="background:#0d1b2a;border:1px solid #1a1a3e;border-radius:8px;padding:16px;margin:12px 0;">
+  <div style="color:#e94560;font-weight:bold;margin-bottom:10px;font-size:14px;">填写角色信息</div>
+  <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+    <label style="flex:1;min-width:120px;">角色姓名<input type="text" id="charName" placeholder="角色姓名"></label>
+    <label style="flex:1;min-width:100px;">性别<input type="text" id="charGender" placeholder="性别"></label>
+    <label style="flex:1;min-width:100px;">玩家名<input type="text" id="playerName" placeholder="（选填）"></label>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+    <label style="flex:1;min-width:120px;">住地<input type="text" id="charResidence" placeholder="住地"></label>
+    <label style="flex:1;min-width:120px;">故乡<input type="text" id="charHometown" placeholder="故乡"></label>
+    <label style="flex:1;min-width:100px;">信用评级<input type="text" id="charCredit" readonly></label>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+    <label style="flex:1;min-width:120px;">时代<input type="text" id="eraOut" readonly></label>
+    <label style="flex:1;min-width:120px;">职业<input type="text" id="occNameOut" readonly></label>
+    <label style="flex:1;min-width:100px;">年龄<input type="text" id="ageOut" readonly></label>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="fillToPreview()">填充到预览 ↓</button>
+  </div>
+</div>
+<div class="btn-row">
+  <button class="btn btn-copy" onclick="copyOutput()">复制全部内容</button>
+  <button class="btn btn-secondary" onclick="exportSeab()" id="seabBtn" style="padding:10px 20px;font-size:14px">导出SEAB码</button>
+</div>
+<div id="seabSection" style="display:none;margin:10px 0">
+  <div style="font-size:12px;color:#aaa;margin-bottom:4px">SEAB码（点击复制）：</div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div id="seabCodeDisp" onclick="copySeabCode()" style="background:#0d1b2a;border:1px solid #1a1a3e;border-radius:6px;padding:8px 12px;font-size:12px;color:#888;font-family:'Microsoft YaHei',sans-serif;flex:1;word-break:break-all;cursor:pointer;transition:border-color .2s;letter-spacing:1px;line-height:1.8" title="点击复制"></div>
+    <button class="btn btn-ghost" onclick="copySeabCode()" id="seabCopyBtn" style="padding:8px 16px;font-size:13px;white-space:nowrap">复制</button>
+  </div>
+</div>
+<div class="output-area" id="outputArea"></div>
+</div>
+
+<div class="btn-row" style="justify-content:center;margin-top:16px">
+<button class="btn btn-ghost" id="prevBtn" onclick="prevStep()" style="display:none">上一步</button>
+<button class="btn btn-primary" id="nextBtn" onclick="nextStep()">开始 →</button>
+</div>
+</div>
+
+<!-- Modal: Item Creator/Editor -->
+<div class="modal-overlay" id="itemModal">
+<div class="modal" style="max-width:560px">
+  <button class="modal-close" onclick="closeItemModal()">✕</button>
+  <h2 id="itemModalTitle">添加物品</h2>
+  <div class="item-cat-picker" id="itemCatPicker"></div>
+  <div id="itemEditorFields" style="display:none"></div>
+  <input type="hidden" id="itEditId" value="">
+  <input type="hidden" id="itCategory" value="">
+  <div class="btn-row" id="itemSaveRow" style="display:none">
+    <button class="btn btn-primary" onclick="saveItem()">保存</button>
+    <button class="btn btn-ghost" onclick="closeItemModal()">取消</button>
+  </div>
+</div>
+</div>
+
+<!-- Modal: Weapon Preset Picker -->
+<div class="modal-overlay" id="weaponPresetModal">
+<div class="modal" style="max-width:500px">
+  <button class="modal-close" onclick="closeModal('weaponPresetModal')">✕</button>
+  <h2>选择预设武器</h2>
+  <div style="margin-bottom:8px">
+    <input type="text" id="weaponSearch" placeholder="搜索武器名称…" oninput="filterWeaponPresets()" style="background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px 12px;font-size:13px;width:100%;box-sizing:border-box">
+  </div>
+  <div class="preset-list" id="weaponPresetList"></div>
+</div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const ERAS={modern:["计算机使用","除魅师","企业高管","IT工程师","社交媒体网红","摄影师-摄影记者","飞行员-飞行员","白领工人-职员/主管","白领工人-中高层管理人员"],gaslight:["摄影师-摄影记者","飞行员-特技飞行员","古董商","探险家","精神病医生","罪犯-女飞贼","除魅师"],invictus:["计算机使用","除魅师","飞行员","摄影师-摄影记者","白领工人-职员/主管","白领工人-中高层管理人员"],darkages:["计算机使用","除魅师","飞行员","摄影师-摄影记者","白领工人-职员/主管","白领工人-中高层管理人员","银行出纳员","设计师","拳击手","消防员"]};
+
+const OCC_LIST=[
+{name:"会计师",era:["all"],credit:"30-70",skillAttr:"EDU",skillMul:4,skills:["会计","法律","图书馆使用","聆听","说服","侦查","+2其他个人或时代特长"]},
+{name:"古董商",era:["gaslight","1920s","modern"],credit:"30-50",skillAttr:"EDU",skillMul:4,skills:["会计","估价","汽车驾驶","+2社交技能","历史","图书馆使用","导航"]},
+{name:"银行出纳员",era:["modern","1920s"],credit:"9-30",skillAttr:"EDU",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["会计","技艺(打字/速记)","2社交技能","母语","图书馆使用或计算机使用","心理学","+1其他"]},
+{name:"书商",era:["gaslight","1920s","modern"],credit:"20-40",skillAttr:"EDU",skillMul:4,skills:["会计","估价","汽车驾驶","历史","图书馆使用","母语","外语","+1社交技能"]},
+{name:"药剂师",era:["gaslight","1920s","modern"],credit:"35-75",skillAttr:"EDU",skillMul:4,skills:["会计","急救","外语(拉丁文)","图书馆使用","+1社交技能","心理学","科学(制药/化学)"]},
+{name:"杂技演员",era:["all"],credit:"9-20",skillAttr:"DEX",skillMul:4,skills:["攀爬","闪避","跳跃","投掷","侦查","游泳","+2其他个人或时代特长"]},
+{name:"演员-戏剧演员",era:["gaslight","1920s","modern"],credit:"9-40",skillAttr:"APP",skillMul:2,skillAttr2:"EDU",skillMul2:2,skills:["技艺(表演)","乔装","格斗","历史","2社交技能","心理学","+1其他个人特长"]},
+{name:"演员-电影演员",era:["1920s","modern"],credit:"20-90",skillAttr:"APP",skillMul:4,skills:["技艺(表演)","乔装","汽车驾驶","2社交技能","心理学","+2其他个人特长"]},
+{name:"艺人",era:["all"],credit:"9-70",skillAttr:"APP",skillMul:4,skills:["技艺(表演类)","乔装","2社交技能","聆听","心理学","+2其他个人特长"]},
+{name:"音乐家",era:["all"],credit:"9-30",skillAttr:"DEX",skillMul:2,skillAttr2:"POW",skillMul2:2,skills:["技艺(乐器)","+1社交技能","聆听","心理学","+4其他技能"]},
+{name:"摄影师-摄影师",era:["1920s","modern"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["技艺(摄影)","+1社交技能","心理学","科学(化学)","潜行","侦查","+2其他个人特长"]},
+{name:"摄影师-摄影记者",era:["1920s","modern"],credit:"10-30",skillAttr:"EDU",skillMul:4,skills:["技艺(摄影)","攀爬","+1社交技能","外语","心理学","科学(化学)","+2其他个人特长"]},
+{name:"设计师",era:["modern"],credit:"20-60",skillAttr:"EDU",skillMul:4,skills:["技艺(摄影)","技艺(任一)","计算机使用或图书馆使用","机械维修","心理学","侦查","+1其他个人特长"]},
+{name:"事务所侦探",era:["1920s","modern"],credit:"20-45",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["1社交技能","格斗(斗殴)","射击","法律","图书馆使用","心理学","潜行","追踪"]},
+{name:"私家侦探",era:["1920s","modern"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["技艺(摄影)","乔装","法律","图书馆使用","1社交技能","心理学","侦查","+1其他个人特长"]},
+{name:"警探",era:["1920s","modern"],credit:"20-50",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["技艺(表演)或乔装","射击","法律","聆听","1社交技能","心理学","侦查","+1其他技能"]},
+{name:"巡警",era:["1920s","modern"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["格斗(斗殴)","射击","急救","1社交技能","法律","心理学","侦查","汽车驾驶或骑乘"]},
+{name:"精神病医生(古典)",era:["gaslight","1920s"],credit:"10-60",skillAttr:"EDU",skillMul:4,skills:["法律","聆听","医学","外语","精神分析","心理学","科学(生物学/化学)"]},
+{name:"动物训练师",era:["all"],credit:"10-40",skillAttr:"APP",skillMul:2,skillAttr2:"POW",skillMul2:2,skills:["跳跃","聆听","博物学","心理学","科学(动物学)","潜行","追踪","+1其他个人特长"]},
+{name:"文物学家",era:["all"],credit:"30-70",skillAttr:"EDU",skillMul:4,skills:["估价","技艺(任一)","历史","图书馆使用","外语","1社交技能","侦查","+1其他个人特长"]},
+{name:"考古学家",era:["all"],credit:"10-40",skillAttr:"EDU",skillMul:4,skills:["估价","考古学","历史","外语","图书馆使用","侦查","机械维修","导航或科学(任一)"]},
+{name:"建筑师",era:["1920s","modern"],credit:"30-70",skillAttr:"EDU",skillMul:4,skills:["会计","技艺(技术制图)","法律","母语","计算机使用或图书馆使用","说服","心理学","科学(数学)"]},
+{name:"作家",era:["all"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["技艺(文学)","历史","图书馆使用","博物学或神秘学","外语","母语","心理学","+1其他个人特长"]},
+{name:"编辑",era:["1920s","modern"],credit:"10-30",skillAttr:"EDU",skillMul:4,skills:["会计","历史","母语","2社交技能","心理学","侦查","+1其他个人特长"]},
+{name:"驻外记者",era:["1920s","modern"],credit:"10-40",skillAttr:"EDU",skillMul:4,skills:["历史","外语","母语","聆听","2社交技能","心理学","+1其他个人特长"]},
+{name:"调查记者",era:["1920s","modern"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["技艺(艺术/摄影)","1社交技能","历史","图书馆使用","母语","心理学","+2其他个人特长"]},
+{name:"通讯记者",era:["1920s","modern"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["技艺(表演)","历史","聆听","母语","1社交技能","心理学","潜行","侦查"]},
+{name:"法医",era:["1920s","modern"],credit:"40-60",skillAttr:"EDU",skillMul:4,skills:["外语(拉丁文)","图书馆使用","医学","说服","科学(生物学/鉴证/制药)","侦查"]},
+{name:"法官",era:["all"],credit:"50-80",skillAttr:"EDU",skillMul:4,skills:["历史","恐吓","法律","图书馆使用","聆听","母语","说服","心理学"]},
+{name:"实验室助理",era:["1920s","modern"],credit:"10-30",skillAttr:"EDU",skillMul:4,skills:["计算机使用或图书馆使用","电气维修","外语","科学(化学+任意2项)","侦查","+1其他个人特长"]},
+{name:"律师",era:["all"],credit:"30-80",skillAttr:"EDU",skillMul:4,skills:["会计","法律","图书馆使用","2社交技能","心理学","+2其他技能"]},
+{name:"图书馆管理员",era:["all"],credit:"9-35",skillAttr:"EDU",skillMul:4,skills:["会计","图书馆使用","外语","母语","+4其他个人特长或专业书籍主题"]},
+{name:"博物馆管理员",era:["all"],credit:"10-30",skillAttr:"EDU",skillMul:4,skills:["会计","估价","考古学","历史","图书馆使用","神秘学","外语","侦查"]},
+{name:"神秘学家",era:["all"],credit:"9-65",skillAttr:"EDU",skillMul:4,skills:["人类学","历史","图书馆使用","1社交技能","神秘学","外语","科学(天文)","+1其他个人特长"]},
+{name:"超心理学家",era:["1920s","modern"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["人类学","技艺(摄影)","历史","图书馆使用","神秘学","外语","心理学","+1其他个人特长"]},
+{name:"教授",era:["all"],credit:"20-70",skillAttr:"EDU",skillMul:4,skills:["图书馆使用","外语","母语","心理学","+4其他学术/时代/个人特长"]},
+{name:"研究员",era:["1920s","modern"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["历史","图书馆使用","1社交技能","外语","侦查","+3其他学术领域"]},
+{name:"科学家",era:["1920s","modern"],credit:"9-50",skillAttr:"EDU",skillMul:4,skills:["任意3项科学专业","计算机使用或图书馆使用","外语","母语","1社交技能","侦查"]},
+{name:"精神病学家",era:["1920s","modern"],credit:"30-80",skillAttr:"EDU",skillMul:4,skills:["外语","聆听","医学","说服","精神分析","心理学","科学(生物学/化学)"]},
+{name:"心理学家/精神分析学家",era:["1920s","modern"],credit:"10-40",skillAttr:"EDU",skillMul:4,skills:["会计","图书馆使用","聆听","说服","精神分析","心理学","+2其他学术/个人/时代特长"]},
+{name:"医生",era:["all"],credit:"30-80",skillAttr:"EDU",skillMul:4,skills:["急救","医学","外语(拉丁文)","心理学","科学(生物学/制药)","+2其他学术或个人特长"]},
+{name:"精神病院护工",era:["all"],credit:"8-20",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["闪避","格斗(斗殴)","急救","2社交技能","聆听","心理学","潜行"]},
+{name:"护士",era:["all"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["急救","聆听","医学","1社交技能","心理学","科学(生物学/化学)","侦查"]},
+{name:"潜水员",era:["1920s","modern"],credit:"9-30",skillAttr:"DEX",skillMul:4,skills:["潜水","急救","机械维修","驾驶(船)","科学(生物)","侦查","游泳","+1其他个人特长"]},
+{name:"急救员",era:["modern"],credit:"9-30",skillAttr:"DEX",skillMul:4,skills:["急救","攀爬","电气维修或机械维修","格斗(斗殴)","跳伞","心理学","+1其他个人或时代特长"]},
+{name:"传教士",era:["all"],credit:"0-30",skillAttr:"APP",skillMul:4,skills:["技艺(任一)","急救","机械维修","医学","博物学","1社交技能","+2其他个人特长"]},
+{name:"运动员",era:["all"],credit:"9-70",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","跳跃","格斗(斗殴)","骑乘","1社交技能","游泳","投掷","+1其他个人特长"]},
+{name:"拳击手/摔跤手",era:["all"],credit:"9-60",skillAttr:"STR",skillMul:4,skills:["闪避","格斗(斗殴)","恐吓","跳跃","心理学","侦查","+2其他个人特长"]},
+{name:"牛仔",era:["gaslight","1920s"],credit:"9-20",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["闪避","格斗或射击","急救或博物学","跳跃","骑乘","生存(任一)","投掷","追踪"]},
+{name:"工匠",era:["all"],credit:"10-40",skillAttr:"DEX",skillMul:4,skills:["会计","技艺(任二)","机械维修","博物学","侦查","+2其他个人特长"]},
+{name:"消防员",era:["1920s","modern"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","闪避","汽车驾驶","急救","跳跃","机械维修","操作重型机械","投掷"]},
+{name:"农民",era:["all"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["技艺(耕作)","汽车驾驶(或运货马车)","1社交技能","机械维修","博物学","操作重型机械","追踪","+1其他个人特长"]},
+{name:"非熟练工人",era:["all"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["汽车驾驶","电气维修","格斗","急救","机械维修","操作重型机械","投掷","+1其他个人特长"]},
+{name:"伐木工",era:["gaslight","1920s"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","闪避","格斗(链锯)","急救","跳跃","机械维修","博物学或科学(生物学/植物学)","投掷"]},
+{name:"矿工",era:["gaslight","1920s","modern"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","科学(地质)","跳跃","机械维修","操作重型机械","潜行","侦查","+1其他个人特长"]},
+{name:"技师",era:["1920s","modern"],credit:"9-40",skillAttr:"EDU",skillMul:4,skills:["技艺(木工/焊接/管道等)","攀爬","汽车驾驶","电气维修","机械维修","操作重型机械","+2其他个人特长"]},
+{name:"勤杂护工",era:["all"],credit:"6-15",skillAttr:"STR",skillMul:4,skills:["电气维修","1社交技能","格斗(斗殴)","急救","聆听","机械维修","心理学","潜行"]},
+{name:"赏金猎人",era:["1920s","modern"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["汽车驾驶","电子学或电气维修","格斗或射击","1社交技能","法律","心理学","追踪","潜行"]},
+{name:"刺客",era:["all"],credit:"30-60",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["乔装","电气维修","格斗","射击","锁匠","机械维修","潜行","心理学"]},
+{name:"银行劫匪",era:["1920s","modern"],credit:"5-75",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["汽车驾驶","电气维修或机械维修","格斗","射击","恐吓","锁匠","操作重型机械","+1其他"]},
+{name:"打手/暴徒",era:["all"],credit:"5-30",skillAttr:"STR",skillMul:4,skills:["汽车驾驶","格斗","射击","2社交技能","心理学","潜行","侦查"]},
+{name:"窃贼",era:["all"],credit:"5-40",skillAttr:"DEX",skillMul:4,skills:["估价","攀爬","电气维修或机械维修","聆听","锁匠","妙手","潜行","侦查"]},
+{name:"欺诈师",era:["all"],credit:"10-65",skillAttr:"APP",skillMul:4,skills:["估价","技艺(表演)","法律或外语","聆听","2社交技能","心理学","妙手"]},
+{name:"独行罪犯",era:["all"],credit:"5-65",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["技艺(表演)或乔装","估价","1社交技能","格斗或射击","锁匠或机械维修","潜行","心理学","侦查"]},
+{name:"女飞贼(古典)",era:["gaslight","1920s"],credit:"10-80",skillAttr:"APP",skillMul:4,skills:["技艺(任意)","2社交技能","格斗(斗殴)或射击(手枪)","汽车驾驶","聆听","潜行","+1其他"]},
+{name:"赝造者",era:["all"],credit:"20-60",skillAttr:"EDU",skillMul:4,skills:["会计","估价","技艺(伪造)","历史","图书馆使用","侦查","妙手","+1其他个人特长"]},
+{name:"走私者",era:["all"],credit:"20-60",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["射击","聆听","导航","1社交技能","汽车驾驶或驾驶(飞行器/船)","心理学","妙手","侦查"]},
+{name:"混混",era:["all"],credit:"3-10",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","1社交技能","格斗","射击","跳跃","妙手","潜行","投掷"]},
+{name:"赌徒",era:["all"],credit:"8-50",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["会计","技艺(表演)","2社交技能","聆听","心理学","妙手","侦查"]},
+{name:"黑帮老大",era:["all"],credit:"60-95",skillAttr:"APP",skillMul:4,skills:["格斗","射击","法律","聆听","2社交技能","心理学","侦查"]},
+{name:"黑帮马仔",era:["all"],credit:"9-20",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["汽车驾驶","格斗","射击","2社交技能","心理学","+2其他个人特长"]},
+{name:"间谍",era:["1920s","modern"],credit:"20-60",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["技艺(表演)或乔装","射击","聆听","外语","1社交技能","心理学","妙手","潜行"]},
+{name:"政府官员",era:["all"],credit:"50-90",skillAttr:"APP",skillMul:4,skills:["魅惑","历史","恐吓","话术","聆听","母语","说服","心理学"]},
+{name:"工程师",era:["1920s","modern"],credit:"30-60",skillAttr:"EDU",skillMul:4,skills:["技艺(技术制图)","电气维修","图书馆使用","机械维修","操作重型机械","科学(工程学/物理)","+1其他个人特长"]},
+{name:"军官",era:["all"],credit:"20-70",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["会计","射击","导航","急救","2社交技能","心理学","+1其他个人特长"]},
+{name:"士兵",era:["all"],credit:"9-30",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬或游泳","闪避","格斗","射击","潜行","急救或机械维修或外语(任二)"]},
+{name:"军舰海员",era:["all"],credit:"9-30",skillAttr:"EDU",skillMul:4,skills:["电气维修或机械维修","格斗","射击","急救","导航","驾驶(船)","生存(海上)","游泳"]},
+{name:"民船海员",era:["all"],credit:"20-40",skillAttr:"EDU",skillMul:4,skills:["急救","机械维修","博物学","导航","1社交技能","驾驶(船)","侦查","游泳"]},
+{name:"司法人员",era:["1920s","modern"],credit:"20-40",skillAttr:"EDU",skillMul:4,skills:["汽车驾驶","格斗(斗殴)","射击","法律","说服","潜行","侦查","+1其他个人特长"]},
+{name:"飞行员(飞行器)",era:["1920s","modern"],credit:"20-70",skillAttr:"DEX",skillMul:4,skills:["电气维修","机械维修","导航","操作重型机械","驾驶(飞行器)","科学(天文)","+2其他个人特长"]},
+{name:"特技飞行员(古典)",era:["1920s","gaslight"],credit:"30-60",skillAttr:"EDU",skillMul:4,skills:["会计","电气维修","聆听","机械维修","导航","驾驶(飞行器)","侦查","+1其他个人特长"]},
+{name:"酒保",era:["all"],credit:"8-25",skillAttr:"APP",skillMul:4,skills:["会计","2社交技能","格斗(斗殴)","聆听","心理学","侦查","+1其他个人特长"]},
+{name:"管家/男仆/女仆",era:["all"],credit:"9-40",skillAttr:"EDU",skillMul:4,skills:["会计或估价","技艺(任一)","急救","聆听","外语","心理学","侦查","+1其他个人特长"]},
+{name:"流浪者",era:["all"],credit:"0-5",skillAttr:"APP",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","跳跃","聆听","导航","1社交技能","潜行","+2其他个人特长"]},
+{name:"游民",era:["all"],credit:"0-5",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["技艺(任一)","攀爬","跳跃","聆听","锁匠或妙手","导航","潜行","+1其他个人特长"]},
+{name:"推销员",era:["1920s","modern"],credit:"9-40",skillAttr:"APP",skillMul:4,skills:["会计","2社交技能","汽车驾驶","聆听","心理学","潜行或妙手","+1其他技能"]},
+{name:"秘书",era:["1920s","modern"],credit:"9-30",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["会计","技艺(打字/速记)","2社交技能","母语","图书馆使用或计算机使用","心理学","+1其他个人特长"]},
+{name:"店老板",era:["all"],credit:"20-40",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["会计","2社交技能","电气维修","聆听","机械维修","心理学","侦查"]},
+{name:"职员/主管",era:["modern"],credit:"9-20",skillAttr:"EDU",skillMul:4,skills:["会计","语言","法律","图书馆使用或计算机使用","聆听","1社交技能","+2其他个人特长"]},
+{name:"中高层管理人员",era:["modern"],credit:"20-80",skillAttr:"EDU",skillMul:4,skills:["会计","外语","法律","2社交技能","心理学","+2其他个人特长"]},
+{name:"服务生",era:["all"],credit:"9-20",skillAttr:"DEX",skillMul:2,skillAttr2:"APP",skillMul2:2,skills:["会计","技艺(任一)","闪避","聆听","2社交技能","心理学","+1其他个人特长"]},
+{name:"绅士/淑女",era:["gaslight","1920s"],credit:"40-90",skillAttr:"APP",skillMul:4,skills:["技艺(任一)","2社交技能","射击(步枪/霰弹枪)","历史","外语(任一)","导航","骑乘"]},
+{name:"私人司机",era:["1920s","modern"],credit:"10-40",skillAttr:"DEX",skillMul:4,skills:["汽车驾驶","2社交技能","聆听","机械维修","导航","侦查","+1其他个人特长"]},
+{name:"出租车司机",era:["1920s","modern"],credit:"9-30",skillAttr:"DEX",skillMul:4,skills:["会计","汽车驾驶","电气维修","话术","机械维修","导航","侦查","+1其他个人特长"]},
+{name:"探险家(古典)",era:["gaslight","1920s"],credit:"55-80",skillAttr:"APP",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬或游泳","射击","历史","跳跃","博物学","导航","外语","生存"]},
+{name:"猎人",era:["all"],credit:"20-50",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["射击","聆听或侦查","博物学","导航","外语或生存(任一)","科学(生物学/植物学)","潜行","追踪"]},
+{name:"登山家",era:["1920s","modern"],credit:"30-60",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","急救","跳跃","聆听","导航","外语","生存(阿尔卑斯或类似)","追踪"]},
+{name:"旅行家",era:["all"],credit:"5-20",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["射击","急救","聆听","博物学","导航","侦查","生存(任一)","追踪"]},
+{name:"淘金客",era:["gaslight","1920s"],credit:"0-10",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","急救","历史","机械维修","导航","科学(地质)","侦查","+1其他个人特长"]},
+{name:"神职人员",era:["all"],credit:"9-60",skillAttr:"EDU",skillMul:4,skills:["会计","历史","图书馆使用","聆听","外语","1社交技能","心理学","+1其他技能"]},
+{name:"教团首领",era:["all"],credit:"30-60",skillAttr:"EDU",skillMul:4,skills:["会计","2社交技能","神秘学","心理学","侦查","+2其他个人特长"]},
+{name:"除魅师(现代)",era:["modern"],credit:"20-50",skillAttr:"EDU",skillMul:4,skills:["2社交技能","汽车驾驶","格斗(斗殴)或射击","历史","神秘学","心理学","潜行(经KP允许可用催眠替换1项)"]},
+{name:"狂热者",era:["all"],credit:"0-30",skillAttr:"APP",skillMul:2,skillAttr2:"POW",skillMul2:2,skills:["历史","2社交技能","心理学","潜行","+3其他个人或时代特长"]},
+{name:"殡葬师",era:["all"],credit:"20-40",skillAttr:"EDU",skillMul:4,skills:["会计","汽车驾驶","1社交技能","历史","神秘学","心理学","科学(生物学/化学)"]},
+{name:"工会活动家",era:["1920s","modern"],credit:"5-50",skillAttr:"EDU",skillMul:4,skills:["会计","2社交技能","格斗(斗殴)","法律","聆听","操作重型机械","心理学"]},
+{name:"部落成员",era:["invictus","darkages","gaslight"],credit:"0-15",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","格斗或投掷","聆听","博物学","神秘学","侦查","游泳","生存(任一)"]},
+{name:"学生/实习生",era:["1920s","modern"],credit:"5-10",skillAttr:"EDU",skillMul:4,skills:["语言(母语/外语)","图书馆使用","聆听","3个学习专业","+2其他个人或时代特长"]},
+{name:"替身演员",era:["1920s","modern"],credit:"10-50",skillAttr:"STR",skillMul:2,skillAttr2:"DEX",skillMul2:2,skills:["攀爬","闪避","电气维修或机械维修","格斗","急救","跳跃","游泳","骑乘","潜水或汽车驾驶或驾驶"]},
+{name:"饲养员",era:["1920s","modern"],credit:"9-40",skillAttr:"EDU",skillMul:4,skills:["驯兽","会计","闪避","急救","博物学","医学","科学(制药/动物学)"]}
+];
+
+const ATTRS=["STR","CON","SIZ","DEX","APP","INT","POW","EDU"];
+const ATTR_CN={STR:"力量",CON:"体质",SIZ:"体型",DEX:"敏捷",APP:"外貌",INT:"智力",POW:"意志",EDU:"教育"};
+const ATTR_FORMULA={STR:"3d6×5",CON:"3d6×5",SIZ:"(2d6+6)×5",DEX:"3d6×5",APP:"3d6×5",INT:"(2d6+6)×5",POW:"3d6×5",EDU:"(2d6+6)×5"};
+
+const BASE_SKILLS=[
+{name:"会计",base:5,cat:"academic"},{name:"人类学",base:1,cat:"academic"},{name:"估价",base:5,cat:"academic"},
+{name:"考古学",base:1,cat:"academic"},{name:"魅惑",base:15,cat:"social"},{name:"攀爬",base:20,cat:"physical"},
+{name:"计算机使用",base:5,cat:"tech",eraLock:["modern"]},{name:"信用评级",base:0,cat:"social"},
+{name:"克苏鲁神话",base:0,cat:"academic"},{name:"乔装",base:5,cat:"tech"},{name:"闪避",base:"DEX/2",cat:"physical",special:true},
+{name:"汽车驾驶",base:20,cat:"tech",eraLock:["1920s","modern"]},{name:"电气维修",base:10,cat:"tech"},
+{name:"话术",base:5,cat:"social"},{name:"格斗(斗殴)",base:25,cat:"combat"},{name:"格斗(斧头)",base:15,cat:"combat"},
+{name:"格斗(剑)",base:20,cat:"combat"},{name:"格斗(长鞭)",base:5,cat:"combat"},{name:"格斗(链锯)",base:10,cat:"combat",eraLock:["modern"]},
+{name:"射击(手枪)",base:20,cat:"combat"},{name:"射击(步枪/霰弹枪)",base:25,cat:"combat"},
+{name:"射击(冲锋枪)",base:15,cat:"combat",eraLock:["1920s","modern"]},{name:"射击(重武器)",base:10,cat:"combat",eraLock:["1920s","modern"]},
+{name:"射击(弓)",base:15,cat:"combat",eraLock:["gaslight","invictus","darkages"]},{name:"射击(投矛)",base:20,cat:"combat",eraLock:["invictus","darkages"]},
+{name:"射击(火焰喷射器)",base:10,cat:"combat",eraLock:["1920s","modern"]},{name:"急救",base:30,cat:"academic"},
+{name:"历史",base:5,cat:"academic"},{name:"恐吓",base:15,cat:"social"},{name:"跳跃",base:20,cat:"physical"},
+{name:"法律",base:5,cat:"academic"},{name:"图书馆使用",base:20,cat:"academic"},{name:"聆听",base:20,cat:"physical"},
+{name:"锁匠",base:1,cat:"tech"},{name:"机械维修",base:10,cat:"tech"},{name:"医学",base:1,cat:"academic"},
+{name:"博物学",base:10,cat:"academic"},{name:"导航",base:10,cat:"tech"},{name:"神秘学",base:5,cat:"academic"},
+{name:"操作重型机械",base:1,cat:"tech"},{name:"说服",base:10,cat:"social"},{name:"精神分析",base:1,cat:"academic"},
+{name:"心理学",base:10,cat:"academic"},{name:"妙手",base:10,cat:"tech"},{name:"侦查",base:25,cat:"physical"},
+{name:"潜行",base:20,cat:"physical"},{name:"游泳",base:20,cat:"physical"},{name:"投掷",base:20,cat:"physical"},
+{name:"追踪",base:10,cat:"physical"},{name:"驯兽",base:5,cat:"academic"},{name:"骑乘",base:5,cat:"physical"},
+{name:"读唇",base:1,cat:"tech"},{name:"催眠",base:1,cat:"academic"},{name:"潜水",base:1,cat:"physical"},
+{name:"驾驶(船)",base:1,cat:"tech"},{name:"驾驶(飞行器)",base:1,cat:"tech",eraLock:["1920s","modern"]}
+];
+
+const SOCIAL_SKILLS=["魅惑","话术","说服","恐吓","取悦","信用评级"];
+
+// ==================== STATE ====================
+let currentStep=0;
+let currentSkillFilter='all'; // track active skill filter
+let state={era:"1920s",style:"standard",occ:null,attrMode:"buy",
+  attrs:{STR:50,CON:50,SIZ:50,DEX:50,APP:50,INT:60,POW:50,EDU:60},
+  age:25,luck:50,
+  buyTotal:460,
+  ageMod:{eduBonus:0,strConDexPen:0,appPen:0,sizStrPen:0,eduPen:0,luckReroll:false,movAdj:0},
+  occPoints:0,intPoints:0,occUsed:0,intUsed:0,
+  skills:{}, // {skillName: {occ:N, int:N, base:N, locked:bool, isOcc:bool}}
+  items:[] // backpack items
+};
+
+// ==================== INIT ====================
+function init(){
+  renderProgress();
+  renderBuyTable();
+  renderDiceTable();
+  filterOcc();
+  initSkills();
+}
+
+// ==================== NAVIGATION ====================
+function goStep(n){
+  document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===n));
+  document.getElementById('prevBtn').style.display=n>0?'':'none';
+  const nextLabels=['下一步：选择时代 →','下一步：选择职业 →','下一步：分配属性 →','下一步：分配技能 →','下一步：填写背景 →','生成角色卡 →'];
+  if(n<6){document.getElementById('nextBtn').textContent=nextLabels[n];document.getElementById('nextBtn').style.display='';}
+  else{document.getElementById('nextBtn').textContent='← 返回上一步';}
+  // Hide nav buttons on cover
+  if(n===0){document.getElementById('prevBtn').style.display='none';document.getElementById('nextBtn').style.display='none';}
+  currentStep=n;
+  renderProgress();
+}
+function nextStep(){
+  if(currentStep<6)goStep(currentStep+1);
+  else goStep(currentStep-1);
+}
+function prevStep(){
+  if(currentStep>0)goStep(currentStep-1);
+}
+function renderProgress(){
+  const labels=["封面","时代","职业","属性","技能","背景","输出"];
+  let h='';
+  for(let i=0;i<7;i++){
+    let cls=i<currentStep?'done':i===currentStep?'current':'future';
+    h+=`<div class="progress-dot ${cls}" title="${labels[i]}"></div>`;
+  }
+  document.getElementById('progressBar').innerHTML=h;
+}
+
+// ==================== ERA ====================
+function onEraChange(){
+  state.era=document.getElementById('eraSelect').value;
+  filterOcc();
+  state.occ=null;
+  document.getElementById('occSelect').value='';
+  initSkills();
+}
+
+// ==================== OCCUPATION ====================
+function filterOcc(){
+  const q=document.getElementById('occSearch').value.toLowerCase();
+  const sel=document.getElementById('occSelect');
+  sel.innerHTML='';
+  const filtered=OCC_LIST.filter(o=>{
+    if(q&&!o.name.toLowerCase().includes(q))return false;
+    const eraMatch=o.era.some(e=>e==='all'||e===state.era);
+    return eraMatch;
+  });
+  filtered.forEach(o=>{const op=document.createElement('option');op.value=o.name;op.textContent=o.name;sel.appendChild(op);});
+}
+function onOccChange(){
+  const name=document.getElementById('occSelect').value;
+  const occ=OCC_LIST.find(o=>o.name===name);
+  state.occ=occ;
+  if(!occ){document.getElementById('occInfo').innerHTML='请先选择职业';return;}
+  let info=`<b>${occ.name}</b><br>信誉范围：${occ.credit}<br>`;
+  if(occ.skillMul2) info+=`技能点：${occ.skillAttr}×${occ.skillMul} + ${occ.skillAttr2}×${occ.skillMul2}<br>`;
+  else info+=`技能点：${occ.skillAttr}×${occ.skillMul}<br>`;
+  info+=`<br><b>本职技能：</b><br>`;
+  occ.skills.forEach(s=>info+=`<span class="occ-tag">${s}</span>`);
+  document.getElementById('occInfo').innerHTML=info;
+  initSkills();
+}
+
+// ==================== ATTRIBUTES ====================
+// --- Age Modifier Rules (COC 7th Edition) ---
+const AGE_MODS=[
+  {min:15,max:19,eduChecks:0,strConDexPen:0,appPen:0,sizStrPen:5,eduPen:5,luckReroll:true,movAdj:0,label:"少年期：STR+SIZ合计减5，EDU减5，幸运骰2次取高"},
+  {min:20,max:39,eduChecks:1,strConDexPen:0,appPen:0,sizStrPen:0,eduPen:0,luckReroll:false,movAdj:0,label:"标准成年：1次EDU增强检定"},
+  {min:40,max:49,eduChecks:2,strConDexPen:5,appPen:5,sizStrPen:0,eduPen:0,luckReroll:false,movAdj:-1,label:"中年：2次EDU增强，STR/CON/DEX合计减5，APP减5，MOV-1"},
+  {min:50,max:59,eduChecks:3,strConDexPen:10,appPen:10,sizStrPen:0,eduPen:0,luckReroll:false,movAdj:-2,label:"壮年：3次EDU增强，STR/CON/DEX合计减10，APP减10，MOV-2"},
+  {min:60,max:69,eduChecks:4,strConDexPen:20,appPen:15,sizStrPen:0,eduPen:0,luckReroll:false,movAdj:-3,label:"初老：4次EDU增强，STR/CON/DEX合计减20，APP减15，MOV-3"},
+  {min:70,max:79,eduChecks:4,strConDexPen:40,appPen:20,sizStrPen:0,eduPen:0,luckReroll:false,movAdj:-4,label:"老年：4次EDU增强，STR/CON/DEX合计减40，APP减20，MOV-4"},
+  {min:80,max:89,eduChecks:4,strConDexPen:80,appPen:25,sizStrPen:0,eduPen:0,luckReroll:false,movAdj:-5,label:"高龄：4次EDU增强，STR/CON/DEX合计减80，APP减25，MOV-5"}
+];
+
+function getAgeMod(age){
+  return AGE_MODS.find(m=>age>=m.min&&age<=m.max)||AGE_MODS[1];
+}
+
+function onAgeChange(){
+  const age=parseInt(document.getElementById('ageInput').value)||25;
+  state.age=Math.max(15,Math.min(89,age));
+  document.getElementById('ageInput').value=state.age;
+  const mod=getAgeMod(state.age);
+  state.ageMod={eduBonus:0,strConDexPen:mod.strConDexPen,appPen:mod.appPen,sizStrPen:mod.sizStrPen,eduPen:mod.eduPen,luckReroll:mod.luckReroll,movAdj:mod.movAdj,eduChecks:mod.eduChecks};
+  // Update age info display
+  document.getElementById('ageInfo').innerHTML=`<b>${state.age}岁</b> — ${mod.label}`;
+  // Show/hide age modifier section
+  const hasMod=mod.eduChecks>1||mod.strConDexPen>0||mod.appPen>0||mod.sizStrPen>0||mod.eduPen>0;
+  const sec=document.getElementById('ageModSection');
+  sec.style.display=hasMod?'':'none';
+  if(hasMod){
+    let mc='';
+    if(mod.sizStrPen>0)mc+=`<div style="color:#c0392b">• STR+SIZ 合计扣除 ${mod.sizStrPen} 点</div>`;
+    if(mod.eduPen>0)mc+=`<div style="color:#c0392b">• EDU 扣除 ${mod.eduPen} 点</div>`;
+    if(mod.strConDexPen>0)mc+=`<div style="color:#c0392b">• STR/CON/DEX 合计扣除 ${mod.strConDexPen} 点（请手动分配扣除）</div>`;
+    if(mod.appPen>0)mc+=`<div style="color:#c0392b">• APP 扣除 ${mod.appPen} 点</div>`;
+    if(mod.eduChecks>1)mc+=`<div style="color:#27ae60">• EDU增强检定 ${mod.eduChecks} 次</div>`;
+    mc+=`<div style="color:#aaa;margin-top:4px;font-size:12px">MOV调整：${mod.movAdj>=0?'+':''}${mod.movAdj}</div>`;
+    document.getElementById('ageModContent').innerHTML=mc;
+    // Show EDU roll section if checks > 1
+    const eduSec=document.getElementById('eduRollSection');
+    eduSec.style.display=mod.eduChecks>1?'':'none';
+    document.getElementById('eduRolls').innerHTML='';
+    // Show penalty info
+    const penInfo=document.getElementById('attrPenaltyInfo');
+    if(mod.strConDexPen>0){
+      penInfo.innerHTML=`<div style="color:#e94560">⚠ STR/CON/DEX合计需扣 ${mod.strConDexPen} 点。请在下方属性表中手动减少对应属性值。</div>`;
+    }else if(mod.sizStrPen>0){
+      penInfo.innerHTML=`<div style="color:#e94560">⚠ STR+SIZ合计需扣 ${mod.sizStrPen} 点。请在下方属性表中手动减少。</div>`;
+    }else{
+      penInfo.innerHTML='';
+    }
+  }
+  // Apply APP penalty directly
+  applyAgePenalties();
+  renderBuyTable();
+  renderDiceTable();
+}
+
+function applyAgePenalties(){
+  const mod=state.ageMod;
+  // For 15-19: reduce EDU by eduPen (applied when calculating base)
+  // For 40+: reduce APP by appPen
+  // For STR/CON/DEX penalties, we show warnings and let user adjust manually
+  // APP auto-adjust:
+  if(mod.appPen>0){
+    const origAPP=state.attrs.APP;
+    // Don't auto-deduct here, just show the requirement
+  }
+}
+
+function rollEduImprovement(){
+  const mod=getAgeMod(state.age);
+  const checks=mod.eduChecks;
+  if(checks<=1)return; // 1 check is handled normally in skill point calc
+  let results=[];
+  let eduVal=state.attrs.EDU;
+  for(let i=0;i<checks;i++){
+    const roll=Math.floor(Math.random()*100)+1;
+    if(roll>eduVal){
+      const gain=Math.floor(Math.random()*10)+1;
+      eduVal=Math.min(99,eduVal+gain);
+      results.push(`#${i+1}: 掷出 ${roll} > EDU ${state.attrs.EDU} → +${gain}，EDU现为 ${eduVal}`);
+    }else{
+      results.push(`#${i+1}: 掷出 ${roll} ≤ EDU ${state.attrs.EDU} → 未增加`);
+    }
+  }
+  state.attrs.EDU=eduVal;
+  state.ageMod.eduBonus=eduVal-parseInt(document.getElementById('ageInput').dataset.prevEdu||eduVal);
+  document.getElementById('eduRolls').innerHTML=results.map(r=>`<div style="font-size:12px;color:#aaa">${r}</div>`).join('');
+  renderBuyTable();
+  renderDiceTable();
+}
+
+function rollLuck(){
+  let val=roll3d6x5();
+  const mod=getAgeMod(state.age);
+  if(mod.luckReroll){
+    const val2=roll3d6x5();
+    val=Math.max(val,val2);
+    document.getElementById('luckVal').value=val;
+    state.luck=val;
+    // Show info
+    const info=document.getElementById('ageInfo');
+    info.innerHTML+=`<br><span style="color:#27ae60">🎲 幸运骰2次取高：${val}</span>`;
+  }else{
+    document.getElementById('luckVal').value=val;
+    state.luck=val;
+  }
+}
+
+function setAttrMode(m){
+  state.attrMode=m;
+  document.getElementById('tabBuy').classList.toggle('active',m==='buy');
+  document.getElementById('tabDice').classList.toggle('active',m==='dice');
+  document.getElementById('buyMode').style.display=m==='buy'?'':'none';
+  document.getElementById('diceMode').style.display=m==='dice'?'':'none';
+}
+function renderBuyTable(){
+  let h='';
+  ATTRS.forEach(a=>{
+    h+=`<tr><td style="text-align:right;font-weight:bold;color:#e94560;width:60px">${ATTR_CN[a]}</td>
+    <td><input type="number" min="20" max="99" value="${state.attrs[a]}" onchange="updateBuyAttr('${a}',this.value)" style="width:70px"></td>
+    <td>${Math.floor(state.attrs[a]/2)}</td><td>${Math.floor(state.attrs[a]/5)}</td>
+    <td style="color:#666;font-size:11px">${ATTR_FORMULA[a]}</td></tr>`;
+  });
+  document.getElementById('buyTable').innerHTML=h;
+  updateBuyBar();
+}
+function updateBuyAttr(attr,val){
+  val=Math.max(20,Math.min(99,parseInt(val)||20));
+  state.attrs[attr]=val;
+  renderBuyTable();
+}
+function updateBuyBar(){
+  const used=ATTRS.reduce((s,a)=>s+state.attrs[a],0);
+  const left=state.buyTotal-used;
+  const pct=Math.max(0,left/state.buyTotal*100);
+  const bar=document.getElementById('buyBar');
+  const lbl=document.getElementById('buyPointsLeft');
+  bar.style.width=pct+'%';
+  lbl.textContent=left;
+  document.querySelector('#buyMode .point-bar').classList.toggle('over',left<0);
+}
+function randomBuy(){
+  let pool=state.buyTotal;
+  let vals={};
+  ATTRS.forEach(a=>vals[a]=20);
+  pool-=20*8;
+  for(let i=0;i<1000&&pool>0;i++){
+    const a=ATTRS[Math.floor(Math.random()*8)];
+    if(vals[a]<99&&pool>0){vals[a]++;pool--;}
+  }
+  Object.assign(state.attrs,vals);
+  renderBuyTable();
+}
+function renderDiceTable(){
+  let h='';
+  ATTRS.forEach((a,i)=>{
+    h+=`<tr><td style="text-align:right;font-weight:bold;color:#e94560;width:60px">${ATTR_CN[a]}</td>
+    <td><input type="number" min="20" max="99" value="${state.attrs[a]}" id="dice_${a}" style="width:70px"></td>
+    <td>${Math.floor(state.attrs[a]/2)}</td><td>${Math.floor(state.attrs[a]/5)}</td>
+    <td style="color:#666;font-size:11px">${ATTR_FORMULA[a]}</td>
+    <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:12px" onclick="reRollSingle(${i})">重骰</button></td></tr>`;
+  });
+  document.getElementById('diceTable').innerHTML=h;
+}
+function roll3d6x5(){return((Math.floor(Math.random()*6)+1)+(Math.floor(Math.random()*6)+1)+(Math.floor(Math.random()*6)+1))*5;}
+function roll2d6p6x5(){return((Math.floor(Math.random()*6)+1)+(Math.floor(Math.random()*6)+1)+6)*5;}
+function rollAttr(a){return(a==='SIZ'||a==='INT'||a==='EDU')?roll2d6p6x5():roll3d6x5();}
+function rollAllDice(){
+  ATTRS.forEach(a=>{state.attrs[a]=rollAttr(a);document.getElementById('dice_'+a).value=state.attrs[a];});
+  // Roll luck
+  const mod=getAgeMod(state.age);
+  if(mod.luckReroll){
+    const l1=roll3d6x5(),l2=roll3d6x5();
+    state.luck=Math.max(l1,l2);
+  }else{
+    state.luck=roll3d6x5();
+  }
+  document.getElementById('luckVal').value=state.luck;
+  renderDiceTable();
+  // If age requires EDU checks > 1, prompt
+  if(mod.eduChecks>1){
+    document.getElementById('eduRolls').innerHTML='<div style="color:#e94560;font-size:12px">骰点完成，请点击下方按钮进行EDU增强检定</div>';
+  }
+}
+function reRollSingle(idx){
+  const a=ATTRS[idx];
+  if(idx<0){rollAllDice();return;}
+  state.attrs[a]=rollAttr(a);
+  document.getElementById('dice_'+a).value=state.attrs[a];
+  renderDiceTable();
+}
+
+// ==================== SKILLS ====================
+function initSkills(){
+  calcSkillPoints();
+  const oldSkills=state.skills;
+  state.skills={};
+  const occSkills=getOccSkillNames();
+  BASE_SKILLS.forEach(s=>{
+    const eraLocked=s.eraLock&&!s.eraLock.includes(state.era);
+    const baseVal=s.special?(s.name==='闪避'?Math.floor(state.attrs.DEX/2):0):s.base;
+    const isOcc=occSkills.some(os=>skillMatch(os,s.name));
+    const old=oldSkills[s.name];
+    state.skills[s.name]={base:baseVal,occ:old&&isOcc?old.occ:0,int:old?old.int:0,locked:eraLocked,isOcc};
+  });
+  renderSkillTable();
+}
+function getOccSkillNames(){
+  if(!state.occ)return[];
+  const names=[];
+  state.occ.skills.forEach(s=>{
+    if(s.startsWith('+'))return;
+    const clean=s.replace(/\(.*?\)/g,'').replace('任一','').replace('任意','').replace('任二','').replace('2社交技能','').replace('2其他','').replace('1社交技能','').replace('1其他','').replace('任一','').replace('3个学习专业','').replace('3个','').replace('4其他','').replace('4个','').trim();
+    if(clean==='母语'||clean==='外语'||clean==='其他语言'||clean==='社交技能'||clean==='其他个人或时代特长'||clean==='其他个人特长'||clean==='其他技能'||clean==='其他学术领域'||clean==='其他学术、个人或时代特长'||clean==='其他学术或个人特长'||clean==='个人特长'||clean==='时代特长'||clean==='专业书籍主题'||clean==='技能'||clean==='学术、时代或个人特长'||clean==='学术领域'||clean==='学习专业')return;
+    if(clean==='格斗'||clean==='射击'||clean==='驾驶'||clean==='科学'||clean==='技艺'||clean==='外语'||clean==='生存')return;
+    names.push(clean);
+  });
+  return names;
+}
+function skillMatch(pattern,skillName){
+  if(pattern===skillName)return true;
+  if(skillName.startsWith(pattern))return true;
+  const pClean=pattern.replace(/（.*?）|\(.*?\)/g,'');
+  if(skillName.startsWith(pClean))return true;
+  if(pClean==='格斗'&&skillName.startsWith('格斗'))return true;
+  if(pClean==='射击'&&skillName.startsWith('射击'))return true;
+  if(pClean==='驾驶'&&skillName.startsWith('驾驶'))return true;
+  if(pClean==='科学'&&skillName.startsWith('科学'))return true;
+  if(pClean==='技艺'&&skillName.startsWith('技艺'))return true;
+  if(pClean==='外语'&&skillName.startsWith('外语'))return true;
+  if(pClean==='生存'&&skillName.startsWith('生存'))return true;
+  return false;
+}
+function calcSkillPoints(){
+  if(!state.occ)return;
+  const a1=state.attrs[state.occ.skillAttr]||60;
+  state.occPoints=state.occ.skillMul?a1*state.occ.skillMul:0;
+  if(state.occ.skillAttr2){
+    const a2=state.attrs[state.occ.skillAttr2]||60;
+    state.occPoints+=a2*state.occ.skillMul2;
+  }
+  state.intPoints=state.attrs.INT*2;
+  state.occUsed=0;state.intUsed=0;
+  Object.values(state.skills).forEach(s=>{state.occUsed+=s.occ;state.intUsed+=s.int;});
+  updateSkillBars();
+}
+function updateSkillBars(){
+  const occLeft=state.occPoints-state.occUsed;
+  const intLeft=state.intPoints-state.intUsed;
+  const occOver=occLeft<0;
+  const intOver=intLeft<0;
+  const occDisplay=occOver?0:occLeft;
+  const intDisplay=intOver?0:intLeft;
+  const occPct=state.occPoints>0?Math.max(0,occDisplay)/state.occPoints*100:100;
+  const intPct=state.intPoints>0?Math.max(0,intDisplay)/state.intPoints*100:100;
+  document.getElementById('occLeft').innerHTML=occOver?`<span style="color:#c0392b">❌ 超支 ${Math.abs(occLeft)} 点！</span>`:`${occDisplay} / ${state.occPoints}`;
+  document.getElementById('intLeft').innerHTML=intOver?`<span style="color:#c0392b">❌ 超支 ${Math.abs(intLeft)} 点！</span>`:`${intDisplay} / ${state.intPoints}`;
+  document.getElementById('occFill').style.width=occPct+'%';
+  document.getElementById('intFill').style.width=intPct+'%';
+  document.getElementById('occBar').classList.toggle('over',occOver);
+  document.getElementById('intBar').classList.toggle('over',intOver);
+}
+function renderSkillTable(filter){
+  if(filter!==undefined)currentSkillFilter=filter;
+  filter=currentSkillFilter;
+  let h='';
+  const sorted=Object.entries(state.skills).sort((a,b)=>a[0].localeCompare(b[0],'zh'));
+  sorted.forEach(([name,s])=>{
+    if(s.locked&&filter&&filter!=='all')return;
+    if(filter==='occ'&&!s.isOcc)return;
+    if(filter&&filter!=='all'&&filter!=='occ'){
+      const skillData=BASE_SKILLS.find(b=>b.name===name);
+      if(skillData&&skillData.cat!==filter)return;
+    }
+    const total=s.base+s.occ+s.int;
+    const lockedClass=s.locked?'skill-lock':'';
+    const lockTag=s.locked?' <span style="color:#e94560;font-size:11px">🔒</span>':'';
+    const typeTag=s.isOcc?'<span style="color:#533483;font-size:11px">本职</span>':'<span style="color:#666;font-size:11px">非</span>';
+    h+=`<tr class="${lockedClass}">
+    <td style="text-align:left;padding-left:10px;white-space:nowrap">${name}${lockTag}</td>
+    <td>${s.base}%</td><td>${typeTag}</td>
+    <td>${s.locked?'--':`<input type="number" min="0" max="99" value="${s.occ}" ${s.isOcc?'':'disabled'} onchange="setOcc('${name}',this.value)" style="width:55px">`}</td>
+    <td>${s.locked?'--':`<input type="number" min="0" max="99" value="${s.int}" onchange="setInt('${name}',this.value)" style="width:55px">`}</td>
+    <td style="font-weight:bold;color:#e94560">${total}%</td>
+    <td>${Math.floor(total/2)}%</td><td>${Math.floor(total/5)}%</td></tr>`;
+  });
+  document.getElementById('skillTable').innerHTML=h;
+}
+function showSkillCat(cat){document.querySelectorAll('#skillTabs .tab').forEach(t=>t.classList.toggle('active',t.textContent.includes(
+  cat==='all'?'全部':cat==='occ'?'本职':cat==='combat'?'战斗':cat==='social'?'社交':cat==='academic'?'学术':cat==='physical'?'体能':'技术'
+)));renderSkillTable(cat);}
+function setOcc(name,val){
+  val=Math.max(0,parseInt(val)||0);
+  const s=state.skills[name];if(!s||!s.isOcc)return;
+  // Check max skill cap (80% standard, 99% pulp)
+  const maxSkill=state.style==='pulp'?99:80;
+  const maxFromCap=maxSkill-s.base-s.int;
+  if(val>maxFromCap){
+    alert(`"${name}"技能总值不能超过${maxSkill}%！输入已归零。`);
+    s.occ=0;calcSkillPoints();renderSkillTable();return;
+  }
+  // Check remaining occupation points
+  const occLeft=(state.occPoints-state.occUsed)+s.occ; // remaining + current (since we're replacing)
+  if(val>occLeft){
+    alert(`职业技能点不足！剩余 ${occLeft} 点，输入了 ${val} 点。输入已归零。`);
+    s.occ=0;calcSkillPoints();renderSkillTable();return;
+  }
+  s.occ=val;
+  calcSkillPoints();renderSkillTable();
+}
+function setInt(name,val){
+  val=Math.max(0,parseInt(val)||0);
+  const s=state.skills[name];if(!s||s.locked)return;
+  // Check max skill cap (80% standard, 99% pulp)
+  const maxSkill=state.style==='pulp'?99:80;
+  const maxFromCap=maxSkill-s.base-s.occ;
+  if(val>maxFromCap){
+    alert(`"${name}"技能总值不能超过${maxSkill}%！输入已归零。`);
+    s.int=0;calcSkillPoints();renderSkillTable();return;
+  }
+  // Check remaining interest points
+  const intLeft=(state.intPoints-state.intUsed)+s.int; // remaining + current
+  if(val>intLeft){
+    alert(`兴趣技能点不足！剩余 ${intLeft} 点，输入了 ${val} 点。输入已归零。`);
+    s.int=0;calcSkillPoints();renderSkillTable();return;
+  }
+  s.int=val;
+  calcSkillPoints();renderSkillTable();
+}
+
+// ==================== BACKPACK / ITEMS ====================
+function toggleBackpack(){
+  const content=document.getElementById('bpContent');
+  const label=document.getElementById('bpToggleLabel');
+  const isOpen=content.classList.toggle('open');
+  label.textContent=isOpen?'收起 ▴':'展开 ▾';
+}
+
+function renderBackpack(){
+  const list=document.getElementById('bpItemList');
+  const countEl=document.getElementById('bpCount');
+  if(!state.items)state.items=[];
+  countEl.textContent=state.items.length;
+  if(!state.items.length){
+    list.innerHTML='<div class="bp-empty">背包为空，点击上方按钮添加物品</div>';
+    return;
+  }
+  list.innerHTML=state.items.map(item=>{
+    const cat=ITEM_CATEGORIES[item.category]||ITEM_CATEGORIES.custom;
+    let counterStr='';
+    if(item.maxCounter&&item.maxCounter>0)counterStr=`${item.counter||0}/${item.maxCounter}`;
+    else if(item.counter&&item.counter>1)counterStr=`×${item.counter}`;
+    let sub='';
+    if(item.category==='weapon'&&item.skill)sub=item.skill+(item.dice?' '+item.dice:'');
+    else if(item.category==='prop'&&item.effect)sub=item.effect+(item.dice?' '+item.dice:'');
+    else if(item.category==='clue'&&item.content)sub=item.content.slice(0,20);
+    else if(item.desc)sub=item.desc.slice(0,20);
+    // Effects summary
+    let effectsStr='';
+    if(item.effects&&item.effects.length){
+      effectsStr=item.effects.map(e=>{
+        const opLabel=EFFECT_OPS.find(o=>o.v===e.op);
+        return `${e.target} ${opLabel?opLabel.label:''} ${e.dice||''}`;
+      }).join(', ');
+    }
+    return `<div class="bp-item" data-id="${item.id}">
+      <span class="bp-item-icon">${cat.icon}</span>
+      <span class="bp-item-name">${item.name||'未命名'}</span>
+      ${sub?`<span class="bp-item-sub">${sub}</span>`:''}
+      ${effectsStr?`<span class="bp-item-sub" style="color:#e94560">【${effectsStr}】</span>`:''}
+      ${counterStr?`<span class="bp-item-counter">${counterStr}</span>`:''}
+      ${item.locked?'<span style="font-size:11px;color:#533483">🔒</span>':''}
+      <button class="bp-item-btn edit-btn" onclick="editItem('${item.id}')" title="编辑">✎</button>
+      <button class="bp-item-btn" onclick="deleteItem('${item.id}')" title="删除">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function showItemCreator(){
+  document.getElementById('itemModalTitle').textContent='添加物品';
+  document.getElementById('itEditId').value='';
+  document.getElementById('itCategory').value='';
+  const picker=document.getElementById('itemCatPicker');
+  picker.innerHTML='';
+  picker.style.display='';
+  Object.entries(ITEM_CATEGORIES).forEach(([key,cat])=>{
+    const btn=document.createElement('button');
+    btn.textContent=cat.icon+' '+cat.label;
+    btn.onclick=()=>selectItemCategory(key);
+    picker.appendChild(btn);
+  });
+  document.getElementById('itemEditorFields').style.display='none';
+  document.getElementById('itemEditorFields').innerHTML='';
+  document.getElementById('itemSaveRow').style.display='none';
+  document.getElementById('itemModal').classList.add('open');
+}
+
+function selectItemCategory(cat){
+  const catDef=ITEM_CATEGORIES[cat];
+  document.getElementById('itCategory').value=cat;
+  // Highlight selected category
+  document.querySelectorAll('#itemCatPicker button').forEach(btn=>{
+    btn.classList.toggle('active',btn.textContent.includes(catDef.label));
+  });
+  showItemEditorForCategory(null,cat);
+}
+
+function showItemEditorForCategory(existing,cat){
+  const catDef=ITEM_CATEGORIES[cat];
+  const tmpl=catDef.template;
+  const area=document.getElementById('itemEditorFields');
+  let html='';
+  // Name
+  html+=`<div style="margin-bottom:10px"><label style="display:block;color:#aaa;font-size:12px;margin-bottom:4px">名称 *</label><input type="text" id="it_name" value="${existing?escHtml(existing.name):''}" style="background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px 12px;font-size:14px;width:100%;box-sizing:border-box"></div>`;
+  // Category-specific fields
+  if(cat==='clue'){
+    html+=fieldTextarea('content','内容',existing?existing.content:'');
+    html+=fieldTextarea('desc','描述',existing?existing.desc:'');
+  }else if(cat==='prop'){
+    html+=fieldInput('effect','效果',existing?existing.effect:'');
+    html+=fieldInput('dice','骰子',existing?existing.dice:'','如：1d6');
+    html+=fieldTextarea('desc','描述',existing?existing.desc:'');
+    html+=`<div style="display:flex;gap:8px;margin-bottom:10px"><div style="flex:1">${fieldInputRaw('counter','数量',existing?existing.counter:1,'1')}</div><div style="flex:1">${fieldInputRaw('maxCounter','最大',existing?existing.maxCounter:1,'1')}</div></div>`;
+    html+=fieldCheckbox('indestructible','不可摧毁',existing?existing.indestructible:false);
+    html+=fieldInput('uses','使用次数',existing?existing.uses:0);
+  }else if(cat==='weapon'){
+    html+=`<div style="margin-bottom:8px"><button class="btn btn-ghost" onclick="openWeaponPresets()" style="font-size:12px;padding:4px 10px">🗡 从预设选择</button></div>`;
+    html+=fieldInput('effect','效果',existing?existing.effect:'');
+    html+=fieldInput('dice','伤害骰',existing?existing.dice:'','如：1d8');
+    html+=fieldTextarea('desc','描述',existing?existing.desc:'');
+    html+=`<div style="display:flex;gap:8px;margin-bottom:10px"><div style="flex:1">${fieldInputRaw('skill','关联技能',existing?existing.skill:'','格斗(斗殴)')}</div><div style="flex:1">${fieldInputRaw('range','射程(码)',existing?existing.range:'','触摸')}</div></div>`;
+    html+=`<div style="display:flex;gap:8px;margin-bottom:10px"><div style="flex:1">${fieldInputRaw('counter','弹量',existing?existing.counter:0,'0')}</div><div style="flex:1">${fieldInputRaw('maxCounter','最大弹量',existing?existing.maxCounter:0,'0')}</div></div>`;
+    html+=fieldInput('malfunction','故障值',existing?existing.malfunction:0);
+    html+=fieldCheckbox('indestructible','不可摧毁',existing?existing.indestructible:false);
+  }else if(cat==='misc'){
+    html+=fieldTextarea('desc','描述',existing?existing.desc:'');
+    html+=fieldInput('counter','数量',existing?existing.counter:1);
+  }else if(cat==='custom'){
+    html+=fieldTextarea('desc','描述',existing?existing.desc:'');
+    html+=fieldInput('dice','骰子',existing?existing.dice:'','如：1d6');
+    html+=`<div style="display:flex;gap:8px;margin-bottom:10px"><div style="flex:1">${fieldInputRaw('counter','数量',existing?existing.counter:1,'1')}</div><div style="flex:1">${fieldInputRaw('maxCounter','最大',existing?existing.maxCounter:0,'0')}</div></div>`;
+    html+=fieldCheckbox('indestructible','不可摧毁',existing?existing.indestructible:false);
+  }
+  // Locked
+  html+=fieldCheckbox('locked','锁定（不可删除）',existing?existing.locked:false);
+  // Effects (for prop, weapon, custom)
+  if(cat==='prop'||cat==='weapon'||cat==='custom'){
+    html+=`<div id="itemEffectsArea" style="margin-top:8px"><label>物品效果（使用时的属性/状态变化）</label></div>`;
+    html+=`<button class="btn btn-ghost" onclick="addItemEffectRow()" style="font-size:12px;padding:4px 10px;margin-bottom:10px">＋ 添加效果</button>`;
+  }
+  area.innerHTML=html;
+  area.style.display='';
+  // Render existing effects
+  if(existing&&existing.effects&&existing.effects.length){
+    renderItemEffects(existing.effects);
+  }else{
+    const ea=document.getElementById('itemEffectsArea');
+    if(ea)ea.innerHTML='<label>物品效果（使用时的属性/状态变化）</label>';
+  }
+  document.getElementById('itemSaveRow').style.display='';
+}
+function fieldInput(id,label,val,ph){
+  return `<div style="margin-bottom:10px"><label style="display:block;color:#aaa;font-size:12px;margin-bottom:4px">${label}</label><input type="text" id="it_${id}" value="${escHtml(String(val||''))}" placeholder="${ph||''}" style="background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px 12px;font-size:13px;width:100%;box-sizing:border-box"></div>`;
+}
+function fieldInputRaw(id,label,val,ph){
+  return `<label style="display:block;color:#aaa;font-size:12px;margin-bottom:4px">${label}</label><input type="text" id="it_${id}" value="${escHtml(String(val||''))}" placeholder="${ph||''}" style="background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px 12px;font-size:13px;width:100%;box-sizing:border-box">`;
+}
+function fieldTextarea(id,label,val){
+  return `<div style="margin-bottom:10px"><label style="display:block;color:#aaa;font-size:12px;margin-bottom:4px">${label}</label><textarea id="it_${id}" rows="2" style="background:#0f3460;border:1px solid #533483;color:#e0e0e0;border-radius:6px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;resize:vertical">${escHtml(val||'')}</textarea></div>`;
+}
+function fieldCheckbox(id,label,checked){
+  return `<div style="margin-bottom:10px"><label style="display:flex;align-items:center;gap:6px;color:#aaa;font-size:12px;cursor:pointer"><input type="checkbox" id="it_${id}" ${checked?'checked':''}> ${label}</label></div>`;
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ==================== ITEM EFFECTS ====================
+const EFFECT_TARGETS=['HP','MP','SAN','幸运','STR','CON','SIZ','DEX','APP','INT','POW','EDU','STR+1d6','CON+1d6','宝物'];
+const EFFECT_OPS=[{v:'add',label:'增加(+)'},{v:'sub',label:'减少(-)'},{v:'set',label:'设置(=)'}];
+
+function addItemEffectRow(target='',op='add',value=''){
+  const area=document.getElementById('itemEffectsArea');
+  if(!area)return;
+  const idx=area.children.length;
+  const div=document.createElement('div');
+  div.className='effect-row';
+  div.innerHTML=`
+    <select onchange="updateEffectTarget(${idx},this.value)">
+      <option value="">-- 目标 --</option>
+      ${EFFECT_TARGETS.map(t=>`<option value="${t}" ${t===target?'selected':''}>${t}</option>`).join('')}
+    </select>
+    <select onchange="updateEffectOp(${idx},this.value)">
+      ${EFFECT_OPS.map(o=>`<option value="${o.v}" ${o.v===op?'selected':''}>${o.label}</option>`).join('')}
+    </select>
+    <input type="text" value="${escHtml(String(value||''))}" onchange="updateEffectValue(${idx},this.value)" placeholder="数值/公式" style="flex:1">
+    <button class="effect-remove" onclick="removeEffectRow(this)" title="删除">✕</button>
+  `;
+  area.appendChild(div);
+}
+
+function removeEffectRow(btn){
+  btn.parentElement.remove();
+}
+
+function updateEffectTarget(idx,val){
+  // Target updated via DOM directly
+}
+
+function updateEffectOp(idx,val){
+  // Op updated via DOM directly
+}
+
+function updateEffectValue(idx,val){
+  // Value updated via DOM directly
+}
+
+function collectItemEffects(){
+  const area=document.getElementById('itemEffectsArea');
+  if(!area)return[];
+  const effects=[];
+  area.querySelectorAll('.effect-row').forEach(row=>{
+    const selects=row.querySelectorAll('select');
+    const input=row.querySelector('input');
+    if(selects.length>=2&&input){
+      const target=selects[0].value;
+      const op=selects[1].value;
+      const value=input.value.trim();
+      if(target&&value){
+        effects.push({target,op,dice:value});
+      }
+    }
+  });
+  return effects;
+}
+
+function renderItemEffects(effects){
+  const area=document.getElementById('itemEffectsArea');
+  if(!area)return;
+  area.innerHTML='';
+  if(!effects||!effects.length){
+    addItemEffectRow();
+    return;
+  }
+  effects.forEach(e=>addItemEffectRow(e.target,e.op,e.dice||''));
+}
+
+
+function saveItem(){
+  const cat=document.getElementById('itCategory').value;
+  const name=(document.getElementById('it_name').value||'').trim();
+  if(!name){alert('请输入物品名称');return;}
+  const editId=document.getElementById('itEditId').value;
+  const locked=document.getElementById('it_locked')?document.getElementById('it_locked').checked:false;
+  const item={id:editId||uid('i'),category:cat,name,locked};
+  // Collect optional fields
+  const fields=ITEM_CATEGORIES[cat]?ITEM_CATEGORIES[cat].fields:[];
+  fields.forEach(f=>{
+    if(f==='name'||f==='locked')return;
+    const el=document.getElementById('it_'+f);
+    if(!el)return;
+    if(el.type==='checkbox')item[f]=el.checked;
+    else if(el.type==='number'||f==='counter'||f==='maxCounter'||f==='malfunction'||f==='uses')item[f]=parseInt(el.value)||0;
+    else item[f]=el.value.trim();
+  });
+  // Collect effects
+  item.effects=collectItemEffects();
+  if(editId){
+    const idx=state.items.findIndex(i=>i.id===editId);
+    if(idx>=0)state.items[idx]=item;
+  }else{
+    state.items.push(item);
+  }
+  closeItemModal();
+  renderBackpack();
+}
+
+function editItem(id){
+  const item=state.items.find(i=>i.id===id);
+  if(!item)return;
+  document.getElementById('itemModalTitle').textContent='编辑物品';
+  document.getElementById('itEditId').value=item.id;
+  document.getElementById('itCategory').value=item.category;
+  // Show category picker with selection
+  const picker=document.getElementById('itemCatPicker');
+  picker.innerHTML='';
+  Object.entries(ITEM_CATEGORIES).forEach(([key,cat])=>{
+    const btn=document.createElement('button');
+    btn.textContent=cat.icon+' '+cat.label;
+    if(key===item.category)btn.classList.add('active');
+    btn.onclick=()=>selectItemCategory(key);
+    picker.appendChild(btn);
+  });
+  showItemEditorForCategory(item,item.category);
+  document.getElementById('itemModal').classList.add('open');
+}
+
+function deleteItem(id){
+  const item=state.items.find(i=>i.id===id);
+  if(!item)return;
+  if(item.locked){alert('此物品已锁定，无法删除');return;}
+  state.items=state.items.filter(i=>i.id!==id);
+  renderBackpack();
+}
+
+function closeItemModal(){
+  document.getElementById('itemModal').classList.remove('open');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+}
+
+// ==================== WEAPON PRESETS ====================
+function addWeaponPreset(){
+  openWeaponPresets();
+}
+function openWeaponPresets(){
+  document.getElementById('weaponSearch').value='';
+  renderWeaponPresetList(WEAPON_PRESETS);
+  document.getElementById('weaponPresetModal').classList.add('open');
+}
+function renderWeaponPresetList(presets){
+  const list=document.getElementById('weaponPresetList');
+  list.innerHTML=presets.map((w,i)=>{
+    const origIdx=WEAPON_PRESETS.indexOf(w);
+    return `<div class="preset-list-item" onclick="selectWeaponPreset(${origIdx})">
+      <span class="pname">${w.name}</span><span class="pdice">${w.dice}</span>
+    </div>`;
+  }).join('');
+}
+function filterWeaponPresets(){
+  const q=document.getElementById('weaponSearch').value.trim().toLowerCase();
+  const filtered=WEAPON_PRESETS.filter(w=>w.name.toLowerCase().includes(q)||w.skill.toLowerCase().includes(q));
+  renderWeaponPresetList(filtered);
+}
+function selectWeaponPreset(idx){
+  const p=WEAPON_PRESETS[idx];
+  closeModal('weaponPresetModal');
+  // Open item creator with weapon category pre-filled
+  document.getElementById('itemModalTitle').textContent='添加武器';
+  document.getElementById('itEditId').value='';
+  document.getElementById('itCategory').value='weapon';
+  const picker=document.getElementById('itemCatPicker');
+  picker.innerHTML='';
+  Object.entries(ITEM_CATEGORIES).forEach(([key,cat])=>{
+    const btn=document.createElement('button');
+    btn.textContent=cat.icon+' '+cat.label;
+    if(key==='weapon')btn.classList.add('active');
+    btn.onclick=()=>selectItemCategory(key);
+    picker.appendChild(btn);
+  });
+  showItemEditorForCategory(null,'weapon');
+  // Fill preset values
+  setTimeout(()=>{
+    const nameEl=document.getElementById('it_name');
+    if(nameEl)nameEl.value=p.name;
+    const effectEl=document.getElementById('it_effect');
+    if(effectEl)effectEl.value=p.effect||'';
+    const diceEl=document.getElementById('it_dice');
+    if(diceEl)diceEl.value=p.dice||'';
+    const descEl=document.getElementById('it_desc');
+    if(descEl)descEl.value=p.desc||'';
+    const skillEl=document.getElementById('it_skill');
+    if(skillEl)skillEl.value=p.skill||'';
+    const rangeEl=document.getElementById('it_range');
+    if(rangeEl)rangeEl.value=p.range||'';
+    const counterEl=document.getElementById('it_counter');
+    if(counterEl)counterEl.value=p.counter||0;
+    const maxCounterEl=document.getElementById('it_maxCounter');
+    if(maxCounterEl)maxCounterEl.value=p.maxCounter||0;
+    const malfEl=document.getElementById('it_malfunction');
+    if(malfEl)malfEl.value=p.malfunction||0;
+    const indeEl=document.getElementById('it_indestructible');
+    if(indeEl)indeEl.checked=!!p.indestructible;
+  },50);
+  document.getElementById('itemModal').classList.add('open');
+}
+
+// ==================== OUTPUT ====================
+function generateOutput(){
+  const a=state.attrs;
+  const sumSI=a.STR+a.SIZ;
+  let db='0',build='0';
+  if(sumSI<=64){db='-2';build='-2';}
+  else if(sumSI<=84){db='-1';build='-1';}
+  else if(sumSI<=124){db='0';build='0';}
+  else if(sumSI<=164){db='+1d4';build='+1';}
+  else if(sumSI<=204){db='+1d6';build='+2';}
+  else if(sumSI<=284){db='+2d6';build='+3';}
+  let mov=8;
+  if(a.DEX<a.STR&&a.STR<a.SIZ)mov=7;
+  else if(a.DEX>a.STR&&a.STR>a.SIZ)mov=9;
+  // Apply age MOV adjustment
+  mov+=state.ageMod.movAdj||0;
+  mov=Math.max(1,mov);
+  const hp=Math.floor((a.CON+a.SIZ)/10);
+  const mp=Math.floor(a.POW/5);
+  const san=a.POW;
+  const cr=state.skills['信用评级']?(state.skills['信用评级'].base+state.skills['信用评级'].occ+state.skills['信用评级'].int):0;
+
+  const charNameVal=document.getElementById('charName').value||'____________________';
+  const genderVal=document.getElementById('charGender').value||'________';
+  const playerVal=document.getElementById('playerName').value||'____________________';
+  const residenceVal=document.getElementById('charResidence').value||'____________________';
+  const hometownVal=document.getElementById('charHometown').value||'____________________';
+  // Use charCredit input value if filled, otherwise auto-calculated cr
+  const creditInput=document.getElementById('charCredit').value;
+  const creditVal=creditInput?parseInt(creditInput)||cr:cr;
+  let o=`=====================================================\n        克苏鲁的呼唤 第七版 调查员角色卡\n=====================================================\n\n`;
+  o+=`【基本信息】\n姓名：${charNameVal}    玩家：${playerVal}\n`;
+  o+=`年龄：${state.age}    性别：${genderVal}    住地：${residenceVal}\n`;
+  o+=`故乡：${hometownVal}    时代：${state.era}\n`;
+  o+=`职业：${state.occ?state.occ.name:'________'}    信誉评级：${creditVal}%\n\n`;
+  o+=`-----------------------------------------------------\n`;
+  o+=`【八大属性】                          原值  半值  1/5值\n`;
+  ATTRS.forEach(at=>{
+    const v=a[at];
+    o+=`${ATTR_CN[at].padEnd(4,' ')} ${at.padEnd(4,' ')}  ${ATTR_FORMULA[at].padEnd(12,' ')} = ${String(v).padStart(3)}  / ${String(Math.floor(v/2)).padStart(3)}  / ${String(Math.floor(v/5)).padStart(3)}\n`;
+  });
+  o+=`幸运 LUK  (3d6×5)   = ${String(state.luck).padStart(3)}  / ${String(Math.floor(state.luck/2)).padStart(3)}  / ${String(Math.floor(state.luck/5)).padStart(3)}\n\n`;
+  o+=`-----------------------------------------------------\n【衍生属性】\n`;
+  o+=`生命值 HP  = (CON+SIZ)÷10 = ${hp} / ${hp}(当前)\n`;
+  o+=`理智值 SAN = 初始=POW     = ${san} / ${san}(当前)\n`;
+  o+=`魔法值 MP  = POW÷5        = ${mp} / ${mp}(当前)\n`;
+  o+=`伤害加值 DB = ${db}  (STR+SIZ=${sumSI})\n`;
+  o+=`体格 Build = ${build}\n`;
+  o+=`移动速度 MOV = ${mov}`;
+  const ageMod=getAgeMod(state.age);
+  if(ageMod.movAdj!==0)o+=`（含年龄调整 ${ageMod.movAdj>=0?'+':''}${ageMod.movAdj}）`;
+  o+=`\n\n`;
+  // Age modifier note
+  if(state.age<20||state.age>=40){
+    o+=`-----------------------------------------------------\n【年龄补正】\n`;
+    o+=`年龄：${state.age}岁 — ${ageMod.label}\n`;
+    if(ageMod.sizStrPen>0)o+=`  STR+SIZ合计扣除：${ageMod.sizStrPen} 点\n`;
+    if(ageMod.eduPen>0)o+=`  EDU扣除：${ageMod.eduPen} 点\n`;
+    if(ageMod.strConDexPen>0)o+=`  STR/CON/DEX合计扣除：${ageMod.strConDexPen} 点\n`;
+    if(ageMod.appPen>0)o+=`  APP扣除：${ageMod.appPen} 点\n`;
+    if(ageMod.eduChecks>1)o+=`  EDU增强检定：${ageMod.eduChecks} 次\n`;
+    o+=`\n`;
+  }
+  o+=`-----------------------------------------------------\n【技能点计算】\n`;
+  if(state.occ){
+    o+=`职业技能点 = ${state.occ.skillAttr}×${state.occ.skillMul}`;
+    if(state.occ.skillAttr2)o+=` + ${state.occ.skillAttr2}×${state.occ.skillMul2}`;
+    o+=` = ${state.occPoints} 点 (已用 ${state.occUsed})\n`;
+  }
+  o+=`兴趣技能点 = INT×2 = ${state.intPoints} 点 (已用 ${state.intUsed})\n\n`;
+  o+=`-----------------------------------------------------\n【技能列表】\n\n`;
+  o+=`技能名称              基础值  职业  兴趣  总计  半值  1/5\n`;
+  o+=`─────────────────────────────────────────────────────\n`;
+  const sorted=Object.entries(state.skills).filter(([_,s])=>!s.locked).sort((a,b)=>{
+    const ia=a[1].isOcc?0:1,ib=b[1].isOcc?0:1;
+    if(ia!==ib)return ia-ib;
+    return a[0].localeCompare(b[0],'zh');
+  });
+  sorted.forEach(([name,s])=>{
+    const total=s.base+s.occ+s.int;
+    const tag=s.isOcc?'※':'  ';
+    o+=`${tag} ${name.padEnd(16,' ')} ${String(s.base+'%').padStart(5)}  ${String(s.occ).padStart(3)}  ${String(s.int).padStart(3)}  ${String(total+'%').padStart(5)}  ${String(Math.floor(total/2)+'%').padStart(5)}  ${String(Math.floor(total/5)+'%').padStart(5)}\n`;
+  });
+  o+=`─────────────────────────────────────────────────────\n\n`;
+  o+=`-----------------------------------------------------\n【资产】\n现金 = 信用评级 × 2 = ${creditVal*2}\n资产 = 信用评级 × 10 = ${creditVal*10}\n消费水平：____________________\n\n`;
+  o+=`-----------------------------------------------------\n【装备与武器】\n武器名称          技能       伤害     射程   弹量  故障值\n`;
+  o+=`─────────────────────────────────────────────────────\n`;
+  const weapons=(state.items||[]).filter(i=>i.category==='weapon');
+  if(weapons.length){
+    weapons.forEach(w=>{
+      const wn=(w.name||'未命名').padEnd(16,' ');
+      const sk=(w.skill||'--').padEnd(8,' ');
+      const dc=(w.dice||'--').padEnd(7,' ');
+      const rg=(w.range||'--').padEnd(5,' ');
+      const ammo=w.maxCounter>0?`${w.counter||0}/${w.maxCounter}`:'--';
+      const malf=w.malfunction?String(w.malfunction):'--';
+      o+=`${wn} ${sk} ${dc} ${rg} ${ammo.padEnd(4,' ')} ${malf}\n`;
+    });
+  }else{
+    o+=`（无武器）\n`;
+  }
+  o+=`\n`;
+  // Non-weapon items grouped by category
+  const nonWeapons=(state.items||[]).filter(i=>i.category!=='weapon');
+  o+=`随身物品：\n`;
+  if(nonWeapons.length){
+    const catOrder=['clue','prop','misc','custom'];
+    catOrder.forEach(cat=>{
+      const catItems=nonWeapons.filter(i=>i.category===cat);
+      if(!catItems.length)return;
+      const catDef=ITEM_CATEGORIES[cat]||ITEM_CATEGORIES.custom;
+      o+=`  ${catDef.icon} ${catDef.label}：\n`;
+      catItems.forEach(item=>{
+        let line=`    · ${item.name||'未命名'}`;
+        if(item.counter&&item.counter>1)line+=` ×${item.counter}`;
+        if(item.category==='clue'&&item.content)line+=`：${item.content}`;
+        else if(item.effect)line+=`：${item.effect}${item.dice?' ('+item.dice+')':''}`;
+        else if(item.desc)line+=`：${item.desc.slice(0,30)}`;
+        // Add effects
+        if(item.effects&&item.effects.length){
+          const effectsDesc=item.effects.map(e=>{
+            const opLabel=EFFECT_OPS.find(o=>o.v===e.op);
+            return `${e.target}${opLabel?opLabel.label:''}${e.dice||''}`;
+          }).join(', ');
+          line+=` 【效果：${effectsDesc}】`;
+        }
+        o+=line+'\n';
+      });
+    });
+  }else{
+    o+=`（无）\n`;
+  }
+  o+=`\n`;
+  o+=`-----------------------------------------------------\n【背景与经历】\n\n`;
+  const bgApp=document.getElementById('bgAppearance').value||'____________________（未填写）';
+  const bgPhy=document.getElementById('bgPhysique').value||'____________________（未填写）';
+  const bgBg=document.getElementById('bgBackground').value||'____________________（未填写）';
+  const bgBelief=document.getElementById('bgBelief').value||'____________________';
+  const bgPerson=document.getElementById('bgImportantPerson').value||'____________________';
+  const bgPlace=document.getElementById('bgImportantPlace').value||'____________________';
+  const bgTreas=document.getElementById('bgTreasure').value||'____________________';
+  const bgHabit=document.getElementById('bgHabit').value||'____________________';
+  const bgTrStr=document.getElementById('bgTraits').value||'____________________';
+  o+=`外貌描述：${bgApp}\n\n`;
+  o+=`身材特征：${bgPhy}\n\n`;
+  o+=`背景故事：${bgBg}\n\n`;
+  o+=`理想/信念：${bgBelief}\n\n`;
+  o+=`重要之人：${bgPerson}\n\n`;
+  o+=`意义之地：${bgPlace}\n\n`;
+  o+=`宝贵之物：${bgTreas}\n\n`;
+  o+=`特质/习惯：${bgHabit}\n\n`;
+  o+=`性格特质：${bgTrStr}\n\n`;
+  o+=`=====================================================\n`;
+  return o;
+}
+function copyOutput(){
+  fillToPreview(); // ensure preview is up-to-date
+  const text=document.getElementById('outputArea').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.btn-copy');
+    btn.textContent='已复制！';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='复制全部内容';btn.classList.remove('copied');},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    const btn=document.querySelector('.btn-copy');
+    btn.textContent='已复制！';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='复制全部内容';btn.classList.remove('copied');},2000);
+  });
+}
+
+function fillToPreview(){
+  // Fill readonly fields from state
+  if(state.occ){
+    document.getElementById('occNameOut').value=state.occ.name;
+    const crSkill=state.skills['信用评级'];
+    const crVal=crSkill?crSkill.base+crSkill.occ+crSkill.int:0;
+    document.getElementById('charCredit').value=crVal+'%';
+  }
+  document.getElementById('eraOut').value=state.era;
+  document.getElementById('ageOut').value=state.age;
+  // Generate and display preview
+  document.getElementById('outputArea').textContent=generateOutput();
+  // Show warnings
+  const occLeft=state.occPoints-state.occUsed;
+  const intLeft=state.intPoints-state.intUsed;
+  let warn='';
+  if(occLeft>0)warn+=`⚠ 职业技能点剩余 ${occLeft} 点未分配（建卡后自动消失）\n`;
+  if(intLeft>0)warn+=`⚠ 兴趣技能点剩余 ${intLeft} 点未分配\n`;
+  if(occLeft<0)warn+=`❌ 职业技能点超支 ${Math.abs(occLeft)} 点！请减少职业加点！\n`;
+  if(intLeft<0)warn+=`❌ 兴趣技能点超支 ${Math.abs(intLeft)} 点！请减少兴趣加点！\n`;
+  const warnEl=document.getElementById('outputWarn');
+  if(warn){warnEl.textContent=warn;warnEl.style.display='block';}
+  else warnEl.style.display='none';
+}
+
+// Observer: auto-trigger on entering specific steps
+const origGoStep=goStep;
+goStep=function(n){
+  origGoStep(n);
+  if(n===6){
+    fillToPreview();
+  }
+  if(n===5){
+    syncBackgroundMeta();
+    if(!document.getElementById('bgAppearance').value){
+      autoFillBackground();
+    }
+    renderBackpack();
+  }
+  if(n===3){
+    renderBuyTable();renderDiceTable();
+    onAgeChange(); // refresh age display
+  }
+  if(n===4){
+    initSkills();
+  }
+};
+
+// ==================== ONOMATOPOEIA ENCODING ====================
+// 64 onomatopoeia chars replacing Base64 alphabet (A-Z, a-z, 0-9, +, /)
+// Each char is unique; index maps directly to Base64 index
+const ONMO_CHARS='啊叮呼噜呜嗷嘎叽咕哼唧嘤啪嗒啦嘻哈喔咿呀嘞嘣嗖呃咦嘁呲唰嗤嘘嗄噗咻嗳嘌唏嗔啧嗝嗐嗬哎噢嗗嘟铛~!@#$%^&*()_+-|[]<';
+const ONMO_PREFIX='哦齁-';
+const B64_CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+function encodeOnomatopoeia(base64Str){
+  let result='';
+  for(let i=0;i<base64Str.length;i++){
+    const idx=B64_CHARS.indexOf(base64Str[i]);
+    if(idx===-1)result+=base64Str[i]; // keep = padding as-is
+    else result+=ONMO_CHARS[idx];
+  }
+  return ONMO_PREFIX+result;
+}
+
+function decodeOnomatopoeia(onmoStr){
+  if(!onmoStr.startsWith(ONMO_PREFIX))return null;
+  const body=onmoStr.slice(ONMO_PREFIX.length);
+  let result='';
+  for(let i=0;i<body.length;i++){
+    const idx=ONMO_CHARS.indexOf(body[i]);
+    if(idx===-1)result+=body[i]; // keep = padding
+    else result+=B64_CHARS[idx];
+  }
+  return result;
+}
+
+// ==================== ITEM DATA ====================
+const ITEM_CATEGORIES={
+  clue:{label:"线索/证据",icon:"📜",fields:["name","content","desc"],template:{category:"clue",name:"",content:"",desc:"",locked:false,effects:[]}},
+  prop:{label:"道具",icon:"💊",fields:["name","effect","dice","desc","counter","maxCounter","indestructible","uses","effects"],template:{category:"prop",name:"",effect:"",dice:"",desc:"",counter:1,maxCounter:1,indestructible:false,uses:0,locked:false,effects:[]}},
+  weapon:{label:"武器",icon:"🗡",fields:["name","effect","dice","desc","counter","maxCounter","indestructible","skill","range","malfunction","effects"],template:{category:"weapon",name:"",effect:"",dice:"",desc:"",counter:1,maxCounter:1,indestructible:false,skill:"",range:"",malfunction:0,locked:false,effects:[]}},
+  misc:{label:"杂物",icon:"🔧",fields:["name","desc","counter"],template:{category:"misc",name:"",desc:"",counter:1,locked:false,effects:[]}},
+  custom:{label:"自定义",icon:"⭐",fields:["name","desc","dice","counter","maxCounter","indestructible","effects"],template:{category:"custom",name:"",desc:"",dice:"",counter:1,maxCounter:0,indestructible:false,locked:false,effects:[]}}
+};
+const WEAPON_PRESETS=[
+  {name:"斗殴(拳脚)",skill:"格斗(斗殴)",dice:"1d3",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"徒手攻击",effect:"近战伤害"},
+  {name:"匕首",skill:"格斗(斗殴)",dice:"1d4+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"短刃近战武器",effect:"近战伤害"},
+  {name:"斧头",skill:"格斗(斧)",dice:"1d8+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"伐木斧，也可作武器",effect:"近战伤害"},
+  {name:"棒球棍",skill:"格斗(斗殴)",dice:"1d8",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"木制球棒",effect:"近战伤害"},
+  {name:"链条",skill:"格斗(斗殴)",dice:"1d6",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"铁链缠绕攻击",effect:"近战伤害"},
+  {name:"大锤",skill:"格斗(斗殴)",dice:"2d6+4",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"重型锤击武器，攻击者先攻-50",effect:"近战伤害"},
+  {name:"刀剑",skill:"格斗(剑)",dice:"1d8+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"长剑或军刀",effect:"近战伤害"},
+  {name:"长矛",skill:"格斗(矛)",dice:"1d8+1",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"长柄穿刺武器",effect:"近战伤害"},
+  {name:"刺刀",skill:"格斗(斗殴)",dice:"1d6+2",range:"触摸",counter:0,maxCounter:0,indestructible:true,malfunction:0,desc:"安装在步枪上的刺刀",effect:"近战伤害"},
+  {name:".22手枪",skill:"射击(手枪)",dice:"1d8",range:"15",counter:8,maxCounter:8,indestructible:false,malfunction:95,desc:"轻型手枪，弹匣8发",effect:"射击伤害"},
+  {name:".38左轮手枪",skill:"射击(手枪)",dice:"1d8",range:"15",counter:6,maxCounter:6,indestructible:false,malfunction:98,desc:"警用左轮，转轮6发",effect:"射击伤害"},
+  {name:".45手枪",skill:"射击(手枪)",dice:"1d10+2",range:"15",counter:7,maxCounter:7,indestructible:false,malfunction:96,desc:"大口径手枪，弹匣7发",effect:"射击伤害"},
+  {name:"霰弹枪",skill:"射击(霰弹枪)",dice:"2d6+4",range:"15",counter:2,maxCounter:2,indestructible:false,malfunction:98,desc:"近距离威力巨大",effect:"射击伤害"},
+  {name:"步枪",skill:"射击(步枪)",dice:"1d10+2",range:"110",counter:5,maxCounter:5,indestructible:false,malfunction:99,desc:"标准步枪，射程远",effect:"射击伤害"},
+  {name:"猎枪",skill:"射击(霰弹枪)",dice:"2d6+4",range:"15",counter:2,maxCounter:2,indestructible:false,malfunction:98,desc:"双管猎枪",effect:"射击伤害"},
+  {name:"汤普森冲锋枪",skill:"射击(冲锋枪)",dice:"1d10",range:"15",counter:20,maxCounter:50,indestructible:false,malfunction:96,desc:"可单发/连射/扫射，弹鼓50发",effect:"射击伤害"},
+  {name:"弓",skill:"射击(弓)",dice:"1d6+1",range:"45",counter:12,maxCounter:12,indestructible:false,malfunction:99,desc:"弓箭",effect:"射击伤害"},
+  {name:"飞刀",skill:"投掷",dice:"1d4+2",range:"5",counter:3,maxCounter:3,indestructible:false,malfunction:0,desc:"可投掷的短刀",effect:"投掷伤害"},
+  {name:"长弓",skill:"射击(弓)",dice:"1d8+1",range:"55",counter:12,maxCounter:12,indestructible:false,malfunction:99,desc:"英式长弓，射程更远",effect:"射击伤害"},
+  {name:"火焰瓶",skill:"投掷",dice:"1d6",range:"5",counter:1,maxCounter:1,indestructible:false,malfunction:0,desc:"简易燃烧瓶，一次性",effect:"投掷伤害"}
+];
+function uid(prefix){return prefix+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);}
+
+// ==================== SEAB CODE ====================
+function buildSeabPayload(){
+  const a=state.attrs;
+  const sumSI=a.STR+a.SIZ;
+  let db='0',build=0;
+  if(sumSI<=64){db='-2';build=-2;}
+  else if(sumSI<=84){db='-1';build=-1;}
+  else if(sumSI<=124){db='0';build=0;}
+  else if(sumSI<=164){db='+1d4';build=1;}
+  else if(sumSI<=204){db='+1d6';build=2;}
+  else{db='+2d6';build=3;}
+  let mov=8;
+  if(a.DEX<a.STR&&a.STR<a.SIZ)mov=7;
+  else if(a.DEX>a.STR&&a.STR>a.SIZ)mov=9;
+  mov+=(state.ageMod&&state.ageMod.movAdj?state.ageMod.movAdj:0);
+  mov=Math.max(1,mov);
+  const hp=Math.floor((a.CON+a.SIZ)/10);
+  const mp=Math.floor(a.POW/5);
+  const san=a.POW;
+  const luck=parseInt(document.getElementById('luckVal').value)||50;
+  const skArr=Object.entries(state.skills)
+    .filter(([_,s])=>s.occ>0||s.int>0)
+    .map(([n,s])=>[n,s.base,s.occ,s.int]);
+  return{
+    v:2,type:'PC',era:state.era,style:state.style||'standard',
+    occ:state.occ?state.occ.name:'',gender:document.getElementById('charGender').value||'',
+    name:document.getElementById('charName').value||'',
+    playerName:document.getElementById('playerName').value||'',
+    residence:document.getElementById('charResidence').value||'',
+    hometown:document.getElementById('charHometown').value||'',
+    age:state.age||25,
+    a:["STR","CON","SIZ","DEX","APP","INT","POW","EDU"].map(k=>a[k]),
+    sk:skArr,
+    d:[hp,mp,san,luck],db,build,mov,
+    credit:(state.skills['信用评级']?state.skills['信用评级'].base+state.skills['信用评级'].occ+state.skills['信用评级'].int:0),
+    appearance:document.getElementById('bgAppearance').value||'',
+    physique:document.getElementById('bgPhysique').value||'',
+    background:document.getElementById('bgBackground').value||'',
+    traits:document.getElementById('bgTraits').value||'',
+    belief:document.getElementById('bgBelief').value||'',
+    importantPerson:document.getElementById('bgImportantPerson').value||'',
+    importantPlace:document.getElementById('bgImportantPlace').value||'',
+    treasure:document.getElementById('bgTreasure').value||'',
+    habit:document.getElementById('bgHabit').value||'',
+    status:[],
+    items:state.items||[]
+  };
+}
+
+function exportSeab(){
+  const payload=JSON.stringify(buildSeabPayload());
+  const b64=btoa(unescape(encodeURIComponent(payload)));
+  const onmoCode=encodeOnomatopoeia(b64);
+  document.getElementById('seabCodeDisp').textContent=onmoCode;
+  document.getElementById('seabSection').style.display='block';
+  document.getElementById('seabCodeDisp').style.borderColor='#533483';
+}
+
+function copySeabCode(){
+  const code=document.getElementById('seabCodeDisp').textContent;
+  if(!code) return;
+  navigator.clipboard.writeText(code).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  });
+  const btn=document.getElementById('seabCopyBtn');
+  btn.textContent='已复制！';btn.style.background='#27ae60';btn.style.color='#fff';
+  setTimeout(()=>{btn.textContent='复制';btn.style.background='';btn.style.color='';},2000);
+}
+
+// ==================== BACKGROUND GEN ====================
+const BG_APPEARANCE={
+  high:[  // APP 70+
+    "五官端正、轮廓分明，气质出众",
+    "面容姣好，皮肤白皙细腻，举止从容",
+    "一双清澈明亮的眼眸，容易给人留下深刻印象",
+    "浓眉大眼，笑起来带着天然的亲和力",
+    "气质优雅，发丝总是打理得一丝不苟",
+    "面庞棱角分明，目光锐利，自带一股令人信服的气场"
+  ],
+  mid:[   // APP 40-69
+    "面容平和，称不上出众但看着令人舒适",
+    "五官普通，却有一双藏着故事的眼睛",
+    "外表朴素，胜在真诚，笑起来让人放松",
+    "发色普通，偶尔会有一缕发丝垂落额前",
+    "容貌端正，不引人注目，却也不易被遗忘",
+    "神情专注时眉头微蹙，平时却透着平静"
+  ],
+  low:[   // APP 39以下
+    "长相粗糙，脸上留有几道浅浅的疤痕",
+    "五官不够精致，风霜感略重，显得比实际年龄苍老一些",
+    "外表粗犷，但一双眼睛透着坚定",
+    "皮肤黝黑，脸上皱纹略多，显出长年操劳的痕迹",
+    "相貌平平，有时会被人忽视，却能靠这点占到便宜"
+  ]
+};
+const BG_PHYSIQUE={
+  strong:[  // STR 70+
+    "体格魁梧，肌肉结实，力量感一望即知",
+    "壮硕的体型，站在人群里颇为显眼",
+    "宽肩厚背，握手时让人感受到极大的力道",
+    "身体健壮，皮下隐约可见肌肉线条"
+  ],
+  mid:[     // STR 40-69
+    "体型中等，不算壮实但也不消瘦",
+    "身材匀称，日常活动游刃有余",
+    "体型普通，偏瘦的一侧，略显单薄"
+  ],
+  weak:[    // STR 39以下
+    "体型偏瘦，手腕细而修长",
+    "身型单薄，但行动敏捷",
+    "骨感十足，大码的衣服穿在身上显得略微宽松"
+  ],
+  tall:[    // SIZ 70+（叠加）
+    "；身量颇高，走路时常需要低头进门",
+    "；高挑的身形在人群里十分醒目",
+    "；高大的轮廓让人一眼就能注意到"
+  ],
+  short:[   // SIZ 39以下（叠加）
+    "；身形小巧，步伐轻盈",
+    "；个头不高，却有股不服输的劲头",
+    "；矮小的体型让人有时会低估他/她的能力"
+  ]
+};
+const BG_TRAITS_POOL=[
+  ["冷静","沉稳","理性","务实","慎重"],
+  ["热情","开朗","乐观","健谈","亲切"],
+  ["内向","敏感","细腻","观察力强","话少"],
+  ["固执","原则性强","不苟言笑","坚韧","自律"],
+  ["好奇","求知欲强","博学","爱钻研","思维活跃"],
+  ["多疑","谨慎","防备心重","不易信任他人","善于分析"],
+  ["勇敢","冲动","行动力强","不惧风险","莽撞"],
+  ["温和","善解人意","喜欢帮助他人","心软","有同理心"],
+  ["幽默","圆滑","见机行事","社交能手","随和"],
+  ["孤僻","独来独往","不善交际","享受独处","神秘感"]
+];
+const BG_BELIEF_POOL=[
+  "知识是抵御黑暗最有力的武器",
+  "保护家人是我唯一的执念",
+  "真相终将大白，无论代价几何",
+  "法律维系秩序，秩序保护众生",
+  "信仰赐予我力量，也赐予我方向",
+  "人生苦短，活在当下才是正道",
+  "弱肉强食是世界的本质，我只想活得够久",
+  "理性与证据是唯一值得信赖的东西",
+  "每个人都有不可侵犯的尊严",
+  "金钱与权力不过是工具，用于达成正确的目的"
+];
+const BG_BACKGROUND_TEMPLATES={
+  academic:(occ,age,era)=>{
+    const yrs=Math.max(1,age-22);
+    return `在大学中度过了${yrs>10?'漫长的'+yrs+'年':yrs+'年'}求学岁月后，以${occ}为职。习惯了图书馆与档案室的气息，对未解的谜题有着近乎执念的追求。某次偶然的研究让他/她触碰到了不该触碰的领域。`;
+  },
+  criminal:(occ,age,era)=>{
+    return `出身底层，年轻时为谋生走上了${occ}这条路。在阴暗的街道里打滚多年，看过太多见不得光的事，也因此练就了一双能识别谎言的眼睛。`;
+  },
+  worker:(occ,age,era)=>{
+    return `从事${occ}工作多年，靠着双手维持生计。不信奉那些高深莫测的东西，但现实已一次次打破他/她的常识。`;
+  },
+  investigator:(occ,age,era)=>{
+    return `做${occ}久了，见过各种光怪陆离的案子，本以为世间不存在解释不了的谜，直到碰上了那件事。`;
+  },
+  traveler:(occ,age,era)=>{
+    const places=['远东','南美丛林','北极荒原','欧洲旧城','非洲大陆','中东沙漠'];
+    const place=places[Math.floor(Math.random()*places.length)];
+    return `以${occ}之名走遍四方，曾深入${place}，见过文明的边界之外究竟有什么。那段经历在内心留下了难以磨灭的印记。`;
+  },
+  default:(occ,age,era)=>{
+    return `以${occ}为业，生活曾经平静如常。直到某天，一件普通不过的事情成了一切混乱的起点。`;
+  }
+};
+
+function getBgCategory(occ){
+  if(!occ)return'default';
+  const n=occ.name;
+  if(['考古学家','研究员','科学家','教授','博物馆管理员','图书馆管理员','神秘学家','超心理学家'].some(x=>n.includes(x.slice(0,3))))return'academic';
+  if(['刺客','银行劫匪','打手','窃贼','欺诈师','赌徒','混混','黑帮','走私者','赝造者'].some(x=>n.includes(x.slice(0,2))))return'criminal';
+  if(['事务所侦探','私家侦探','警探','巡警','司法人员','赏金猎人'].some(x=>n.includes(x.slice(0,3))))return'investigator';
+  if(['探险家','登山家','猎人','旅行家','淘金客','部落成员'].some(x=>n.includes(x.slice(0,3))))return'traveler';
+  if(['会计师','律师','建筑师','工程师','医生','法医'].some(x=>n.includes(x.slice(0,2))))return'academic';
+  return'worker';
+}
+
+function pickRand(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function genAppearanceText(attrs){
+  const app=attrs.APP;
+  let pool=app>=70?BG_APPEARANCE.high:app>=40?BG_APPEARANCE.mid:BG_APPEARANCE.low;
+  return pickRand(pool);
+}
+
+function genPhysiqueText(attrs){
+  const str=attrs.STR,siz=attrs.SIZ;
+  let base=str>=70?pickRand(BG_PHYSIQUE.strong):str>=40?pickRand(BG_PHYSIQUE.mid):pickRand(BG_PHYSIQUE.weak);
+  if(siz>=70)base+=pickRand(BG_PHYSIQUE.tall);
+  else if(siz<40)base+=pickRand(BG_PHYSIQUE.short);
+  return base;
+}
+
+function genTraitsText(){
+  const pool=BG_TRAITS_POOL[Math.floor(Math.random()*BG_TRAITS_POOL.length)];
+  // Pick 3~4 from the chosen pool row
+  const shuffled=[...pool].sort(()=>Math.random()-.5);
+  return shuffled.slice(0,3+Math.floor(Math.random()*2)).join(' / ');
+}
+
+function genBackgroundText(occ,age,era){
+  const cat=getBgCategory(occ);
+  const fn=BG_BACKGROUND_TEMPLATES[cat]||BG_BACKGROUND_TEMPLATES.default;
+  return fn(occ?occ.name:'普通人',age,era);
+}
+
+function syncBackgroundMeta(){
+  const a=state.attrs;
+  const appEl=document.getElementById('bgAppVal');
+  const strEl=document.getElementById('bgStrVal');
+  const sizEl=document.getElementById('bgSizVal');
+  const occEl=document.getElementById('bgOccLabel');
+  if(appEl)appEl.textContent=a.APP;
+  if(strEl)strEl.textContent=a.STR;
+  if(sizEl)sizEl.textContent=a.SIZ;
+  if(occEl)occEl.textContent=state.occ?state.occ.name:'未选择';
+}
+
+function autoFillBackground(){
+  syncBackgroundMeta();
+  const a=state.attrs;
+  document.getElementById('bgAppearance').value=genAppearanceText(a);
+  document.getElementById('bgPhysique').value=genPhysiqueText(a);
+  const tr=genTraitsText();
+  document.getElementById('bgTraits').value=tr;
+  renderTraitsChips(tr);
+  document.getElementById('bgBackground').value=genBackgroundText(state.occ,state.age,state.era);
+  // Auto-suggest beliefs
+  if(!document.getElementById('bgBelief').value){
+    document.getElementById('bgBelief').value=pickRand(BG_BELIEF_POOL);
+  }
+}
+
+function regenField(field){
+  const a=state.attrs;
+  if(field==='appearance'){document.getElementById('bgAppearance').value=genAppearanceText(a);}
+  else if(field==='physique'){document.getElementById('bgPhysique').value=genPhysiqueText(a);}
+  else if(field==='traits'){
+    const tr=genTraitsText();document.getElementById('bgTraits').value=tr;renderTraitsChips(tr);
+  }
+  else if(field==='background'){document.getElementById('bgBackground').value=genBackgroundText(state.occ,state.age,state.era);}
+}
+
+function renderTraitsChips(str){
+  const chipsEl=document.getElementById('bgTraitsChips');
+  if(!chipsEl)return;
+  const words=str.split('/').map(s=>s.trim()).filter(Boolean);
+  chipsEl.innerHTML=words.map(w=>`<span class="occ-tag selected" style="cursor:pointer" onclick="removeTraitChip(this,'${w}')" title="点击删除">${w} ×</span>`).join('');
+}
+
+function removeTraitChip(el,word){
+  let val=document.getElementById('bgTraits').value;
+  const parts=val.split('/').map(s=>s.trim()).filter(s=>s&&s!==word);
+  val=parts.join(' / ');
+  document.getElementById('bgTraits').value=val;
+  el.remove();
+}
+
+function clearBackground(){
+  ['bgAppearance','bgPhysique','bgTraits','bgBackground','bgBelief','bgImportantPerson','bgImportantPlace','bgTreasure','bgHabit'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('bgTraitsChips').innerHTML='';
+}
+
+// ==================== COVER ACTIONS ====================
+function startNew(){
+  // Reset state and go to step 1 (Era)
+  state.items=[];
+  goStep(1);
+}
+
+function showSeabInput(){
+  document.getElementById('seabInputSection').style.display='block';
+}
+function hideSeabInput(){
+  document.getElementById('seabInputSection').style.display='none';
+}
+
+function importSeabAndGo(){
+  const raw=document.getElementById('seabImportInput').value.trim();
+  let b64;
+  if(raw.startsWith('哦齁-')){
+    // New onomatopoeia format
+    b64=decodeOnomatopoeia(raw);
+    if(!b64){alert('无效的SEAB码，解析失败');return;}
+  }else if(raw.startsWith('SEAB-')){
+    // Legacy Base64 format
+    b64=raw.slice(5);
+  }else if(raw.startsWith('呜噜-')){
+    alert('此角色码使用旧版拟声格式（呜噜-），已不支持。\n请重新导出角色码（哦齁- 格式）后再导入。');
+    return;
+  }else{
+    alert('无效的角色码，必须以「哦齁-」或「SEAB-」开头');return;
+  }
+  try{
+    const json=decodeURIComponent(escape(atob(b64)));
+    const d=JSON.parse(json);
+    if(d.type!=='PC'){alert('此 SEAB 码不是 PC 类型，无法导入车卡工具。');return;}
+    // Fill era & style
+    state.era=d.era||'1920s';
+    state.style=d.style||'standard';
+    document.getElementById('eraSelect').value=state.era;
+    document.getElementById('styleSelect').value=state.style;
+    // Fill occupation
+    if(d.occ){
+      const occ=OCC_LIST.find(o=>o.name===d.occ);
+      if(occ){
+        state.occ=occ;
+        document.getElementById('occSelect').value=occ.name;
+        onOccChange();
+      }
+    }
+    // Fill age
+    if(d.age){
+      state.age=d.age;
+      document.getElementById('ageInput').value=d.age;
+    }
+    // Fill attributes
+    if(d.a&&d.a.length===8){
+      ATTRS.forEach((a,i)=>{state.attrs[a]=d.a[i];});
+    }
+    // Fill luck
+    if(d.d&&d.d[3]){
+      state.luck=d.d[3];
+      document.getElementById('luckVal').value=d.d[3];
+    }
+    // Fill skills
+    if(d.sk){
+      state.skills={};
+      const occSkills=getOccSkillNames();
+      BASE_SKILLS.forEach(s=>{
+        const eraLocked=s.eraLock&&!s.eraLock.includes(state.era);
+        const baseVal=s.special?(s.name==='闪避'?Math.floor(state.attrs.DEX/2):0):s.base;
+        const isOcc=occSkills.some(os=>skillMatch(os,s.name));
+        const imported=d.sk.find(x=>x[0]===s.name);
+        state.skills[s.name]={base:baseVal,occ:imported?imported[2]:0,int:imported?imported[3]:0,locked:eraLocked,isOcc};
+      });
+      calcSkillPoints();
+      renderSkillTable();
+    }
+    // Fill background fields
+    if(d.appearance)document.getElementById('bgAppearance').value=d.appearance;
+    if(d.physique)document.getElementById('bgPhysique').value=d.physique;
+    if(d.background)document.getElementById('bgBackground').value=d.background;
+    if(d.traits){
+      document.getElementById('bgTraits').value=d.traits;
+      renderTraitsChips(d.traits);
+    }
+    if(d.belief)document.getElementById('bgBelief').value=d.belief;
+    if(d.importantPerson)document.getElementById('bgImportantPerson').value=d.importantPerson;
+    if(d.importantPlace)document.getElementById('bgImportantPlace').value=d.importantPlace;
+    if(d.treasure)document.getElementById('bgTreasure').value=d.treasure;
+    if(d.habit)document.getElementById('bgHabit').value=d.habit;
+    // Fill items (v:2 feature)
+    if(d.items&&Array.isArray(d.items)){
+      state.items=d.items;
+    }
+    if(d.playerName){
+      // New SEAB format: name = char name, playerName = player name
+      document.getElementById('playerName').value=d.playerName;
+      if(d.name)document.getElementById('charName').value=d.name;
+    }else if(d.name){
+      // Old SEAB format: name was player name
+      document.getElementById('playerName').value=d.name;
+    }
+    if(d.gender)document.getElementById('charGender').value=d.gender;
+    if(d.residence)document.getElementById('charResidence').value=d.residence;
+    if(d.hometown)document.getElementById('charHometown').value=d.hometown;
+    if(d.credit!==undefined){
+      // Credit rating skill
+      const crSkill=state.skills['信用评级'];
+      if(crSkill){
+        // Try to put it in occ points first, then int
+        const crNeeded=d.credit-crSkill.base;
+        if(crSkill.isOcc&&crNeeded>0){
+          crSkill.occ=Math.min(crNeeded,state.occPoints-state.occUsed+crSkill.occ);
+          const remaining=d.credit-crSkill.base-crSkill.occ;
+          if(remaining>0)crSkill.int=remaining;
+        }else if(crNeeded>0){
+          crSkill.int=Math.min(crNeeded,state.intPoints-state.intUsed+crSkill.int);
+        }
+        calcSkillPoints();
+      }
+    }
+    // Refresh tables
+    renderBuyTable();
+    renderDiceTable();
+    filterOcc();
+    onAgeChange();
+    // Jump to background step (step 5)
+    hideSeabInput();
+    goStep(5);
+  }catch(e){
+    alert('SEAB 码解析失败：'+e.message);
+  }
+}
+
+function startRandom(){
+  // Reset items
+  state.items=[];
+  // Random era
+  const eras=['1920s','gaslight','modern','invictus','darkages'];
+  state.era=eras[Math.floor(Math.random()*eras.length)];
+  document.getElementById('eraSelect').value=state.era;
+  onEraChange();
+
+  // Random occupation
+  filterOcc();
+  const sel=document.getElementById('occSelect');
+  const options=sel.options;
+  if(options.length>0){
+    const idx=Math.floor(Math.random()*options.length);
+    sel.selectedIndex=idx;
+    onOccChange();
+  }
+
+  // Random attributes (dice mode)
+  state.attrMode='dice';
+  ATTRS.forEach(a=>{state.attrs[a]=rollAttr(a);});
+  // Random luck
+  state.luck=roll3d6x5();
+  document.getElementById('luckVal').value=state.luck;
+  // Random age 18-55
+  state.age=18+Math.floor(Math.random()*38);
+  document.getElementById('ageInput').value=state.age;
+  onAgeChange();
+  renderBuyTable();
+  renderDiceTable();
+
+  // Random skills - distribute points randomly
+  initSkills();
+  autoDistributeSkills();
+
+  // Jump to background step (step 5)
+  goStep(5);
+}
+
+function autoDistributeSkills(){
+  if(!state.occ)return;
+  // Distribute occupation points
+  const occNames=getOccSkillNames();
+  const occSkills=Object.entries(state.skills).filter(([n,s])=>s.isOcc&&!s.locked);
+  const maxSkill=state.style==='pulp'?99:80;
+  let occLeft=state.occPoints;
+  // Shuffle and distribute
+  const shuffled=[...occSkills].sort(()=>Math.random()-.5);
+  for(const [name,s] of shuffled){
+    if(occLeft<=0)break;
+    const maxAdd=maxSkill-s.base-s.int;
+    const add=Math.min(occLeft,Math.floor(Math.random()*(maxAdd+1)));
+    if(add>0){s.occ=add;occLeft-=add;}
+  }
+  // Distribute interest points
+  const intSkills=Object.entries(state.skills).filter(([n,s])=>!s.locked);
+  let intLeft=state.intPoints;
+  const intShuffled=[...intSkills].sort(()=>Math.random()-.5);
+  for(const [name,s] of intShuffled){
+    if(intLeft<=0)break;
+    const maxAdd=maxSkill-s.base-s.occ;
+    const add=Math.min(intLeft,Math.floor(Math.random()*(maxAdd+1)));
+    if(add>0){s.int=add;intLeft-=add;}
+  }
+  calcSkillPoints();
+  renderSkillTable();
+}
+
+// Sync chips when traits input is manually edited
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('bgTraits');
+  if(inp)inp.addEventListener('input',()=>renderTraitsChips(inp.value));
+});
+
+init();
+</script>
+</body>
+</html>

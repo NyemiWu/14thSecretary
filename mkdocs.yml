@@ -65,6 +65,8 @@ plugins:
         - zh
         - en
   - tags
+  # 导航由各目录下的 .pages 文件驱动，新增文档不用改本文件
+  - awesome-pages
 
 markdown_extensions:
   - abbr
@@ -103,32 +105,8 @@ extra:
       link: https://github.com/YOURNAME/14thSecretary
       name: 14thSecretary on GitHub
 
-nav:
-  - 首页: index.md
-
-  - 文本分区:
-      - text/index.md
-      - 设定:
-          - text/canon/index.md
-          - 秘语体系: text/canon/secrets.md
-          - 四段式真名: text/canon/true-name.md
-          - 赐名流程: text/canon/ritual.md
-      - 图鉴:
-          - text/bestiary/index.md
-          - 001 灰烬中的某物: text/bestiary/001-ash.md
-          - 002 静水之下: text/bestiary/002-stillwater.md
-          - 003 第八次雷暴: text/bestiary/003-thunder.md
-          - 004 巡礼者的残响: text/bestiary/004-pilgrim.md
-
-  - 可交互叙事分区:
-      - interactive/index.md
-      - 工具:
-          - interactive/tools/index.md
-          - 测名台: interactive/tools/naming-demo.md
-
-  - 缓冲分区:
-      - buffer/index.md
-      - 缓冲流程: buffer/rules.md
-      - 内容后台: buffer/cms.md
-      - 编辑规范: buffer/style-guide.md
-      - 条目模板: buffer/entries.md
+# ------------------------------------------------------------
+# 导航不在这里维护。
+# 每个目录下的 .pages 文件定义该层级的顺序与标题，新文档自动进导航。
+# 顶层：docs/.pages   ·   文本分区：docs/text/.pages
+# ------------------------------------------------------------
