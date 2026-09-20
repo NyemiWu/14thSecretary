@@ -8,7 +8,7 @@ tags:
 
 不写 Markdown 的成员从这里进。表单式界面，图片拖拽上传，点一下提交。
 
-**地址：`/editor/`** —— 部署后就是 `https://YOURNAME.github.io/14thSecretary/editor/`
+**地址：`/editor/`** —— 部署后就是 `https://nyemiwu.github.io/14thSecretary/editor/`
 
 !!! tip "零安装、零第三方"
     编辑器是一个纯静态 HTML，**不加载任何外部脚本**。
@@ -21,7 +21,7 @@ tags:
 
 **1. 拿到内容后台的链接**
 
-`https://YOURNAME.github.io/14thSecretary/editor/` —— 直接打开，不用登录。
+`https://nyemiwu.github.io/14thSecretary/editor/` —— 直接打开，不用登录。
 
 **2. 生成一个访问令牌**
 

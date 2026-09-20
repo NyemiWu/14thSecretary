@@ -38,15 +38,10 @@ tags:
 
 | 编号 | 标题 | 提交人 | 提交日 | 目标 | 稿件 |
 |---|---|---|---|---|---|
-| 001 | 秘语·显位的语义边界 | 灰隼 | 2026-09-20 | `text/canon/secrets.md` | `docs/buffer/pending/001-secret-boundary.md` |
+| 001 | 秘语·显位的语义边界 | 灰隼 | 2026-09-20 | `text/canon/secrets.md` | [GitHub 原文](https://github.com/NyemiWu/14thSecretary/blob/main/docs/buffer/pending/001-secret-boundary.md) |
 
 !!! warning "待审稿件不发布到站点"
     `mkdocs.yml` 配了 `draft_docs: buffer/pending/` ——
     这些稿子只在 `mkdocs serve` 本地预览时构建，`mkdocs build` 不发布。
     管理员标记通过、移进 `public/` 之后，站上才可见。
-
----
-
-!!! danger "GitHub 链接尚未可用"
-    `mkdocs.yml` 的 `repo_url` 还是 `YOURNAME` 占位，换成真实仓库地址后重跑本脚本。
 

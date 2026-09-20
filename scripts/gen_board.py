@@ -28,7 +28,7 @@ PENDING_DIR = os.path.join(ROOT, "docs", "buffer", "pending")
 PUBLIC_DIR = os.path.join(ROOT, "docs", "buffer", "public")
 OUT_PATH = os.path.join(ROOT, "docs", "buffer", "index.md")
 
-GITHUB_PLACEHOLDER = "YOURNAME"
+GITHUB_PLACEHOLDER = "YOURNAME"  # 已换成真实账号，此常量仅用于检测未配置状态
 
 
 def split_front_matter(text):

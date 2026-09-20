@@ -6,30 +6,25 @@
 
 ```bash
 # 安装（只做一次）
-pip install mkdocs-material
+pip install -r requirements.txt
 
 # 本地预览 —— 浏览器打开 http://127.0.0.1:8000，改文件即时刷新
 mkdocs serve
 
 # 构建到 site/ 检查产物
 mkdocs build
-
-# 发布上线（自动建 gh-pages 分支并开启 Pages）
-mkdocs gh-deploy
 ```
 
-## 首次发布前要改的三处
+## 内容怎么上线
 
-`mkdocs.yml` 里这几处现在是占位值，换成真实值再推：
+**推送到 `main` 就自动发布**，不需要任何人跑命令。
 
-```yaml
-site_url:  https://YOURNAME.github.io/14thSecretary/
-repo_url:  https://github.com/YOURNAME/14thSecretary
-repo_name: YOURNAME/14thSecretary
-```
+`.github/workflows/deploy.yml` 会在每次 main 更新时：刷新看板与板块落地页 → 构建 → 发布到 Pages。
+所以成员通过 `/editor/` 提交稿件后，直接 commit 到 main 就已经触发上线链路。
 
-另需在 GitHub 仓库页面 `Settings → Pages` 确认 Source 为
-`Deploy from a branch` / `gh-pages` / `root`（`mkdocs gh-deploy` 首次执行时会自动设置）。
+本地跑 `mkdocs build` 只是为了**在推之前自查**（有没有坏链、页面渲染正不正常）。
+
+首次需要手动开一次：仓库 `Settings → Pages → Build and deployment → Source` 选 **GitHub Actions**。
 
 ## 目录
 
@@ -107,9 +102,14 @@ docs/
 
 ## 发布方式
 
-当前默认用 `mkdocs gh-deploy`（本地构建后推到 `gh-pages` 分支）。
-如果以后想让 GitHub 替你构建，可以改成 GitHub Actions 工作流，
-并把 Pages 的 Source 切成 `GitHub Actions` —— 两种方式不能同时用。
+**GitHub Actions 自动构建**（`.github/workflows/deploy.yml`）。
+推 `main` 就触发：刷新生成页 → `mkdocs build` → 发布到 Pages。
+成员从 `/editor/` 提交的内容走的就是这条链路，**不需要任何人在本地跑命令**。
+
+仓库 `Settings → Pages → Source` 必须选 **GitHub Actions**（不是 `Deploy from a branch`）。
+
+备选：本地 `mkdocs gh-deploy` 推 `gh-pages` 分支，但**两种方式不能同时用**，
+切换时记得同步改 Pages 的 Source。
 
 ## 内容状态
 

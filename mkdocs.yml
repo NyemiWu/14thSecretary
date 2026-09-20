@@ -2,9 +2,9 @@ site_name: 14thSecretary
 site_description: 文本分区 · 可交互叙事分区 · 缓冲分区
 site_author: 14thSecretary
 
-site_url: https://YOURNAME.github.io/14thSecretary/
-repo_url: https://github.com/YOURNAME/14thSecretary
-repo_name: YOURNAME/14thSecretary
+site_url: https://nyemiwu.github.io/14thSecretary/
+repo_url: https://github.com/NyemiWu/14thSecretary
+repo_name: NyemiWu/14thSecretary
 edit_uri: edit/main/docs/
 
 copyright: 14thSecretary · 内部资料
@@ -102,7 +102,7 @@ extra:
   generator: false
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/YOURNAME/14thSecretary
+      link: https://github.com/NyemiWu/14thSecretary
       name: 14thSecretary on GitHub
 
 # ------------------------------------------------------------

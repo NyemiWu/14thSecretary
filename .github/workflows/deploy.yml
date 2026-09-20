@@ -1,0 +1,60 @@
+name: Deploy site
+
+# 每次 main 有提交就重建并发布。
+# 成员通过 /editor/ 提交的稿件走的就是这条路 —— 不需要任何人在本地跑命令。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只跑一个部署；正在部署时不打断，排队等它跑完
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 看板与板块落地页都是由内容生成的，构建前先刷新一遍，
+      # 避免有人手改了稿件却忘了重跑脚本导致站点和服务端不一致。
+      - name: Regenerate index pages
+        run: |
+          python scripts/gen_board.py
+          python scripts/gen_section_index.py
+
+      - name: Build site
+        run: mkdocs build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
