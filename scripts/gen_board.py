@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""扫描缓冲分区，生成审核看板 docs/buffer/index.md。
+"""扫描缓冲分区，生成看板 docs/buffer/index.md。
 
-流程只有四步：提交 → @邮箱请求审核 → 审核通过进公示（可点赞点踩）→ 管理员裁决。
+缓冲区分两级，状态由稿件在哪个目录决定：
+    buffer/pending/   待审（管理者还没标记）
+    buffer/public/    公示中（管理者已标记通过）
+公示期满 / 要求更改 → 直接从缓冲区删除。
 
     python scripts/gen_board.py            # 生成
     python scripts/gen_board.py --check    # 只校验是否最新（CI 用），不一致退出码 1
@@ -21,52 +24,11 @@ except ImportError:
     sys.exit("需要 PyYAML：pip install pyyaml")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SUBMIT_DIR = os.path.join(ROOT, "docs", "buffer", "submissions")
+PENDING_DIR = os.path.join(ROOT, "docs", "buffer", "pending")
 PUBLIC_DIR = os.path.join(ROOT, "docs", "buffer", "public")
 OUT_PATH = os.path.join(ROOT, "docs", "buffer", "index.md")
 
 GITHUB_PLACEHOLDER = "YOURNAME"
-
-# 状态 -> 看板归到哪一组
-GROUP = {
-    "submitted": "review",
-    "reviewing": "review",
-    "public": "public",
-    "merged": "done",
-    "removed": "done",
-}
-
-STATUS_LABEL = {
-    "submitted": "已提交",
-    "reviewing": "审核中",
-    "public": "公示中",
-    "merged": "已并入",
-    "removed": "已去除",
-}
-
-
-def _mkdocs_loader():
-    """mkdocs.yml 里带 `!!python/name:...` 标签，safe_load 会直接报错，
-    所以注册一个吞掉所有 python 标签的 loader。"""
-    class Loader(yaml.SafeLoader):
-        pass
-
-    Loader.add_multi_constructor(
-        "tag:yaml.org,2002:python/",
-        lambda loader, suffix, node: None,
-    )
-    return Loader
-
-
-def load_config():
-    cfg = os.path.join(ROOT, "mkdocs.yml")
-    if not os.path.isfile(cfg):
-        return {}
-    with io.open(cfg, "r", encoding="utf-8") as fh:
-        try:
-            return yaml.load(fh, Loader=_mkdocs_loader()) or {}
-        except yaml.YAMLError:
-            return {}
 
 
 def split_front_matter(text):
@@ -93,78 +55,81 @@ def as_date(value):
     return None
 
 
-def collect():
+def scan(folder):
     items = []
-    for folder, published in ((SUBMIT_DIR, False), (PUBLIC_DIR, True)):
-        if not os.path.isdir(folder):
+    if not os.path.isdir(folder):
+        return items
+    for name in sorted(os.listdir(folder)):
+        if not name.endswith(".md") or name.startswith("_"):
             continue
-        for name in sorted(os.listdir(folder)):
-            if not name.endswith(".md") or name.startswith("_"):
-                continue
-            path = os.path.join(folder, name)
-            with io.open(path, "r", encoding="utf-8") as fh:
-                meta, _ = split_front_matter(fh.read())
-            status = str(meta.get("status") or "submitted").strip().lower()
-            if status not in GROUP:
-                status = "submitted"
-            items.append({
-                "file": name,
-                "slug": name[:-3],
-                "folder": "public" if published else "submissions",
-                "published": published,
-                "meta": meta,
-                "status": status,
-                "group": GROUP[status],
-            })
+        with io.open(os.path.join(folder, name), "r", encoding="utf-8") as fh:
+            meta, _ = split_front_matter(fh.read())
+        items.append({"file": name, "slug": name[:-3], "meta": meta})
     return items
 
 
-def link_for(it, repo_url):
-    """公示稿已发布，用站内相对链接；待审稿未发布，指向 GitHub 原文。"""
-    if it["published"]:
-        return "%s/%s.md" % (it["folder"], it["slug"]), True
-    if repo_url and GITHUB_PLACEHOLDER not in repo_url:
-        return "%s/blob/main/docs/buffer/submissions/%s" % (repo_url, it["file"]), False
-    return None, False
+def load_repo_url():
+    """从 mkdocs.yml 读 repo_url。
+    注意：mkdocs.yml 里有 `!!python/name:...` 标签，safe_load 会抛错，
+    所以注册一个吞掉 python 标签的 loader。"""
+    cfg = os.path.join(ROOT, "mkdocs.yml")
+    if not os.path.isfile(cfg):
+        return ""
+
+    class Loader(yaml.SafeLoader):
+        pass
+
+    Loader.add_multi_constructor("tag:yaml.org,2002:python/", lambda l, s, n: None)
+    with io.open(cfg, "r", encoding="utf-8") as fh:
+        try:
+            data = yaml.load(fh, Loader=Loader) or {}
+        except yaml.YAMLError:
+            data = {}
+    url = str(data.get("repo_url") or "").strip()
+    if url.endswith(".git"):
+        url = url[:-4]
+    return url.rstrip("/")
 
 
-def render(items, today, cfg):
-    repo_url = str(cfg.get("repo_url") or "").strip()
-    if repo_url.endswith(".git"):
-        repo_url = repo_url[:-4]
-    repo_url = repo_url.rstrip("/")
-    review_email = str((cfg.get("extra") or {}).get("review_email") or "—")
+def esc(text):
+    return str(text).replace("|", "\\|")
 
-    pub = [i for i in items if i["group"] == "public"]
-    rev = [i for i in items if i["group"] == "review"]
-    done = [i for i in items if i["group"] == "done"]
+
+def render(today, repo_url):
+    pub = scan(PUBLIC_DIR)
+    pend = scan(PENDING_DIR)
     pub.sort(key=lambda i: str(i["meta"].get("public_until") or "9999"))
+    repo_ready = bool(repo_url) and GITHUB_PLACEHOLDER not in repo_url
+
+    def gh_link(fname):
+        if not repo_ready:
+            return None
+        return "%s/blob/main/docs/buffer/pending/%s" % (repo_url, fname)
 
     o = []
     o.append("---")
-    o.append("title: 审核看板")
+    o.append("title: 缓冲看板")
     o.append("tags:")
     o.append("  - 元")
     o.append("---")
     o.append("")
-    o.append("# 审核看板")
+    o.append("# 缓冲看板")
     o.append("")
     o.append('!!! info "本页自动生成，不要手改"')
-    o.append("    由 `scripts/gen_board.py` 扫描 `buffer/submissions/` 与 `buffer/public/` 生成。")
-    o.append("    稿件状态变了就跑一次：`python scripts/gen_board.py`")
+    o.append("    由 `scripts/gen_board.py` 扫描 `buffer/pending/` 与 `buffer/public/` 生成。")
+    o.append("    稿件一动就跑一次：`python scripts/gen_board.py`")
     o.append("")
-    o.append("    流程说明见 [流程](rules.md)。")
+    o.append("    流程见 [缓冲流程](rules.md)。")
     o.append("")
-    o.append("**截至 %s** —— 公示中 **%d** · 待审核 **%d**"
-             % (today.isoformat(), len(pub), len(rev)))
+    o.append("**截至 %s** —— 公示中 **%d** · 待审 **%d**"
+             % (today.isoformat(), len(pub), len(pend)))
     o.append("")
 
     # ---------- 公示中 ----------
     o.append("## 公示中")
     o.append("")
-    o.append('!!! tip "公示期怎么表态"')
-    o.append("    在对应稿件的公示 Issue 上用 **👍 / 👎** reaction 表态即可，不用打字。")
-    o.append("    公示期满后由管理员裁决：**保留 → 并入正式分区**，**去除 → 稿件下架**。")
+    o.append("管理员已标记通过，正在公示期。期满后**从缓冲区删除**：")
+    o.append("内容并入正式分区，或者直接丢弃。")
     o.append("")
     if not pub:
         o.append("当前没有正在公示的稿件。")
@@ -174,75 +139,60 @@ def render(items, today, cfg):
         o.append("|---|---|---|---|---|---|---|---|")
         for it in pub:
             meta = it["meta"]
-            href, _ = link_for(it, repo_url)
             no = it["slug"].split("-")[0]
-            no_cell = "[%s](%s)" % (no, href) if href else no
+            link = "public/%s.md" % it["slug"]
             until = as_date(meta.get("public_until"))
             if until is None:
-                when = "未设"
-                flag = STATUS_LABEL["public"]
+                when, flag = "未设", "公示中"
             elif today > until:
-                when = "%s（已期满）" % until.isoformat()
-                flag = ":material-alert: 待裁决"
+                when, flag = "%s（已期满）" % until.isoformat(), ":material-alert: **期满 · 该处理了**"
             else:
-                when = "%s（剩 %d 天）" % (until.isoformat(), (until - today).days)
-                flag = STATUS_LABEL["public"]
-            o.append("| %s | %s | %s | %s | %s | %s | %s | %s |"
-                     % (no_cell, meta.get("title", "—"), meta.get("submitter", "—"),
+                when, flag = "%s（剩 %d 天）" % (until.isoformat(), (until - today).days), "公示中"
+            o.append("| [%s](%s) | %s | %s | %s | %s | %s | %s | %s |"
+                     % (no, link, esc(meta.get("title", "—")), meta.get("submitter", "—"),
                         meta.get("reviewed_by", "—"), when,
                         meta.get("votes_up", "—"), meta.get("votes_down", "—"), flag))
         o.append("")
-        o.append('!!! note "票数怎么来的"')
-        o.append("    站点是静态的，收不了票。点赞点踩在 GitHub Issue 的 reaction 上，")
-        o.append("    由管理员回填到稿件的 `votes_up` / `votes_down` 字段。")
+        o.append('!!! note "票数怎么来"')
+        o.append("    站点是静态的，收不了票。点赞点踩在对应公示 Issue 的 👍 / 👎 reaction 上，")
+        o.append("    由管理员回填到稿件的 `votes_up` / `votes_down`。")
         o.append("")
 
-    # ---------- 待审核 ----------
+    # ---------- 待审 ----------
     o.append("---")
     o.append("")
-    o.append("## 待审核")
+    o.append("## 待审")
     o.append("")
-    o.append("审核请求发至 **`%s`** —— 提交人提交后需自行发信，见 [流程](rules.md)。" % review_email)
+    o.append("等管理员标记。**通过** → 移进 `public/` 并补 `public_until`；")
+    o.append("**要求更改** → 直接删除，提交人重新提交。")
     o.append("")
-    if not rev:
+    if not pend:
         o.append("当前没有待审稿件。")
         o.append("")
     else:
-        o.append("| 编号 | 标题 | 提交人 | 提交日 | 状态 | 稿件 |")
+        o.append("| 编号 | 标题 | 提交人 | 提交日 | 目标 | 稿件 |")
         o.append("|---|---|---|---|---|---|")
-        for it in rev:
+        for it in pend:
             meta = it["meta"]
-            href, _ = link_for(it, repo_url)
             no = it["slug"].split("-")[0]
-            if href:
-                cell = "[GitHub 原文](%s)" % href
-            else:
-                cell = "`docs/buffer/submissions/%s`" % it["file"]
-            o.append("| %s | %s | %s | %s | %s | %s |"
-                     % (no, meta.get("title", "—"), meta.get("submitter", "—"),
-                        meta.get("submitted") or "—",
-                        STATUS_LABEL.get(it["status"], it["status"]), cell))
+            link = gh_link(it["file"])
+            cell = "[GitHub 原文](%s)" % link if link else "`docs/buffer/pending/%s`" % it["file"]
+            o.append("| %s | %s | %s | %s | `%s` | %s |"
+                     % (no, esc(meta.get("title", "—")), meta.get("submitter", "—"),
+                        meta.get("submitted") or "—", meta.get("target", "—"), cell))
         o.append("")
         o.append('!!! warning "待审稿件不发布到站点"')
-        o.append("    `mkdocs.yml` 配了 `draft_docs: buffer/submissions/` ——")
+        o.append("    `mkdocs.yml` 配了 `draft_docs: buffer/pending/` ——")
         o.append("    这些稿子只在 `mkdocs serve` 本地预览时构建，`mkdocs build` 不发布。")
-        o.append("    审核通过后才移进 `buffer/public/` 进入公示，那时站上才可见。")
+        o.append("    管理员标记通过、移进 `public/` 之后，站上才可见。")
         o.append("")
 
-    # ---------- 已裁决 ----------
-    if done:
+    if not repo_ready:
         o.append("---")
         o.append("")
-        o.append("## 已裁决")
-        o.append("")
-        o.append("| 编号 | 标题 | 结果 | 裁决说明 |")
-        o.append("|---|---|---|---|")
-        for it in done:
-            meta = it["meta"]
-            o.append("| %s | %s | %s | %s |"
-                     % (it["slug"].split("-")[0], meta.get("title", "—"),
-                        STATUS_LABEL.get(it["status"], it["status"]),
-                        (meta.get("note") or "—").replace("|", "\\|")))
+        o.append('!!! danger "GitHub 链接尚未可用"')
+        o.append("    `mkdocs.yml` 的 `repo_url` 还是 `%s` 占位，换成真实仓库地址后重跑本脚本。"
+                 % GITHUB_PLACEHOLDER)
         o.append("")
 
     return "\n".join(o) + "\n"
@@ -253,9 +203,8 @@ def main():
     ap.add_argument("--check", action="store_true", help="只检查看板是否最新")
     args = ap.parse_args()
 
-    cfg = load_config()
     today = dt.date.today()
-    content = render(collect(), today, cfg)
+    content = render(today, load_repo_url())
 
     if args.check:
         old = ""

@@ -9,10 +9,10 @@ tags:
 复制对应的一段，改内容就行。
 
 !!! warning "先看顺序"
-    写新内容 → 用「待审稿件」模板落到 `buffer/submissions/` → @邮箱请求审核 → 通过后
-    进公示 → 管理员裁决保留，才套下面正式分区的模板并入。**不要跳过缓冲分区**。
+    写新内容 → 用「缓冲稿」模板放进 `buffer/pending/` → 管理者标记通过 → 移进 `buffer/public/`
+    进入公示 → 期满删除，内容并入下面正式分区的模板。**不要跳过缓冲区。**
 
-## 待审稿件（缓冲分区）
+## 缓冲稿（pending / public 通用）
 
 ```markdown
 ---
@@ -20,15 +20,13 @@ title: 稿件标题
 submitter: 提交人
 submitted: 2026-09-21
 target: text/canon/xxx.md
-notify: review@example.com
-status: submitted
 tags:
   - 待审
 ---
 
 # 稿件标题
 
-正文。格式按目标分区的正式模板写，通过后整段搬过去，不做二次改写。
+正文。格式按目标分区的正式模板写，期满并入时整段搬过去，不做二次改写。
 
 ## 提交说明
 
@@ -37,11 +35,11 @@ tags:
 - 需要重点看哪几段：
 ```
 
-状态字段的含义见 [流程](rules.md)。审核通过后补 `reviewed_by` / `reviewed_on` /
-`public_until`，并把文件移进 `public/`。
+管理者标记通过时，把文件移进 `public/` 并补 `reviewed_by` / `reviewed_on` /
+`public_until`，`tags` 改成 `公示`。字段含义见 [缓冲流程](rules.md)。
 
-!!! warning "别跳过缓冲分区"
-    任何新内容都先落 `buffer/submissions/`。直接写进 `text/` 或 `interactive/` 等于绕过审核。
+!!! warning "别跳过缓冲区"
+    任何新内容都先落 `buffer/pending/`。直接写进 `text/` 或 `interactive/` 等于绕过审核。
 
 ## 设定条目（文本分区）
 

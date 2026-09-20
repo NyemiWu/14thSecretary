@@ -3,7 +3,6 @@ title: 005 灰烬行者 · 图鉴条目
 submitter: 白鸦
 submitted: 2026-09-15
 target: text/bestiary/005-ashwalker.md
-status: public
 reviewed_by: 乙
 reviewed_on: 2026-09-17
 public_until: 2026-09-20
@@ -15,9 +14,9 @@ tags:
 
 # 005 · 灰烬行者
 
-!!! warning "本条正在公示 · 已期满待裁决"
-    审核已通过（审核人：**乙** · 2026-09-17），公示期 **2026-09-20 已满**。
-    待管理员裁决：保留则并入 `text/bestiary/005-ashwalker.md`，去除则本条下架。
+!!! warning "本条正在公示 · 已期满"
+    管理员已标记通过（审核人：**乙** · 2026-09-17），公示期 **2026-09-20 已满**。
+    该处理了：并入 `text/bestiary/005-ashwalker.md`，或直接丢弃，然后从缓冲区删除。
 
 <div class="entry-head">
   <div class="entry-seal">C 一神 牧 咒</div>

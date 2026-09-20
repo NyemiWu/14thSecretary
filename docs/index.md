@@ -34,7 +34,7 @@ title: 首页
 
     ---
 
-    待审稿件与公示区。**新内容一律先进这里**：提交 → 审核 → 公示 → 管理员裁决。
+    新内容一律先进这里。**状态 = 它在哪个目录**：待审 → 管理者标记 → 公示 → 期满删除。
 
     [:octicons-arrow-right-24: 进入](buffer/index.md)
 
@@ -90,7 +90,7 @@ title: 首页
 
     ---
 
-    提交 → @邮箱审核 → 公示（点赞点踩）→ 管理员裁决。
+    提交 → 管理者标记 → 公示（点赞点踩）→ 期满删除。
 
     [:octicons-arrow-right-24: 进入](buffer/rules.md)
 
@@ -109,7 +109,7 @@ title: 首页
 | 可交互 · 测名台 | :material-check-circle:{ .md .middle } 可用 | 单文件 HTML，内嵌 |
 | 缓冲 · 群审机制 | :material-check-circle:{ .md .middle } 已启用 | 3 份示例稿件 |
 | 文本 · 世界 / 势力 / 人物 / 编年 | :material-progress-clock:{ .md .middle } 待开 | 见文本分区页 |
-| 缓冲 · 提交 / 审核 / 公示 | :material-check-circle:{ .md .middle } 已启用 | 2 份公示、1 份待审示例 |
+| 缓冲 · 提交 / 标记 / 公示 | :material-check-circle:{ .md .middle } 已启用 | 1 份待审、2 份公示示例 |
 
 ## 仓库怎么长
 
@@ -121,21 +121,22 @@ docs/
 │  └─ bestiary/          图鉴：条目型内容
 ├─ interactive/          可交互叙事分区 —— 能玩的内容
 │  └─ tools/             工具：介绍页 + 同名 HTML 并排
-├─ buffer/               缓冲分区
-│  ├─ index.md           审核看板（脚本生成）
-│  ├─ rules.md           流程：提交 / 审核 / 公示 / 裁决
+├─ buffer/               缓冲分区 —— 通道，不是仓库
+│  ├─ index.md           缓冲看板（脚本生成）
+│  ├─ rules.md           流程：提交 / 标记 / 公示 / 删除
 │  ├─ style-guide.md     编辑规范
 │  ├─ entries.md         条目模板
-│  ├─ submissions/       待审稿件（不发布）
-│  └─ public/            公示稿件（站上可见）
+│  ├─ pending/           待审（不发布）
+│  └─ public/            公示中（站上可见）
 ├─ assets/               图片 / 图标
 └─ stylesheets/          样式微调
 ```
 
-一条内容从写到上线的完整路径：
+一条内容从提交到上线的完整路径：
 
 ```text
-提交 → @邮箱请求审核 → 通过进公示（点赞点踩）→ 管理员裁决保留 → 并入 text/ 或 interactive/
+放进 pending/ → 管理者标记通过 → 移进 public/ 公示（点赞点踩）
+              → 期满删除：内容并入 text/ 或 interactive/，或者直接丢弃
 ```
 
 内容只会越写越多，所以**每条设定一个文件**，不要往单页里堆。

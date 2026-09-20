@@ -44,26 +44,31 @@ docs/
 │  └─ bestiary/         图鉴（每只一页）
 ├─ interactive/         可交互叙事分区 —— 能玩的内容
 │  └─ tools/            工具：介绍页 + 同名 HTML 并排
-├─ buffer/              缓冲分区
-│  ├─ index.md          审核看板（脚本生成，勿手改）
-│  ├─ rules.md          流程：提交 / 审核 / 公示 / 裁决
+├─ buffer/              缓冲分区 —— 通道，不是仓库
+│  ├─ index.md          缓冲看板（脚本生成，勿手改）
+│  ├─ rules.md          流程：提交 / 标记 / 公示 / 删除
 │  ├─ style-guide.md    编辑规范
 │  ├─ entries.md        条目模板
-│  ├─ submissions/      待审稿件（只在本地预览构建，不发布）
-│  └─ public/           公示稿件（站上可见，不进导航）
+│  ├─ pending/          待审（只在本地预览构建，不发布）
+│  └─ public/           公示中（站上可见，不进导航）
 ├─ assets/              图片 / 图标
 └─ stylesheets/         样式微调
 ```
 
 ## 内容怎么进正式分区
 
+**状态 = 稿件在哪个目录**，移动文件就是改状态：
+
 ```text
-提交 → @邮箱请求审核 → 通过进公示（点赞点踩）→ 管理员裁决保留 → 并入 text/ 或 interactive/
+放进 buffer/pending/  →  管理者标记通过  →  移进 buffer/public/ 公示（点赞点踩）
+                      →  期满删除：内容并入 text/ 或 interactive/，或者直接丢弃
 ```
+
+管理者也可以直接**要求更改** —— 删掉稿件，提交人改完重新提交。
 
 **任何新内容都必须先落缓冲分区**，不能直接写进 `text/` 或 `interactive/`。
 审核人名单靠 `.github/CODEOWNERS` + main 分支保护强制，见
-[流程](docs/buffer/rules.md)。
+[缓冲流程](docs/buffer/rules.md)。
 
 公示期的点赞点踩走 GitHub Issue 的 👍/👎 reaction（静态站收不了票）。
 
@@ -71,7 +76,7 @@ docs/
 
 - [编辑规范](docs/buffer/style-guide.md) —— 目录规则、命名规则、提示块用法
 - [条目模板](docs/buffer/entries.md) —— 直接复制粘贴
-- [流程](docs/buffer/rules.md) —— 提交 / 审核 / 公示 / 裁决四步
+- [缓冲流程](docs/buffer/rules.md) —— 提交 / 标记 / 公示 / 删除
 - [条目模板](docs/buffer/entries.md) —— 直接复制粘贴
 
 一句话规则：**目录和文件名用 ASCII，中文只出现在标题和 `nav` 里。**
@@ -90,4 +95,4 @@ docs/
 | 文本 · 图鉴 | 4 条演示条目，待替换 |
 | 文本 · 世界 / 势力 / 人物 / 编年 | 待开 |
 | 可交互 · 测名台 | 可用 |
-| 缓冲 · 缓冲流程 | 已启用（2 份公示、1 份待审示例） |
+| 缓冲 · 提交 / 标记 / 公示 | 已启用（1 份待审、2 份公示示例） |

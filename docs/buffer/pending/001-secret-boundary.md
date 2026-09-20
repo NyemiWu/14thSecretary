@@ -3,8 +3,6 @@ title: 秘语·显位的语义边界
 submitter: 灰隼
 submitted: 2026-09-20
 target: text/canon/secrets.md
-notify: review@example.com
-status: reviewing
 tags:
   - 待审
 ---

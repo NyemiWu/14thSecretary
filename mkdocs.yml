@@ -9,11 +9,12 @@ edit_uri: edit/main/docs/
 
 copyright: 14thSecretary · 内部资料
 
-# 缓冲分区的两级可见性：
-#   submissions/  待审稿件 —— 只在 mkdocs serve 本地预览时构建，mkdocs build 不发布
-#   public/       公示稿件 —— 正常构建，站上可见（公示的意义就在于能被看到）
+# 缓冲区分两级 —— 状态由稿件在哪个目录决定，不用额外字段：
+#   pending/  待审（管理者还没标记）—— 只在 mkdocs serve 本地预览时构建，build 不发布
+#   public/   公示中（管理者已标记通过）—— 正常构建，站上可见
+#   公示期满 / 要求更改 → 直接从缓冲区删除，要改就重新提交
 draft_docs: |
-  buffer/submissions/
+  buffer/pending/
 not_in_nav: |
   buffer/public/**
 
@@ -97,9 +98,6 @@ markdown_extensions:
 
 extra:
   generator: false
-  # 审核请求邮箱。提交人提交后发审核请求到这个地址。
-  # 改动请同步 docs/buffer/rules.md 里写的地址。
-  review_email: review@example.com
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/YOURNAME/14thSecretary
