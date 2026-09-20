@@ -34,26 +34,49 @@ repo_name: YOURNAME/14thSecretary
 ## 目录
 
 ```
-mkdocs.yml              站点配置：导航、主题、Markdown 扩展
-scripts/gen_board.py    审核看板生成脚本
-.github/                CODEOWNERS（群审权限名单）+ PR 模板
+mkdocs.yml                   站点配置（导航由各目录的 .pages 驱动，不在这里维护）
+requirements.txt             依赖清单
+scripts/                     导入与生成脚本（见下）
+.github/                     CODEOWNERS（审核权限名单）+ PR 模板
 docs/
-├─ index.md             首页
-├─ text/                文本分区 —— 纯阅读内容
-│  ├─ canon/            设定：秘语体系、四段式真名、赐名流程
-│  └─ bestiary/         图鉴（每只一页）
-├─ interactive/         可交互叙事分区 —— 能玩的内容
-│  └─ tools/            工具：介绍页 + 同名 HTML 并排
-├─ buffer/              缓冲分区 —— 通道，不是仓库
-│  ├─ index.md          缓冲看板（脚本生成，勿手改）
-│  ├─ rules.md          流程：提交 / 标记 / 公示 / 删除
-│  ├─ style-guide.md    编辑规范
-│  ├─ entries.md        条目模板
-│  ├─ pending/          待审（只在本地预览构建，不发布）
-│  └─ public/           公示中（站上可见，不进导航）
-├─ assets/              图片 / 图标
-└─ stylesheets/         样式微调
+├─ index.md                  首页
+├─ text/                     文本分区 —— 12 个板块
+│  ├─ canon/                 设定：秘语体系、四段式真名、赐名流程
+│  ├─ worldview/             世界观
+│  ├─ society/               社会结构与体制
+│  ├─ regions/               地区（含外城与城际）
+│  ├─ factions/              阵营势力
+│  ├─ characters/            人物角色
+│  ├─ bestiary/              图鉴（赐名怪物 / 意识生物 / 人工智能）
+│  ├─ chronicle/             编年史
+│  ├─ prequel/               前传
+│  ├─ story/                 剧情（主线 / 北岸篇 / 其他文本）
+│  ├─ gallery/               图库
+│  └─ project/               项目管理
+├─ interactive/              可交互叙事分区
+│  └─ tools/                 工具：介绍页 + 同名 HTML 并排
+├─ buffer/                   缓冲分区 —— 通道，不是仓库
+│  ├─ index.md               缓冲看板（脚本生成，勿手改）
+│  ├─ rules.md               流程：提交 / 标记 / 公示 / 删除
+│  ├─ editor.md              内容后台说明
+│  ├─ style-guide.md         编辑规范
+│  ├─ entries.md             条目模板
+│  ├─ pending/               待审（只在本地预览构建，不发布）
+│  └─ public/                公示中（站上可见，不进导航）
+├─ editor/                   内容后台本体（纯静态单文件，零外部依赖）
+├─ assets/                   gallery（图库原图）/ uploads（后台上传）
+└─ stylesheets/              样式微调
 ```
+
+## 脚本
+
+| 脚本 | 干什么 |
+|---|---|
+| `scripts/import_kb.py` | `.docx` / `.html` 批量转 Markdown（走 pandoc） |
+| `scripts/import_doc.py` | 老格式 `.doc` 提取纯文本（pandoc 不支持 OLE2） |
+| `scripts/fix_kb_links.py` | 修 Word 里残留的交叉引用死链 |
+| `scripts/gen_section_index.py` | 生成 `docs/text/*/index.md` 落地页 |
+| `scripts/gen_board.py` | 生成 `docs/buffer/index.md` 缓冲看板 |
 
 ## 内容怎么进正式分区
 
@@ -74,12 +97,13 @@ docs/
 
 ## 写内容前先读
 
+- [缓冲流程](docs/buffer/rules.md) —— 提交 / 标记 / 公示 / 删除
+- [内容后台](docs/buffer/editor.md) —— 不写 Markdown 的人从这里进
 - [编辑规范](docs/buffer/style-guide.md) —— 目录规则、命名规则、提示块用法
 - [条目模板](docs/buffer/entries.md) —— 直接复制粘贴
-- [缓冲流程](docs/buffer/rules.md) —— 提交 / 标记 / 公示 / 删除
-- [条目模板](docs/buffer/entries.md) —— 直接复制粘贴
 
-一句话规则：**目录和文件名用 ASCII，中文只出现在标题和 `nav` 里。**
+一句话规则：**目录和文件名用 ASCII，中文只出现在标题里。**
+（知识库导入时有意破例 —— 一百多篇文档保持原文件名才和你手上的包对得上。）
 
 ## 发布方式
 
@@ -91,8 +115,11 @@ docs/
 
 | 分区 / 板块 | 状态 |
 |---|---|
-| 文本 · 秘语体系 / 四段式真名 / 赐名流程 | 已定稿 |
-| 文本 · 图鉴 | 4 条演示条目，待替换 |
-| 文本 · 世界 / 势力 / 人物 / 编年 | 待开 |
+| 文本 · 全部 12 个板块 | **已导入知识库**（100+ 篇，从原始 .docx 批量转换） |
+| —— 格式 | ⚠ Word 里的加粗标题不会变成 Markdown 标题，层级可能不齐 |
+| 文本 · 4 个老格式 .doc | ⚠ 纯文本提取，表格与格式有损失 |
 | 可交互 · 测名台 | 可用 |
+| 可交互 · COC7 车卡 / 战图 | 已搬入 3 个单文件工具 |
+| 图库 | 35 张原图已入库（含一张 22MB 的大地图） |
 | 缓冲 · 提交 / 标记 / 公示 | 已启用（1 份待审、2 份公示示例） |
+| 内容后台 | 可用（`/editor/`，需成员自备 GitHub 令牌） |

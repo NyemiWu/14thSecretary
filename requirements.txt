@@ -1,0 +1,4 @@
+mkdocs-material>=9.7
+mkdocs-awesome-pages-plugin>=2.10
+pypandoc-binary>=1.17
+olefile>=0.47
