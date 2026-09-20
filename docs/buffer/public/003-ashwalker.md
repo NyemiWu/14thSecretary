@@ -1,30 +1,23 @@
 ---
 title: 005 灰烬行者 · 图鉴条目
 submitter: 白鸦
-submitted: 2026-09-19
+submitted: 2026-09-15
 target: text/bestiary/005-ashwalker.md
-scope: 新增
-quorum: 3
-mode: unanimous
-deadline:
-reviews:
-  - who: 甲
-    verdict: approve
-    date: 2026-09-20
-    note: 六条线索递进合理，判位都能从线索反推。真名藏在第四句，符合写作规范。
-  - who: 乙
-    verdict: approve
-    date: 2026-09-20
-    note: 牧 / 祝 的区分沿用 001 号稿件的边界规则，判为「牧」是对的。
-  - who: 丙
-    verdict: approve
-    date: 2026-09-21
-    note: 无异议。
+status: public
+reviewed_by: 乙
+reviewed_on: 2026-09-17
+public_until: 2026-09-20
+votes_up: 21
+votes_down: 1
 tags:
-  - 待审
+  - 公示
 ---
 
 # 005 · 灰烬行者
+
+!!! warning "本条正在公示 · 已期满待裁决"
+    审核已通过（审核人：**乙** · 2026-09-17），公示期 **2026-09-20 已满**。
+    待管理员裁决：保留则并入 `text/bestiary/005-ashwalker.md`，去除则本条下架。
 
 <div class="entry-head">
   <div class="entry-seal">C 一神 牧 咒</div>
@@ -50,9 +43,10 @@ tags:
 | 三 · 途 | `牧` 牧师 | 触碰尸骸可令其短暂立起 —— 是「照看」的动作 |
 | 四 · 显 | `咒` 秽 | 所过之处草木枯卷、土色发灰，负能量场 |
 
-!!! warning "自查：为什么不是 `祝`"
-    按「力从哪里来」的边界规则 —— 它的效果**必须**经由触碰这个关系性动作成立，
-    自身不散发场域。所以是 `牧`（手段），不是 `祝`。
+!!! note "为什么不是 `祝`"
+    按 `祝 / 牧` 的边界规则（见 001 号在审稿件）——
+    它的效果**必须**经由触碰这个关系性动作成立，自身不散发场域。
+    所以是 `牧`（手段），不是 `祝`。
 
 ## 四段式真名
 

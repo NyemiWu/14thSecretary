@@ -1,25 +1,10 @@
 ---
 title: 秘语·显位的语义边界
 submitter: 灰隼
-submitted: 2026-09-18
+submitted: 2026-09-20
 target: text/canon/secrets.md
-scope: 修订
-quorum: 3
-mode: unanimous
-deadline:
-reviews:
-  - who: 甲
-    verdict: approve
-    date: 2026-09-19
-    note: 边界定义清楚，与四段式真名的对应关系没问题。
-  - who: 乙
-    verdict: pending
-    date:
-    note:
-  - who: 丙
-    verdict: pending
-    date:
-    note:
+notify: review@example.com
+status: reviewing
 tags:
   - 待审
 ---

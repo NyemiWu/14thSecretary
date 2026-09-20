@@ -5,7 +5,7 @@ title: 首页
 # 14thSecretary
 
 !!! warning "骨架版本"
-    分区结构、群审流程、写作规范已经定型，但**设定正文大部分是占位稿**。
+    分区结构、缓冲流程、写作规范已经定型，但**设定正文大部分是占位稿**。
     秘语体系 / 四段式真名 / 赐名流程三页来自设计表，其余等实际设定补上后替换。
 
 ---
@@ -34,7 +34,7 @@ title: 首页
 
     ---
 
-    待审稿件与群审看板。**新内容一律先进这里**，通过后才并入上面两个分区。
+    待审稿件与公示区。**新内容一律先进这里**：提交 → 审核 → 公示 → 管理员裁决。
 
     [:octicons-arrow-right-24: 进入](buffer/index.md)
 
@@ -86,11 +86,11 @@ title: 首页
 
     [:octicons-arrow-right-24: 进入](interactive/tools/naming-demo.md)
 
--   __群审规则__
+-   __缓冲流程__
 
     ---
 
-    谁能审、门槛怎么算、通过后怎么并入。
+    提交 → @邮箱审核 → 公示（点赞点踩）→ 管理员裁决。
 
     [:octicons-arrow-right-24: 进入](buffer/rules.md)
 
@@ -109,6 +109,7 @@ title: 首页
 | 可交互 · 测名台 | :material-check-circle:{ .md .middle } 可用 | 单文件 HTML，内嵌 |
 | 缓冲 · 群审机制 | :material-check-circle:{ .md .middle } 已启用 | 3 份示例稿件 |
 | 文本 · 世界 / 势力 / 人物 / 编年 | :material-progress-clock:{ .md .middle } 待开 | 见文本分区页 |
+| 缓冲 · 提交 / 审核 / 公示 | :material-check-circle:{ .md .middle } 已启用 | 2 份公示、1 份待审示例 |
 
 ## 仓库怎么长
 
@@ -120,13 +121,13 @@ docs/
 │  └─ bestiary/          图鉴：条目型内容
 ├─ interactive/          可交互叙事分区 —— 能玩的内容
 │  └─ tools/             工具：介绍页 + 同名 HTML 并排
-├─ buffer/               缓冲分区 —— 群审的入口
+├─ buffer/               缓冲分区
 │  ├─ index.md           审核看板（脚本生成）
-│  ├─ rules.md           群审规则
-│  ├─ submit.md          提交指南
+│  ├─ rules.md           流程：提交 / 审核 / 公示 / 裁决
 │  ├─ style-guide.md     编辑规范
 │  ├─ entries.md         条目模板
-│  └─ submissions/       待审稿件（不进导航、不进搜索）
+│  ├─ submissions/       待审稿件（不发布）
+│  └─ public/            公示稿件（站上可见）
 ├─ assets/               图片 / 图标
 └─ stylesheets/          样式微调
 ```
@@ -134,7 +135,7 @@ docs/
 一条内容从写到上线的完整路径：
 
 ```text
-写稿 → buffer/submissions/ → 群审 → 维护者并入 → text/ 或 interactive/
+提交 → @邮箱请求审核 → 通过进公示（点赞点踩）→ 管理员裁决保留 → 并入 text/ 或 interactive/
 ```
 
 内容只会越写越多，所以**每条设定一个文件**，不要往单页里堆。

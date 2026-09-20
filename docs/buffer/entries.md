@@ -9,30 +9,19 @@ tags:
 复制对应的一段，改内容就行。
 
 !!! warning "先看顺序"
-    写新内容 → 用「待审稿件」模板落到 `buffer/submissions/` → 走 [群审](rules.md) → 通过后
-    才套下面正式分区的模板并入。**不要跳过缓冲分区。**
+    写新内容 → 用「待审稿件」模板落到 `buffer/submissions/` → @邮箱请求审核 → 通过后
+    进公示 → 管理员裁决保留，才套下面正式分区的模板并入。**不要跳过缓冲分区**。
 
 ## 待审稿件（缓冲分区）
 
 ```markdown
 ---
 title: 稿件标题
-submitter: 提交人代号
+submitter: 提交人
 submitted: 2026-09-21
 target: text/canon/xxx.md
-scope: 新增
-quorum: 3
-mode: unanimous
-deadline:
-reviews:
-  - who: 审核人甲
-    verdict: pending
-    date:
-    note:
-  - who: 审核人乙
-    verdict: pending
-    date:
-    note:
+notify: review@example.com
+status: submitted
 tags:
   - 待审
 ---
@@ -48,11 +37,11 @@ tags:
 - 需要重点看哪几段：
 ```
 
-字段含义与判定规则见 [群审规则](rules.md)。
+状态字段的含义见 [流程](rules.md)。审核通过后补 `reviewed_by` / `reviewed_on` /
+`public_until`，并把文件移进 `public/`。
 
-!!! danger "提交人不能自己填判定"
-    `reviews` 里每个人的 `verdict` 只由**本人**填写。
-    提交人只能新建条目并把 `verdict` 留成 `pending`。
+!!! warning "别跳过缓冲分区"
+    任何新内容都先落 `buffer/submissions/`。直接写进 `text/` 或 `interactive/` 等于绕过审核。
 
 ## 设定条目（文本分区）
 
