@@ -59,9 +59,27 @@ docs/
 │  ├─ pending/               待审（只在本地预览构建，不发布）
 │  └─ public/                公示中（站上可见，不进导航）
 ├─ editor/                   内容后台本体（纯静态单文件，零外部依赖）
+├─ agents/                   机哥分区 —— 给 AI 助手的文档（见下）
+├─ javascripts/              edit-entry.js：内容页的「编辑此条目」入口
 ├─ assets/                   gallery（图库原图）/ uploads（后台上传）
 └─ stylesheets/              样式微调
 ```
+
+## 给 AI 助手
+
+仓库根目录的 **`AGENTS.md`** 是机器可读入口（支持该约定的工具会自动加载）。
+完整版在站上 **`/agents/`** 或源码 `docs/agents/`：
+
+| 页面 | 内容 |
+|---|---|
+| [上手](docs/agents/onboarding.md) | 环境、构建、验证、发布链路 |
+| [仓库地图](docs/agents/repo-map.md) | 每个目录文件干什么，**哪些是生成的不许手改** |
+| [任务手册](docs/agents/workflows.md) | 六种常见任务的步骤化做法 |
+| [硬规则](docs/agents/constraints.md) | 必须做和绝对不能做的事 |
+| [已知坑](docs/agents/pitfalls.md) | 踩过的坑 + 报错原文（可搜） |
+| [skill 登记](docs/agents/skills.md) | skill 与 agent 资产的落点 |
+
+**后续 skill、agent 协作、自动化相关的内容都更新到这一区。**
 
 ## 脚本
 

@@ -12,7 +12,7 @@ title: 首页
 
 ---
 
-## 三个分区
+## 四个分区
 
 <div class="grid cards" markdown>
 
@@ -39,6 +39,15 @@ title: 首页
     新内容一律先进这里。**状态 = 它在哪个目录**：待审 → 标记通过 → 公示 → 期满删除。
 
     [:octicons-arrow-right-24: 进入](buffer/index.md)
+
+-   :material-robot-outline:{ .lg .middle } __机哥分区__
+
+    ---
+
+    写给 AI 助手的：上手、仓库地图、任务手册、硬规则、已知坑。
+    **后续 skill 与 agent 相关的内容都更新在这里。**
+
+    [:octicons-arrow-right-24: 进入](agents/index.md)
 
 </div>
 
@@ -91,6 +100,8 @@ docs/
 │  ├─ pending/            待审（不发布）
 │  └─ public/             公示中（站上可见）
 ├─ editor/               内容后台本体（纯静态，零外部依赖）
+├─ agents/               机哥分区 —— 给 AI 助手的上手与运维文档
+├─ javascripts/          edit-entry.js（内容页的编辑入口按钮）
 ├─ assets/               gallery（图库原图）/ uploads（后台上传）
 └─ stylesheets/
 ```

@@ -1,0 +1,8 @@
+nav:
+  - index.md
+  - 上手: onboarding.md
+  - 仓库地图: repo-map.md
+  - 任务手册: workflows.md
+  - 硬规则: constraints.md
+  - 已知坑: pitfalls.md
+  - skill 登记: skills.md
