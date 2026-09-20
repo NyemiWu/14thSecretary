@@ -1,0 +1,25 @@
+# 14thSecretary · 群审权限名单
+#
+# 用法：把 @YOURNAME 全部换成真实的 GitHub 用户名。
+# 这些人必须先被加进仓库的 Collaborator（有 Write 权限），CODEOWNERS 才会生效。
+#
+# 作用：配合 main 分支的 "Require review from Code Owners"，
+#      只有名单内的人 approve，才算数。其他人点绿也没用。
+
+# ---- 缓冲分区：谁有权审待审稿件 ----
+/docs/buffer/submissions/   @YOURNAME
+/docs/buffer/               @YOURNAME
+
+# ---- 正式分区：只有审核人能落笔，防止绕过缓冲分区直写 ----
+/docs/text/                 @YOURNAME
+/docs/interactive/          @YOURNAME
+/docs/assets/               @YOURNAME
+/docs/stylesheets/          @YOURNAME
+
+# ---- 站点配置与生成脚本 ----
+/mkdocs.yml                 @YOURNAME
+/scripts/                   @YOURNAME
+/.github/                   @YOURNAME
+
+# ---- 兜底：没被上面任何规则覆盖的路径 ----
+*                           @YOURNAME

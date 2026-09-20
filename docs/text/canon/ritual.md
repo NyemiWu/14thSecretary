@@ -63,4 +63,4 @@ tags:
 
 ---
 
-去 [测名台](../tools/naming-demo.md) 上把流程跑一遍，比看规则快。
+去 [测名台](../../interactive/tools/naming-demo.md) 上把流程跑一遍，比看规则快。

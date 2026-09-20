@@ -149,3 +149,35 @@
 .md-typeset table:not([class]) th {
   background-color: var(--md-code-bg-color);
 }
+
+/* ---------- 群审署名（并入正式分区后挂在页脚） ---------- */
+.review-stamp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 1.6rem 0 .6rem;
+  padding: 8px 14px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-left: 2px solid var(--md-accent-fg-color);
+  border-radius: 0 6px 6px 0;
+  background-color: var(--md-code-bg-color);
+  font-size: .7rem;
+}
+
+.review-stamp .rs-label {
+  letter-spacing: .18em;
+  color: var(--md-accent-fg-color);
+}
+
+.review-stamp .rs-who {
+  color: var(--md-default-fg-color--light);
+  letter-spacing: .06em;
+}
+
+.review-stamp .rs-date {
+  margin-left: auto;
+  font-family: var(--md-code-font-family);
+  color: var(--md-default-fg-color--lighter);
+}
+

@@ -35,20 +35,42 @@ repo_name: YOURNAME/14thSecretary
 
 ```
 mkdocs.yml              站点配置：导航、主题、Markdown 扩展
+scripts/gen_board.py    审核看板生成脚本
+.github/                CODEOWNERS（群审权限名单）+ PR 模板
 docs/
 ├─ index.md             首页
-├─ canon/               设定：秘语体系、四段式真名、赐名流程
-├─ bestiary/            怪物图鉴（每只一页）
-├─ tools/               工具介绍页
-├─ meta/                编辑规范与条目模板
-├─ assets/              图片、附件、单文件 HTML
+├─ text/                文本分区 —— 纯阅读内容
+│  ├─ canon/            设定：秘语体系、四段式真名、赐名流程
+│  └─ bestiary/         图鉴（每只一页）
+├─ interactive/         可交互叙事分区 —— 能玩的内容
+│  └─ tools/            工具：介绍页 + 同名 HTML 并排
+├─ buffer/              缓冲分区 —— 群审入口
+│  ├─ index.md          审核看板（脚本生成，勿手改）
+│  ├─ rules.md          群审规则
+│  ├─ submit.md         提交指南
+│  ├─ style-guide.md    编辑规范
+│  ├─ entries.md        条目模板
+│  └─ submissions/      待审稿件（只在本地预览构建，不发布）
+├─ assets/              图片 / 图标
 └─ stylesheets/         样式微调
 ```
 
+## 内容怎么进正式分区
+
+```text
+写稿 → buffer/submissions/ → 群审（GitHub PR） → 维护者并入 → text/ 或 interactive/
+```
+
+**任何新内容都必须先落缓冲分区**，不能直接写进 `text/` 或 `interactive/`。
+权限靠 `.github/CODEOWNERS` + main 分支保护强制，见
+[群审规则](docs/buffer/rules.md)。
+
 ## 写内容前先读
 
-- [编辑规范](docs/meta/style-guide.md) —— 目录规则、命名规则、提示块用法
-- [条目模板](docs/meta/templates.md) —— 直接复制粘贴
+- [编辑规范](docs/buffer/style-guide.md) —— 目录规则、命名规则、提示块用法
+- [条目模板](docs/buffer/entries.md) —— 直接复制粘贴
+- [群审规则](docs/buffer/rules.md) —— 谁能审、门槛怎么算、通过后怎么并入
+- [提交指南](docs/buffer/submit.md) —— 提交人三步走
 
 一句话规则：**目录和文件名用 ASCII，中文只出现在标题和 `nav` 里。**
 
@@ -60,9 +82,10 @@ docs/
 
 ## 内容状态
 
-| 板块 | 状态 |
+| 分区 / 板块 | 状态 |
 |---|---|
-| 秘语体系 / 四段式真名 / 赐名流程 | 已定稿 |
-| 怪物图鉴 | 4 条演示条目，待替换 |
-| 世界设定 | 目录已留位，待补 |
-| 测名台 | 可用 |
+| 文本 · 秘语体系 / 四段式真名 / 赐名流程 | 已定稿 |
+| 文本 · 图鉴 | 4 条演示条目，待替换 |
+| 文本 · 世界 / 势力 / 人物 / 编年 | 待开 |
+| 可交互 · 测名台 | 可用 |
+| 缓冲 · 群审机制 | 已启用（3 份示例稿件） |

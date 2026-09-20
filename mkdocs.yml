@@ -1,5 +1,5 @@
-site_name: 14thSecretary · 设定集
-site_description: 秘语体系 / 赐名怪物 / 世界设定总集
+site_name: 14thSecretary
+site_description: 文本分区 · 可交互叙事分区 · 缓冲分区
 site_author: 14thSecretary
 
 site_url: https://YOURNAME.github.io/14thSecretary/
@@ -7,7 +7,13 @@ repo_url: https://github.com/YOURNAME/14thSecretary
 repo_name: YOURNAME/14thSecretary
 edit_uri: edit/main/docs/
 
-copyright: 14thSecretary · 内部设定资料
+copyright: 14thSecretary · 内部资料 · 缓冲分区内容未经群审不得外传
+
+# 缓冲分区的待审稿件：只在 `mkdocs serve` 本地预览时构建，
+# `mkdocs build` 不发布。即未过审的内容不会上线，但提交人能本地看渲染效果。
+# 群审通过后由维护者挪进 text/ 或 interactive/。
+draft_docs: |
+  buffer/submissions/
 
 theme:
   name: material
@@ -96,20 +102,30 @@ extra:
 
 nav:
   - 首页: index.md
-  - 设定:
-      - canon/index.md
-      - 秘语体系: canon/secrets.md
-      - 四段式真名: canon/true-name.md
-      - 赐名流程: canon/ritual.md
-  - 图鉴:
-      - bestiary/index.md
-      - 001 灰烬中的某物: bestiary/001-ash.md
-      - 002 静水之下: bestiary/002-stillwater.md
-      - 003 第八次雷暴: bestiary/003-thunder.md
-      - 004 巡礼者的残响: bestiary/004-pilgrim.md
-  - 工具:
-      - tools/index.md
-      - 测名台: tools/naming-demo.md
-  - 编辑:
-      - meta/style-guide.md
-      - 条目模板: meta/templates.md
+
+  - 文本分区:
+      - text/index.md
+      - 设定:
+          - text/canon/index.md
+          - 秘语体系: text/canon/secrets.md
+          - 四段式真名: text/canon/true-name.md
+          - 赐名流程: text/canon/ritual.md
+      - 图鉴:
+          - text/bestiary/index.md
+          - 001 灰烬中的某物: text/bestiary/001-ash.md
+          - 002 静水之下: text/bestiary/002-stillwater.md
+          - 003 第八次雷暴: text/bestiary/003-thunder.md
+          - 004 巡礼者的残响: text/bestiary/004-pilgrim.md
+
+  - 可交互叙事分区:
+      - interactive/index.md
+      - 工具:
+          - interactive/tools/index.md
+          - 测名台: interactive/tools/naming-demo.md
+
+  - 缓冲分区:
+      - buffer/index.md
+      - 群审规则: buffer/rules.md
+      - 提交指南: buffer/submit.md
+      - 编辑规范: buffer/style-guide.md
+      - 条目模板: buffer/entries.md

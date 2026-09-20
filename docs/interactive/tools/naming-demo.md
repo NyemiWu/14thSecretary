@@ -7,7 +7,7 @@ tags:
 
 # 测名台
 
-把 [赐名流程](../canon/ritual.md) 完整跑一遍的可玩版本。
+把 [赐名流程](../../text/canon/ritual.md) 完整跑一遍的可玩版本。
 
 !!! info "怎么用"
     - 左侧是观测对象，右侧是测名台。
@@ -16,12 +16,12 @@ tags:
     - 四段全中 → 四句短句展开 → 从四个候选词里**锚定真名**。
     - 紫色的 `無相` 是万能符，能填任意一位，但不锁位、不涨进度。
 
-<!-- 注意：MkDocs 不会重写 <iframe src>，这里的相对路径是给浏览器算的。
-     本页 URL 是 /tools/naming-demo/，所以要用 ../../ 才能回到站点根的 assets/。
-     下面的 markdown 按钮链接相反，交给 MkDocs 解析，写 ../ 才对。 -->
-<iframe class="demo-frame" src="../../assets/naming-demo.html" title="测名台"></iframe>
+<!-- 两个路径基准不同，都对：
+     <iframe src>  MkDocs 不处理 → 按【页面 URL】写，同级即 ../文件名.html
+     markdown 链接 MkDocs 会解析 → 按【源文件目录】写，同级即 文件名.html -->
+<iframe class="demo-frame" src="../naming-demo.html" title="测名台"></iframe>
 
-[:octicons-link-external-24: 在新标签页中打开](../assets/naming-demo.html){ .md-button .md-button--primary target=_blank }
+[:octicons-link-external-24: 在新标签页中打开](naming-demo.html){ .md-button .md-button--primary target=_blank }
 
 ---
 
