@@ -1,0 +1,5 @@
+nav:
+  - index.md
+  - 文本分区: text
+  - 可交互叙事分区: interactive
+  - 缓冲分区: buffer

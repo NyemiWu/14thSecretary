@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>内容后台 · 14thSecretary</title>
+<style>
+:root{
+  --bg:#08090b; --panel:#12141a; --panel2:#0e1015;
+  --line:#252a33; --line2:#333a46;
+  --ink:#e6e4df; --ink2:#a2a8b2; --ink3:#666d78;
+  --gold:#c9a86a; --gold2:#e6cf9a;
+  --ok:#7fae7a; --bad:#c05a52;
+  --serif:"Songti SC","Noto Serif SC","SimSun",serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:radial-gradient(900px 520px at 12% -10%,#161920 0%,rgba(0,0,0,0) 60%),var(--bg);
+  color:var(--ink);font-family:"Microsoft YaHei","PingFang SC",sans-serif;font-size:14px;line-height:1.7;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:20px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+.top h1{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:.14em}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ink3);display:inline-block;margin-right:6px}
+.dot.on{background:var(--ok);box-shadow:0 0 8px rgba(127,174,122,.6)}
+.dot.err{background:var(--bad)}
+.spacer{flex:1}
+.who{font-size:12px;color:var(--ink2)}
+.btn{font:inherit;font-size:13px;letter-spacing:.1em;padding:8px 16px;border-radius:4px;cursor:pointer;
+  border:1px solid var(--line2);background:transparent;color:var(--ink2);transition:.16s;white-space:nowrap}
+.btn:hover{border-color:var(--ink3);color:var(--ink)}
+.btn.primary{border-color:var(--gold);color:#0b0c0e;background:linear-gradient(180deg,var(--gold2),var(--gold));font-weight:600}
+.btn.primary:hover{box-shadow:0 0 16px rgba(201,168,106,.3)}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn.sm{padding:4px 10px;font-size:12px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,var(--panel),#0d0f12);border:1px solid var(--line);border-radius:5px;padding:16px}
+.card+.card{margin-top:14px}
+.card h2{font-family:var(--serif);font-size:13px;font-weight:600;letter-spacing:.18em;color:var(--ink2);
+  display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card h2:before{content:"";width:3px;height:12px;background:var(--gold);opacity:.75;display:block}
+.card h2 .tail{margin-left:auto;font-size:11px;letter-spacing:.08em;color:var(--ink3);font-weight:400}
+.f{margin-bottom:11px}
+.f label{display:block;font-size:11.5px;letter-spacing:.1em;color:var(--ink3);margin-bottom:4px}
+.f label b{color:var(--gold);font-weight:400}
+.f input,.f textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+  color:var(--ink);font:inherit;font-size:13px;padding:8px 10px;transition:.16s}
+.f input:focus,.f textarea:focus{outline:none;border-color:var(--gold);background:#0b0d11}
+.f .hint{font-size:11px;color:var(--ink3);margin-top:3px}
+.f textarea{min-height:300px;resize:vertical;font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;
+  font-size:12.5px;line-height:1.85}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.preview{min-height:360px;max-height:620px;overflow:auto;padding:14px 16px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:4px;font-size:13.5px;color:var(--ink2)}
+.preview h1{font-family:var(--serif);font-size:20px;color:var(--ink);margin:0 0 12px;font-weight:500}
+.preview h2{font-family:var(--serif);font-size:16px;color:var(--ink);margin:18px 0 8px;font-weight:500;
+  border-bottom:1px solid var(--line);padding-bottom:4px}
+.preview h3{font-family:var(--serif);font-size:14.5px;color:var(--ink);margin:14px 0 6px;font-weight:500}
+.preview p{margin:0 0 10px}
+.preview ul,.preview ol{margin:0 0 10px 20px}
+.preview li{margin-bottom:4px}
+.preview blockquote{border-left:2px solid var(--line2);padding-left:12px;color:var(--ink3);margin:0 0 10px}
+.preview code{background:#1a1e25;padding:1px 5px;border-radius:3px;font-size:12px}
+.preview img{max-width:100%;border-radius:4px;border:1px solid var(--line)}
+.preview a{color:var(--gold2)}
+.preview hr{border:none;border-top:1px solid var(--line);margin:14px 0}
+.drop{border:1px dashed var(--line2);border-radius:5px;padding:14px;text-align:center;
+  font-size:12px;color:var(--ink3);transition:.16s;cursor:pointer}
+.drop.hot{border-color:var(--gold);color:var(--gold2);background:rgba(201,168,106,.06)}
+.list{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.list li{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2);
+  background:var(--panel2);border:1px solid var(--line);padding:7px 10px;border-radius:4px}
+.list li b{font-weight:400;color:var(--ink3);font-size:11px;flex:0 0 auto}
+.list li span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg{margin-top:10px;font-size:12.5px;padding:8px 12px;border-radius:4px;display:none}
+.msg.on{display:block}
+.msg.ok{background:rgba(127,174,122,.1);border:1px solid rgba(127,174,122,.4);color:var(--ok)}
+.msg.err{background:rgba(192,90,82,.1);border:1px solid rgba(192,90,82,.4);color:var(--bad)}
+.msg.info{background:rgba(201,168,106,.08);border:1px solid rgba(201,168,106,.35);color:var(--gold2)}
+.ov{position:fixed;inset:0;background:rgba(4,5,7,.85);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+.ov.on{display:flex}
+.modal{background:#14171e;border:1px solid var(--line2);border-radius:5px;max-width:520px;width:100%;padding:24px}
+.modal h3{font-family:var(--serif);font-size:15px;letter-spacing:.14em;margin-bottom:14px}
+code.inline{background:#1a1e25;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--gold2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <h1>14thSecretary · 内容后台</h1>
+    <span class="who"><span class="dot" id="dot"></span><span id="whoTxt">未连接</span></span>
+    <div class="spacer"></div>
+    <button class="btn sm" type="button" id="btnHelp">填写说明</button>
+    <button class="btn sm" type="button" id="btnCfg">设置</button>
+    <button class="btn sm" type="button" id="btnOut">断开</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>写一份缓冲稿<span class="tail" id="modeTxt">新建</span></h2>
+        <div class="row2">
+          <div class="f">
+            <label>稿件编号 <b>*</b></label>
+            <input id="fCode" placeholder="012" maxlength="3">
+            <div class="hint">三位数字，顺延不重复</div>
+          </div>
+          <div class="f">
+            <label>英文短名 <b>*</b></label>
+            <input id="fSlug" placeholder="ember-pact">
+            <div class="hint">小写英文 + 短横线，只用于文件名</div>
+          </div>
+        </div>
+        <div class="f">
+          <label>标题 <b>*</b></label>
+          <input id="fTitle" placeholder="这条内容叫什么">
+        </div>
+        <div class="row2">
+          <div class="f">
+            <label>提交人 <b>*</b></label>
+            <input id="fWho" placeholder="你的代号">
+          </div>
+          <div class="f">
+            <label>提交日期</label>
+            <input id="fDate" type="date">
+          </div>
+        </div>
+        <div class="f">
+          <label>拟并入的位置</label>
+          <input id="fTarget" placeholder="text/canon/xxx.md">
+          <div class="hint">写到正式分区里的哪个路径。不确定就留空</div>
+        </div>
+        <div class="f">
+          <label>正文 <b>*</b></label>
+          <textarea id="fBody" placeholder="直接写。支持 Markdown，右边有预览。"></textarea>
+        </div>
+        <div class="drop" id="drop">把图片拖到这里，或点一下选图 —— 会自动传进仓库并插到光标处</div>
+        <input type="file" id="filePick" accept="image/*" multiple style="display:none">
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn primary" type="button" id="btnSave">提 交 缓 冲 稿</button>
+          <button class="btn" type="button" id="btnNew">清空重写</button>
+        </div>
+        <div class="msg" id="msg"></div>
+      </div>
+
+      <div class="card">
+        <h2>缓冲稿列表<span class="tail" id="listTail"></span></h2>
+        <ul class="list" id="list"></ul>
+        <button class="btn sm" type="button" id="btnReload" style="margin-top:10px">刷新列表</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>预览<span class="tail">Markdown</span></h2>
+        <div class="preview" id="preview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
+
+<script>
+/* 配置：owner / repo / branch / 图片 URL 前缀。首次在「设置」里填一次，存浏览器本地 */
+var DEFAULTS = { owner: "YOURNAME", repo: "14thSecretary", branch: "main", imgPrefix: "/14thSecretary/assets/uploads" };
+var CFG_KEY = "14thsec.cfg";
+var TOKEN_KEY = "14thsec.token";
+
+var cfg = loadCfg();
+var token = localStorage.getItem(TOKEN_KEY) || "";
+var editingPath = null;
+var editingSha = null;
+
+function loadCfg() {
+  try {
+    var raw = localStorage.getItem(CFG_KEY);
+    var obj = raw ? JSON.parse(raw) : {};
+    for (var k in DEFAULTS) if (!(k in obj)) obj[k] = DEFAULTS[k];
+    return obj;
+  } catch (e) { return JSON.parse(JSON.stringify(DEFAULTS)); }
+}
+function $(id) { return document.getElementById(id); }
+
+function show(kind, text) {
+  var m = $("msg");
+  m.className = "msg on " + kind;
+  m.textContent = text;
+  if (kind === "ok") setTimeout(function () { m.className = "msg"; }, 6000);
+}
+function hide() { $("msg").className = "msg"; }
+function setDot(state, text) {
+  $("dot").className = "dot" + (state ? " " + state : "");
+  $("whoTxt").textContent = text;
+}
+
+/* GitHub API —— 原生 fetch，无任何第三方脚本 */
+function api(path, opts) {
+  opts = opts || {};
+  var headers = { "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+  if (token) headers["Authorization"] = "Bearer " + token;
+  if (opts.body) headers["Content-Type"] = "application/json";
+  return fetch("https://api.github.com" + path, {
+    method: opts.method || "GET",
+    headers: headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  }).then(function (res) {
+    return res.text().then(function (t) {
+      var data = null;
+      try { data = t ? JSON.parse(t) : null; } catch (e) { data = { raw: t }; }
+      if (!res.ok) {
+        var err = new Error((data && (data.message || data.raw)) || ("HTTP " + res.status));
+        err.status = res.status;
+        throw err;
+      }
+      return data;
+    });
+  });
+}
+function repoPath(p) { return "/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + p; }
+
+function b64encode(str) {
+  var bytes = new TextEncoder().encode(str), bin = "", i;
+  for (i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function b64decode(b64) {
+  var bin = atob(String(b64).replace(/\s/g, "")), i;
+  var bytes = new Uint8Array(bin.length);
+  for (i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function bufToB64(buf) {
+  var bytes = new Uint8Array(buf), bin = "", i;
+  for (i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+function verify() {
+  if (!token) { setDot("", "未连接"); return Promise.resolve(false); }
+  if (cfg.owner === "YOURNAME") { setDot("err", "还没配置仓库"); return Promise.resolve(false); }
+  return api("/user").then(function (u) {
+    setDot("on", "已连接 · " + u.login);
+    return true;
+  }).catch(function (e) {
+    setDot("err", e.status === 401 ? "令牌无效" : ("连接失败：" + e.message));
+    return false;
+  });
+}
+
+/* Markdown 预览（够用的最小实现） */
+function escHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function inline(s) {
+  s = escHtml(s);
+  s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2">');
+  s = s.replace(/\[([^\]]*)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  s = s.replace(/(^|[^*])\*([^*]+)\*/g, "$1<i>$2</i>");
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  return s;
+}
+function mdToHtml(src) {
+  var lines = String(src || "").split("\n"), out = [], i = 0, inCode = false, list = null;
+  function closeList() { if (list) { out.push("</" + list + ">"); list = null; } }
+  for (i = 0; i < lines.length; i++) {
+    var ln = lines[i], m;
+    if (/^```/.test(ln)) { closeList(); out.push(inCode ? "</pre>" : "<pre>"); inCode = !inCode; continue; }
+    if (inCode) { out.push(escHtml(ln)); continue; }
+    if (!ln.trim()) { closeList(); continue; }
+    if ((m = ln.match(/^(#{1,3})\s+(.*)$/))) {
+      closeList();
+      out.push("<h" + m[1].length + ">" + inline(m[2]) + "</h" + m[1].length + ">");
+      continue;
+    }
+    if (/^>\s?/.test(ln)) { closeList(); out.push("<blockquote>" + inline(ln.replace(/^>\s?/, "")) + "</blockquote>"); continue; }
+    if (/^(-{3,}|\*{3,})$/.test(ln.trim())) { closeList(); out.push("<hr>"); continue; }
+    if ((m = ln.match(/^\s*[-*]\s+(.*)$/))) {
+      if (list !== "ul") { closeList(); out.push("<ul>"); list = "ul"; }
+      out.push("<li>" + inline(m[1]) + "</li>");
+      continue;
+    }
+    if ((m = ln.match(/^\s*\d+[.)]\s+(.*)$/))) {
+      if (list !== "ol") { closeList(); out.push("<ol>"); list = "ol"; }
+      out.push("<li>" + inline(m[1]) + "</li>");
+      continue;
+    }
+    closeList();
+    out.push("<p>" + inline(ln) + "</p>");
+  }
+  closeList();
+  if (inCode) out.push("</pre>");
+  return out.join("\n");
+}
+function renderPreview() {
+  $("preview").innerHTML = mdToHtml($("fBody").value) ||
+    '<p style="color:#666d78">正文写点什么，这里会实时显示。</p>';
+}
+
+/* 图片上传 */
+function sanitizeName(name) {
+  var base = String(name).replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/-{2,}/g, "-").replace(/^-|-$/g, "");
+  if (!base) base = "image";
+  return base + (String(name).match(/\.[^.]+$/) || [".png"])[0].toLowerCase();
+}
+function uploadImage(file) {
+  return file.arrayBuffer().then(function (buf) {
+    var stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    var fname = stamp + "-" + sanitizeName(file.name);
+    return api(repoPath("docs/assets/uploads/" + fname), {
+      method: "PUT",
+      body: { message: "cms: 上传图片 " + fname, content: bufToB64(buf), branch: cfg.branch }
+    }).then(function () { return cfg.imgPrefix.replace(/\/$/, "") + "/" + fname; });
+  });
+}
+function insertAtCursor(text) {
+  var ta = $("fBody");
+  var start = ta.selectionStart || 0, end = ta.selectionEnd || 0;
+  ta.value = ta.value.slice(0, start) + text + ta.value.slice(end);
+  ta.selectionStart = ta.selectionEnd = start + text.length;
+  ta.focus();
+  renderPreview();
+}
+function handleFiles(files) {
+  if (!files || !files.length) return;
+  if (!token) { show("err", "先填写访问令牌才能传图。"); return; }
+  show("info", "正在上传 " + files.length + " 张图片…");
+  var chain = Promise.resolve(), done = 0;
+  Array.prototype.forEach.call(files, function (f) {
+    chain = chain.then(function () {
+      return uploadImage(f).then(function (url) {
+        insertAtCursor("\n![" + f.name.replace(/\.[^.]+$/, "") + "](" + url + ")\n");
+        done++;
+      });
+    });
+  });
+  chain.then(function () { show("ok", "已上传 " + done + " 张图片。"); })
+       .catch(function (e) { show("err", "上传失败：" + e.message); });
+}
+
+/* 保存 */
+function save() {
+  hide();
+  if (!token) { show("err", "请先在「设置」里填写访问令牌。"); return; }
+  var code = $("fCode").value.trim(), slug = $("fSlug").value.trim();
+  var title = $("fTitle").value.trim(), who = $("fWho").value.trim();
+  var date = $("fDate").value.trim() || new Date().toISOString().slice(0, 10);
+  var target = $("fTarget").value.trim(), body = $("fBody").value.trim();
+
+  if (!/^[0-9]{3}$/.test(code)) { show("err", "稿件编号要三位数字，比如 012。"); return; }
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) { show("err", "英文短名只能用小写字母、数字和短横线，比如 ember-pact。"); return; }
+  if (!title) { show("err", "标题不能空。"); return; }
+  if (!who) { show("err", "提交人不能空。"); return; }
+  if (!body) { show("err", "正文不能空。"); return; }
+
+  var fm = ["---", "title: " + title, "submitter: " + who, "submitted: " + date];
+  if (target) fm.push("target: " + target);
+  fm.push("tags:", "  - 待审", "---", "");
+  var content = fm.join("\n") + "# " + title + "\n\n" + body + "\n";
+
+  var path = editingPath || ("docs/buffer/pending/" + code + "-" + slug + ".md");
+  var reqBody = {
+    message: (editingPath ? "cms: 更新缓冲稿 " : "cms: 新建缓冲稿 ") + code + "-" + slug,
+    content: b64encode(content),
+    branch: cfg.branch
+  };
+  if (editingSha) reqBody.sha = editingSha;
+
+  var btn = $("btnSave");
+  btn.disabled = true;
+  show("info", "正在提交…");
+  api(repoPath(path), { method: "PUT", body: reqBody }).then(function () {
+    show("ok", "已提交：" + path + " —— 等管理员标记，不用再做什么。");
+    editingPath = null; editingSha = null;
+    $("modeTxt").textContent = "新建";
+    loadList();
+  }).catch(function (e) {
+    if (e.status === 422) show("err", "文件已存在，或者令牌没有写权限。换个编号，或去「缓冲稿列表」点开改。");
+    else if (e.status === 401) show("err", "令牌无效或已过期，去「设置」重新填。");
+    else show("err", "提交失败：" + e.message);
+  }).then(function () { btn.disabled = false; });
+}
+
+/* 列表 / 载入 */
+function loadList() {
+  if (!token || cfg.owner === "YOURNAME") {
+    $("list").innerHTML = '<li><span style="color:#666d78">连接后才能读取。</span></li>';
+    return;
+  }
+  $("listTail").textContent = "读取中…";
+  api(repoPath("docs/buffer/pending") + "?ref=" + encodeURIComponent(cfg.branch))
+    .then(function (items) {
+      if (!Array.isArray(items)) items = [];
+      var files = items.filter(function (it) { return it.type === "file" && /\.md$/.test(it.name); });
+      $("listTail").textContent = files.length + " 份待审";
+      if (!files.length) {
+        $("list").innerHTML = '<li><span style="color:#666d78">待审区是空的。</span></li>';
+        return;
+      }
+      $("list").innerHTML = files.map(function (f) {
+        return '<li><b>' + f.name.slice(0, 3) + '</b><span>' + escHtml(f.name) + "</span>"
+             + '<button class="btn sm" type="button" data-p="' + escHtml(f.path) + '">打开</button></li>';
+      }).join("");
+    })
+    .catch(function (e) {
+      $("listTail").textContent = "";
+      $("list").innerHTML = '<li><span style="color:#c05a52">读取失败：' + escHtml(e.message) + "</span></li>";
+    });
+}
+function openFile(path) {
+  hide();
+  api(repoPath(path) + "?ref=" + encodeURIComponent(cfg.branch)).then(function (data) {
+    var text = b64decode(data.content), fm = {}, body = text;
+    if (text.indexOf("---") === 0) {
+      var end = text.indexOf("\n---", 3);
+      if (end > 0) {
+        text.slice(3, end).split("\n").forEach(function (ln) {
+          var i = ln.indexOf(":");
+          if (i > 0) fm[ln.slice(0, i).trim()] = ln.slice(i + 1).trim();
+        });
+        body = text.slice(end + 4);
+      }
+    }
+    body = body.replace(/^\s*#\s+.*\n/, "").replace(/^\s+/, "");
+    var name = path.split("/").pop().replace(/\.md$/, "");
+    $("fCode").value = fm.code || name.slice(0, 3);
+    $("fSlug").value = fm.name_en || name.replace(/^\d+-/, "");
+    $("fTitle").value = fm.title || "";
+    $("fWho").value = fm.submitter || "";
+    $("fDate").value = fm.submitted || "";
+    $("fTarget").value = fm.target || "";
+    $("fBody").value = body.replace(/\s+$/, "");
+    editingPath = path; editingSha = data.sha;
+    $("modeTxt").textContent = "修改中 · " + name;
+    renderPreview();
+    show("info", "已载入 " + name + "。改完点提交会覆盖这一份。");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }).catch(function (e) { show("err", "打开失败：" + e.message); });
+}
+
+/* 设置 / 说明 */
+function openModal(html) { $("modal").innerHTML = html; $("ov").className = "ov on"; }
+function closeModal() { $("ov").className = "ov"; }
+
+function showCfg() {
+  openModal(
+    '<h3>设置</h3>' +
+    '<div class="f"><label>仓库 owner</label><input id="cOwner"></div>' +
+    '<div class="f"><label>仓库名</label><input id="cRepo"></div>' +
+    '<div class="f"><label>分支</label><input id="cBranch"></div>' +
+    '<div class="f"><label>图片 URL 前缀</label><input id="cImg">' +
+    '<div class="hint">站点根路径，例：/14thSecretary/assets/uploads</div></div>' +
+    '<div class="f"><label>访问令牌（PAT）</label><input id="cToken" type="password" placeholder="github_pat_…"></div>' +
+    '<div class="hint" style="margin-bottom:14px">只存在这台浏览器本地，不会上传到任何地方。需要 Contents 的读写权限。</div>' +
+    '<div style="display:flex;gap:8px"><button class="btn primary" type="button" id="cSave">保存</button>' +
+    '<button class="btn" type="button" id="cCancel">取消</button></div>'
+  );
+  $("cOwner").value = cfg.owner; $("cRepo").value = cfg.repo;
+  $("cBranch").value = cfg.branch; $("cImg").value = cfg.imgPrefix; $("cToken").value = token;
+  $("cSave").onclick = function () {
+    cfg.owner = $("cOwner").value.trim() || DEFAULTS.owner;
+    cfg.repo = $("cRepo").value.trim() || DEFAULTS.repo;
+    cfg.branch = $("cBranch").value.trim() || DEFAULTS.branch;
+    cfg.imgPrefix = $("cImg").value.trim() || DEFAULTS.imgPrefix;
+    token = $("cToken").value.trim();
+    localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+    localStorage.setItem(TOKEN_KEY, token);
+    closeModal();
+    verify().then(function () { loadList(); });
+  };
+  $("cCancel").onclick = closeModal;
+}
+
+function showHelp() {
+  openModal(
+    '<h3>填写说明</h3>' +
+    '<div class="f"><label>第一步：拿一个访问令牌</label>' +
+    '<div style="font-size:12.5px;color:var(--ink2);line-height:1.9">' +
+    '打开 <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#e6cf9a">github.com/settings/personal-access-tokens/new</a><br>' +
+    'Repository access 选 <b>Only select repositories</b> → 勾 <code class="inline">14thSecretary</code><br>' +
+    'Permissions → Repository permissions → <b>Contents</b> 设为 <b>Read and write</b><br>' +
+    'Generate token，复制那串 <code class="inline">github_pat_…</code>，粘到「设置」里。' +
+    '<br><br>只需做一次。令牌存在本机浏览器，换电脑要重填。</div></div>' +
+    '<div class="f"><label>第二步：写稿</label>' +
+    '<div style="font-size:12.5px;color:var(--ink2);line-height:1.9">' +
+    '编号三位数顺延；英文短名随便起（只用于文件名，不显示）；正文直接写，右边实时预览。<br>' +
+    '图片直接拖到虚线框里，会自动传进仓库并插到光标处。' +
+    '<br><br>点「提交缓冲稿」就完事了 —— 内容进 <code class="inline">buffer/pending/</code>，剩下的等管理员标记。</div></div>' +
+    '<div style="display:flex"><button class="btn primary" type="button" id="hOk">知道了</button></div>'
+  );
+  $("hOk").onclick = closeModal;
+}
+
+/* 绑定 */
+$("fBody").addEventListener("input", renderPreview);
+$("btnSave").addEventListener("click", save);
+$("btnNew").addEventListener("click", function () {
+  editingPath = null; editingSha = null;
+  ["fCode", "fSlug", "fTitle", "fTarget", "fBody"].forEach(function (id) { $(id).value = ""; });
+  $("modeTxt").textContent = "新建";
+  hide(); renderPreview();
+});
+$("btnReload").addEventListener("click", loadList);
+$("btnCfg").addEventListener("click", showCfg);
+$("btnHelp").addEventListener("click", showHelp);
+$("btnOut").addEventListener("click", function () {
+  token = "";
+  localStorage.removeItem(TOKEN_KEY);
+  setDot("", "未连接");
+  loadList();
+  show("info", "已断开。令牌已从本机清除。");
+});
+$("list").addEventListener("click", function (ev) {
+  var el = ev.target;
+  if (!el || !el.getAttribute || !el.getAttribute("data-p")) return;
+  openFile(el.getAttribute("data-p"));
+});
+$("ov").addEventListener("click", function (ev) { if (ev.target === $("ov")) closeModal(); });
+
+var drop = $("drop");
+drop.addEventListener("click", function () { $("filePick").click(); });
+$("filePick").addEventListener("change", function (ev) { handleFiles(ev.target.files); ev.target.value = ""; });
+drop.addEventListener("dragover", function (ev) { ev.preventDefault(); drop.className = "drop hot"; });
+drop.addEventListener("dragleave", function () { drop.className = "drop"; });
+drop.addEventListener("drop", function (ev) {
+  ev.preventDefault(); drop.className = "drop"; handleFiles(ev.dataTransfer.files);
+});
+document.addEventListener("dragover", function (ev) { ev.preventDefault(); });
+document.addEventListener("drop", function (ev) { ev.preventDefault(); });
+
+$("fDate").value = new Date().toISOString().slice(0, 10);
+renderPreview();
+verify().then(function () { loadList(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+nav:
+  - index.md
+  - 赐名怪物:
+      - 001 灰烬中的某物: 001-ash.md
+      - 002 静水之下: 002-stillwater.md
+      - 003 第八次雷暴: 003-thunder.md
+      - 004 巡礼者的残响: 004-pilgrim.md
+  - 人工智能: ai
+  - 意识生物: conscious

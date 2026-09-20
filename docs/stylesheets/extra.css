@@ -181,3 +181,47 @@
   color: var(--md-default-fg-color--lighter);
 }
 
+/* ---------- 图库 ---------- */
+.md-typeset .gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+  margin: 1.4rem 0;
+}
+
+.md-typeset .gallery figure {
+  margin: 0;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--md-code-bg-color);
+}
+
+.md-typeset .gallery img {
+  display: block;
+  width: 100%;
+  height: 148px;
+  object-fit: cover;
+  margin: 0;
+  background-color: #0b0c0e;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.md-typeset .gallery figcaption {
+  padding: 6px 8px;
+  font-size: .64rem;
+  text-align: center;
+  color: var(--md-default-fg-color--light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- 长文档里的表格别撑破 ---------- */
+.md-typeset table:not([class]) {
+  display: table;
+  width: 100%;
+}
+
+

@@ -4,9 +4,11 @@ title: 首页
 
 # 14thSecretary
 
-!!! warning "骨架版本"
-    分区结构、缓冲流程、写作规范已经定型，但**设定正文大部分是占位稿**。
-    秘语体系 / 四段式真名 / 赐名流程三页来自设计表，其余等实际设定补上后替换。
+!!! warning "刚导入知识库，正文还在校对"
+    11 个板块、100+ 篇文档已从原始 `.docx` 批量转换进来。
+    **Word 里的加粗标题大多不会变成 Markdown 标题**，层级可能不齐；
+    4 个老格式 `.doc` 是纯文本提取，表格和格式有损失。
+    读到不对的地方直接在页面上改（右上角有编辑入口）。
 
 ---
 
@@ -18,7 +20,7 @@ title: 首页
 
     ---
 
-    世界观、规则、条目。一切"读"的内容。
+    世界观、社会、地区、阵营、人物、图鉴、编年史、剧情 —— 一切「读」的内容。
 
     [:octicons-arrow-right-24: 进入](text/index.md)
 
@@ -26,7 +28,7 @@ title: 首页
 
     ---
 
-    跑得起来的工具、点得进去的叙事。一切有交互的内容。
+    跑得起来的工具。测名台、COC7 车卡与战图。
 
     [:octicons-arrow-right-24: 进入](interactive/index.md)
 
@@ -34,7 +36,7 @@ title: 首页
 
     ---
 
-    新内容一律先进这里。**状态 = 它在哪个目录**：待审 → 管理者标记 → 公示 → 期满删除。
+    新内容一律先进这里。**状态 = 它在哪个目录**：待审 → 标记通过 → 公示 → 期满删除。
 
     [:octicons-arrow-right-24: 进入](buffer/index.md)
 
@@ -42,102 +44,63 @@ title: 首页
 
 ---
 
-## 快入口
+## 文本分区的十二个板块
 
-<div class="grid cards" markdown>
+| 板块 | 里面有什么 |
+|---|---|
+| [设定](text/canon/index.md) | 秘语体系、四段式真名、赐名流程 |
+| [世界观](text/worldview/index.md) | 意识、意识海、仿生人、识子论、意识工学 |
+| [社会结构与体制](text/society/index.md) | 社会状况、意识形态、片区规划、食品 |
+| [地区](text/regions/index.md) | 穹顶城内外、十三号城、西伯利亚穹顶城 |
+| [阵营势力](text/factions/index.md) | 仿研所、穹顶政联、至高联合、商会…… |
+| [人物角色](text/characters/index.md) | 角色设定与设定卡 |
+| [图鉴](text/bestiary/index.md) | 赐名怪物、意识生物、人工智能 |
+| [编年史](text/chronicle/index.md) | 从市元前到 2058 年 |
+| [前传](text/prequel/index.md) | 前传游戏的策划案、剧本、医疗与技术文档 |
+| [剧情](text/story/index.md) | 主线、北岸篇、其他文本 |
+| [图库](text/gallery/index.md) | 概念设定、角色设计、地图 |
+| [项目管理](text/project/index.md) | 内部目标与排期 |
 
--   __秘语体系__
-
-    ---
-
-    14 条秘语、四组划分。整套赐名机制的原子单位。
-
-    [:octicons-arrow-right-24: 进入](text/canon/secrets.md)
-
--   __四段式真名__
-
-    ---
-
-    四个秘语 + 一个真名。定位一只对象的完整写法。
-
-    [:octicons-arrow-right-24: 进入](text/canon/true-name.md)
-
--   __赐名流程__
-
-    ---
-
-    观察 → 匹配 → 揭秘 → 锚定。
-
-    [:octicons-arrow-right-24: 进入](text/canon/ritual.md)
-
--   __怪物图鉴__
-
-    ---
-
-    已归档的赐名怪物条目，一只一页。
-
-    [:octicons-arrow-right-24: 进入](text/bestiary/index.md)
-
--   __测名台__
-
-    ---
-
-    可交互的测名玩法演示，直接在页面里跑。
-
-    [:octicons-arrow-right-24: 进入](interactive/tools/naming-demo.md)
-
--   __缓冲流程__
-
-    ---
-
-    提交 → 管理者标记 → 公示（点赞点踩）→ 期满删除。
-
-    [:octicons-arrow-right-24: 进入](buffer/rules.md)
-
-</div>
+每个板块的落地页会自动列出该板块全部条目和摘要。
 
 ---
 
-## 站点状态
+## 两条硬规则
 
-| 分区 / 板块 | 状态 | 备注 |
-|---|---|---|
-| 文本 · 秘语体系 | :material-check-circle:{ .md .middle } 已定稿 | 来自设计表 |
-| 文本 · 四段式真名 | :material-check-circle:{ .md .middle } 已定稿 | 来自设计表 |
-| 文本 · 赐名流程 | :material-check-circle:{ .md .middle } 已定稿 | 来自设计表 |
-| 文本 · 图鉴 | :material-progress-clock:{ .md .middle } 占位 | 4 条演示条目 |
-| 可交互 · 测名台 | :material-check-circle:{ .md .middle } 可用 | 单文件 HTML，内嵌 |
-| 缓冲 · 群审机制 | :material-check-circle:{ .md .middle } 已启用 | 3 份示例稿件 |
-| 文本 · 世界 / 势力 / 人物 / 编年 | :material-progress-clock:{ .md .middle } 待开 | 见文本分区页 |
-| 缓冲 · 提交 / 标记 / 公示 | :material-check-circle:{ .md .middle } 已启用 | 1 份待审、2 份公示示例 |
+**一、内容先进缓冲区。**
+任何新稿子都放 `buffer/pending/`，由管理者标记通过、走完公示才并入正式分区。
+[不写 Markdown 的成员走内容后台](buffer/editor.md)，表单式 + 拖拽传图。
+
+**二、目录和文件名用 ASCII，中文只出现在标题里。**
+这条在知识库导入时**有意破例**了 —— 一百多篇文档保持原文件名才能和你手上的包对上。
+新写的文档请遵守。
 
 ## 仓库怎么长
 
 ```
 docs/
 ├─ index.md              首页
-├─ text/                 文本分区 —— 纯阅读内容
-│  ├─ canon/             设定：规则与体系
-│  └─ bestiary/          图鉴：条目型内容
-├─ interactive/          可交互叙事分区 —— 能玩的内容
-│  └─ tools/             工具：介绍页 + 同名 HTML 并排
+├─ text/                 文本分区（12 个板块）
+│  └─ <板块>/             index.md（自动生成）+ 各篇文档 + media/
+├─ interactive/          可交互叙事分区
+│  └─ tools/              介绍页 + 同名 HTML 并排
 ├─ buffer/               缓冲分区 —— 通道，不是仓库
-│  ├─ index.md           缓冲看板（脚本生成）
-│  ├─ rules.md           流程：提交 / 标记 / 公示 / 删除
-│  ├─ style-guide.md     编辑规范
-│  ├─ entries.md         条目模板
-│  ├─ pending/           待审（不发布）
-│  └─ public/            公示中（站上可见）
-├─ assets/               图片 / 图标
-└─ stylesheets/          样式微调
+│  ├─ index.md            缓冲看板（脚本生成）
+│  ├─ rules.md            流程
+│  ├─ editor.md           内容后台说明
+│  ├─ pending/            待审（不发布）
+│  └─ public/             公示中（站上可见）
+├─ editor/               内容后台本体（纯静态，零外部依赖）
+├─ assets/               gallery（图库原图）/ uploads（后台上传）
+└─ stylesheets/
 ```
 
-一条内容从提交到上线的完整路径：
+## 会用到的脚本
 
-```text
-放进 pending/ → 管理者标记通过 → 移进 public/ 公示（点赞点踩）
-              → 期满删除：内容并入 text/ 或 interactive/，或者直接丢弃
-```
-
-内容只会越写越多，所以**每条设定一个文件**，不要往单页里堆。
-目录名一律 ASCII，中文只出现在 `nav` 和页面标题里。
+| 脚本 | 干什么 |
+|---|---|
+| `scripts/import_kb.py` | `.docx` / `.html` 批量转 Markdown（pandoc） |
+| `scripts/import_doc.py` | 老格式 `.doc` 提取纯文本（无 pandoc 支持） |
+| `scripts/fix_kb_links.py` | 修 Word 里残留的交叉引用死链 |
+| `scripts/gen_section_index.py` | 生成各板块落地页 |
+| `scripts/gen_board.py` | 生成缓冲看板 |

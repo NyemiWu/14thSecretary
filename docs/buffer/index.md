@@ -10,7 +10,7 @@ tags:
     由 `scripts/gen_board.py` 扫描 `buffer/pending/` 与 `buffer/public/` 生成。
     稿件一动就跑一次：`python scripts/gen_board.py`
 
-    成员投稿走 [内容后台](cms.md)（表单式，不用写 Markdown），
+    成员投稿走 [内容后台](editor.md)（表单式，不用写 Markdown），
     或者直接往 `buffer/pending/` 放文件。流程见 [缓冲流程](rules.md)。
 
 **截至 2026-09-21** —— 公示中 **2** · 待审 **1**

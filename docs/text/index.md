@@ -94,7 +94,7 @@ title: 文本分区
 
     [:octicons-arrow-right-24: 进入](story/index.md)
 
--   __图库__（0）
+-   __图库__（35）
 
     ---
 

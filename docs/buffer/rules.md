@@ -116,8 +116,8 @@ python scripts/gen_board.py
 
 ## 几个说明
 
-**成员不写 Markdown 的话走 [内容后台](cms.md)。** 表单式界面，图片拖拽上传，
-保存即提交一份缓冲稿，不用碰语法。配好之后成员只需要点一个链接。
+**成员不写 Markdown 的话走 [内容后台](editor.md)。** 表单式界面，图片拖拽上传，
+提交后文件直接落进 `pending/`，不用碰 git。
 
 **待审稿不上线。** `mkdocs.yml` 里 `draft_docs: buffer/pending/` 的语义是
 「只在 `mkdocs serve` 本地预览时构建，`mkdocs build` 不发布」。
