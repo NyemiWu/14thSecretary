@@ -95,6 +95,13 @@ def esc(text):
     return str(text).replace("|", "\\|")
 
 
+def kind(meta):
+    """稿件类型：带 revises 的是「修改已有条目」，否则是新建。"""
+    if meta.get("revises"):
+        return ":material-file-edit: 修改"
+    return ":material-plus: 新建"
+
+
 def render(today, repo_url):
     pub = scan(PUBLIC_DIR)
     pend = scan(PENDING_DIR)
@@ -136,8 +143,8 @@ def render(today, repo_url):
         o.append("当前没有正在公示的稿件。")
         o.append("")
     else:
-        o.append("| 编号 | 标题 | 提交人 | 审核人 | 公示截止 | 点赞 | 点踩 | 状态 |")
-        o.append("|---|---|---|---|---|---|---|---|")
+        o.append("| 编号 | 标题 | 类型 | 提交人 | 审核人 | 公示截止 | 点赞 | 点踩 | 状态 |")
+        o.append("|---|---|---|---|---|---|---|---|---|")
         for it in pub:
             meta = it["meta"]
             no = it["slug"].split("-")[0]
@@ -149,8 +156,9 @@ def render(today, repo_url):
                 when, flag = "%s（已期满）" % until.isoformat(), ":material-alert: **期满 · 该处理了**"
             else:
                 when, flag = "%s（剩 %d 天）" % (until.isoformat(), (until - today).days), "公示中"
-            o.append("| [%s](%s) | %s | %s | %s | %s | %s | %s | %s |"
-                     % (no, link, esc(meta.get("title", "—")), meta.get("submitter", "—"),
+            o.append("| [%s](%s) | %s | %s | %s | %s | %s | %s | %s | %s |"
+                     % (no, link, esc(meta.get("title", "—")), kind(meta),
+                        meta.get("submitter", "—"),
                         meta.get("reviewed_by", "—"), when,
                         meta.get("votes_up", "—"), meta.get("votes_down", "—"), flag))
         o.append("")
@@ -171,16 +179,28 @@ def render(today, repo_url):
         o.append("当前没有待审稿件。")
         o.append("")
     else:
-        o.append("| 编号 | 标题 | 提交人 | 提交日 | 目标 | 稿件 |")
-        o.append("|---|---|---|---|---|---|")
+        o.append("| 编号 | 标题 | 类型 | 提交人 | 提交日 | 目标 | 稿件 |")
+        o.append("|---|---|---|---|---|---|---|")
         for it in pend:
             meta = it["meta"]
             no = it["slug"].split("-")[0]
             link = gh_link(it["file"])
             cell = "[GitHub 原文](%s)" % link if link else "`docs/buffer/pending/%s`" % it["file"]
-            o.append("| %s | %s | %s | %s | `%s` | %s |"
-                     % (no, esc(meta.get("title", "—")), meta.get("submitter", "—"),
-                        meta.get("submitted") or "—", meta.get("target", "—"), cell))
+            rev = meta.get("revises")
+            target = esc(str(meta.get("target", "—")))
+            # 代码块里不能再嵌反引号，否则 Markdown 渲染会坏；
+            # 而且修改稿的 target 通常就等于 revises，重复显示没意义。
+            cell_target = "`%s`" % target
+            if rev and rev != meta.get("target"):
+                cell_target += " —— 改自 `%s`" % esc(rev)
+            o.append("| %s | %s | %s | %s | %s | %s | %s |"
+                     % (no, esc(meta.get("title", "—")), kind(meta), meta.get("submitter", "—"),
+                        meta.get("submitted") or "—", cell_target, cell))
+        o.append("")
+        o.append('!!! note "「修改」是什么意思"')
+        o.append("    带 `revises` 字段的稿件是**改已有条目的稿**，正文是完整的新版本。")
+        o.append("    它不会动原文 —— 通过并公示完，管理员拿它**替换** `target` 指向的那个文件。")
+        o.append("    新建条目的稿没有这个字段。")
         o.append("")
         o.append('!!! warning "待审稿件不发布到站点"')
         o.append("    `mkdocs.yml` 配了 `draft_docs: buffer/pending/` ——")

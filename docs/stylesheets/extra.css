@@ -224,4 +224,39 @@
   width: 100%;
 }
 
+/* ---------- 内容页的「编辑此条目」入口 ----------
+   由 javascripts/edit-entry.js 注入到 h1 后面。
+   指向站内内容后台（/editor/），不是 GitHub 网页编辑器。 */
+.edit-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: .4em;
+  margin: .1rem 0 1.3rem;
+  padding: .26em .75em;
+  font-size: .72rem;
+  letter-spacing: .09em;
+  color: var(--md-default-fg-color--light);
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 3px;
+  text-decoration: none !important;
+  transition: .16s;
+}
+
+.edit-entry:hover {
+  color: #0b0c0e;
+  background: var(--md-accent-fg-color);
+  border-color: var(--md-accent-fg-color);
+}
+
+.edit-entry .ee-ico {
+  font-size: 1.05em;
+  line-height: 1;
+  opacity: .85;
+}
+
+/* 自动生成的聚合页上，这个按钮接的是「新建条目」而不是「编辑」 */
+.edit-entry[href*="mode=new"] {
+  border-style: dashed;
+}
+
 

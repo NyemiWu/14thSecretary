@@ -59,6 +59,11 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
+# 注入「编辑此条目」按钮 —— 从 Material 生成的「编辑此页」链接里推出源文件路径，
+# 指向站内内容后台而不是 GitHub 网页编辑器。见 docs/javascripts/edit-entry.js
+extra_javascript:
+  - javascripts/edit-entry.js
+
 plugins:
   - search:
       lang:

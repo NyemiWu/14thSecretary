@@ -20,6 +20,7 @@ title: 稿件标题
 submitter: 提交人
 submitted: 2026-09-21
 target: text/canon/xxx.md
+# revises: text/canon/yyy.md     # 只有「修改已有条目」才加这行，值是被改的那篇
 tags:
   - 待审
 ---
@@ -27,6 +28,7 @@ tags:
 # 稿件标题
 
 正文。格式按目标分区的正式模板写，期满并入时整段搬过去，不做二次改写。
+**改已有条目时，正文要写该条目的完整新版本** —— 不是 diff。
 
 ## 提交说明
 

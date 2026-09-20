@@ -46,9 +46,12 @@ body{
 .f{margin-bottom:11px}
 .f label{display:block;font-size:11.5px;letter-spacing:.1em;color:var(--ink3);margin-bottom:4px}
 .f label b{color:var(--gold);font-weight:400}
-.f input,.f textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:4px;
+.f input,.f textarea,.f select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:4px;
   color:var(--ink);font:inherit;font-size:13px;padding:8px 10px;transition:.16s}
-.f input:focus,.f textarea:focus{outline:none;border-color:var(--gold);background:#0b0d11}
+.f select{appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink3) 50%),linear-gradient(135deg,var(--ink3) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 17px,calc(100% - 11px) 17px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.f input:focus,.f textarea:focus,.f select:focus{outline:none;border-color:var(--gold);background-color:#0b0d11}
 .f .hint{font-size:11px;color:var(--ink3);margin-top:3px}
 .f textarea{min-height:300px;resize:vertical;font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;
   font-size:12.5px;line-height:1.85}
@@ -80,9 +83,15 @@ body{
 .msg.ok{background:rgba(127,174,122,.1);border:1px solid rgba(127,174,122,.4);color:var(--ok)}
 .msg.err{background:rgba(192,90,82,.1);border:1px solid rgba(192,90,82,.4);color:var(--bad)}
 .msg.info{background:rgba(201,168,106,.08);border:1px solid rgba(201,168,106,.35);color:var(--gold2)}
+.banner{display:none;margin-bottom:14px;padding:11px 14px;border-radius:4px;font-size:12.5px;line-height:1.8}
+.banner.on{display:block}
+.banner.edit{background:rgba(201,168,106,.07);border:1px solid rgba(201,168,106,.35);color:var(--gold2)}
+.banner.warn{background:rgba(192,90,82,.08);border:1px solid rgba(192,90,82,.4);color:#e0928a}
+.banner b{color:var(--ink);font-weight:600}
 .ov{position:fixed;inset:0;background:rgba(4,5,7,.85);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
 .ov.on{display:flex}
-.modal{background:#14171e;border:1px solid var(--line2);border-radius:5px;max-width:520px;width:100%;padding:24px}
+.modal{background:#14171e;border:1px solid var(--line2);border-radius:5px;max-width:520px;width:100%;padding:24px;
+  max-height:86vh;overflow:auto}
 .modal h3{font-family:var(--serif);font-size:15px;letter-spacing:.14em;margin-bottom:14px}
 code.inline{background:#1a1e25;padding:1px 5px;border-radius:3px;font-size:12px;color:var(--gold2)}
 </style>
@@ -103,11 +112,19 @@ code.inline{background:#1a1e25;padding:1px 5px;border-radius:3px;font-size:12px;
     <div>
       <div class="card">
         <h2>写一份缓冲稿<span class="tail" id="modeTxt">新建</span></h2>
+        <div class="banner" id="banner"></div>
+
+        <div class="f">
+          <label>所属分区 <b>*</b></label>
+          <select id="fSection"></select>
+          <div class="hint">内容归到哪个板块。选完下面的「拟并入位置」会自动填好</div>
+        </div>
+
         <div class="row2">
           <div class="f">
             <label>稿件编号 <b>*</b></label>
             <input id="fCode" placeholder="012" maxlength="3">
-            <div class="hint">三位数字，顺延不重复</div>
+            <div class="hint">三位数字，顺延不重复（已自动取下一个可用号）</div>
           </div>
           <div class="f">
             <label>英文短名 <b>*</b></label>
@@ -123,6 +140,7 @@ code.inline{background:#1a1e25;padding:1px 5px;border-radius:3px;font-size:12px;
           <div class="f">
             <label>提交人 <b>*</b></label>
             <input id="fWho" placeholder="你的代号">
+            <div class="hint">会写进稿件头部，公示时显示</div>
           </div>
           <div class="f">
             <label>提交日期</label>
@@ -132,7 +150,7 @@ code.inline{background:#1a1e25;padding:1px 5px;border-radius:3px;font-size:12px;
         <div class="f">
           <label>拟并入的位置</label>
           <input id="fTarget" placeholder="text/canon/xxx.md">
-          <div class="hint">写到正式分区里的哪个路径。不确定就留空</div>
+          <div class="hint">通过后并入正式分区里的哪个路径。一般不用手改</div>
         </div>
         <div class="f">
           <label>正文 <b>*</b></label>
@@ -170,10 +188,33 @@ code.inline{background:#1a1e25;padding:1px 5px;border-radius:3px;font-size:12px;
 var DEFAULTS = { owner: "NyemiWu", repo: "14thSecretary", branch: "main", imgPrefix: "/14thSecretary/assets/uploads" };
 var CFG_KEY = "14thsec.cfg";
 var TOKEN_KEY = "14thsec.token";
+var WHO_KEY = "14thsec.who";
+var SEC_KEY = "14thsec.section";
+
+/* 分区清单：与 scripts/gen_section_index.py 的 SECTIONS 对应。
+   连上之后会再拉一次仓库目录，把新增的板块自动补进来。 */
+var SECTION_LIST = [
+  ["text/canon", "设定"],
+  ["text/worldview", "世界观"],
+  ["text/society", "社会结构与体制"],
+  ["text/regions", "地区"],
+  ["text/factions", "阵营势力"],
+  ["text/characters", "人物角色"],
+  ["text/bestiary", "图鉴"],
+  ["text/chronicle", "编年史"],
+  ["text/prequel", "前传"],
+  ["text/story", "剧情"],
+  ["text/gallery", "图库"],
+  ["text/project", "项目管理"],
+  ["interactive/tools", "工具 · 可交互叙事"]
+];
 
 var cfg = loadCfg();
 var token = localStorage.getItem(TOKEN_KEY) || "";
-var editingPath = null;
+var mode = "new";           /* new | edit */
+var srcRel = null;          /* 编辑模式：源文件（docs 相对路径，例 text/worldview/x.md） */
+var origSection = null;     /* 编辑模式：源文件所在分区 */
+var editingPath = null;     /* 覆盖模式：从缓冲稿列表打开的稿件 */
 var editingSha = null;
 
 function loadCfg() {
@@ -196,6 +237,12 @@ function hide() { $("msg").className = "msg"; }
 function setDot(state, text) {
   $("dot").className = "dot" + (state ? " " + state : "");
   $("whoTxt").textContent = text;
+}
+function setBanner(kind, html) {
+  var b = $("banner");
+  if (!kind) { b.className = "banner"; b.innerHTML = ""; return; }
+  b.className = "banner on " + kind;
+  b.innerHTML = html;
 }
 
 /* GitHub API —— 原生 fetch，无任何第三方脚本 */
@@ -239,6 +286,7 @@ function bufToB64(buf) {
   for (i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
   return btoa(bin);
 }
+function escHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 function verify() {
   if (!token) { setDot("", "未连接"); return Promise.resolve(false); }
@@ -252,8 +300,76 @@ function verify() {
   });
 }
 
-/* Markdown 预览（够用的最小实现） */
-function escHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+/* ---------- 分区下拉 ---------- */
+function sectionLabel(key) {
+  var i;
+  for (i = 0; i < SECTION_LIST.length; i++) if (SECTION_LIST[i][0] === key) return SECTION_LIST[i][1];
+  return key;
+}
+function fillSections(extraKeys) {
+  var seen = {}, html = "", i;
+  function emit(key) {
+    if (seen[key]) return;
+    seen[key] = 1;
+    html += '<option value="' + escHtml(key) + '">' + escHtml(sectionLabel(key)) + "　·　" + escHtml(key) + "</option>";
+  }
+  for (i = 0; i < SECTION_LIST.length; i++) emit(SECTION_LIST[i][0]);
+  if (extraKeys) for (i = 0; i < extraKeys.length; i++) emit(extraKeys[i]);
+  $("fSection").innerHTML = html;
+  var remembered = localStorage.getItem(SEC_KEY);
+  if (remembered && seen[remembered]) $("fSection").value = remembered;
+}
+function refreshSections() {
+  return Promise.all([
+    api(repoPath("docs/text") + "?ref=" + encodeURIComponent(cfg.branch)).catch(function () { return []; }),
+    api(repoPath("docs/interactive") + "?ref=" + encodeURIComponent(cfg.branch)).catch(function () { return []; })
+  ]).then(function (res) {
+    var extra = [], i, j, items;
+    var bases = ["text", "interactive"];
+    for (j = 0; j < res.length; j++) {
+      items = Array.isArray(res[j]) ? res[j] : [];
+      for (i = 0; i < items.length; i++) {
+        if (items[i].type === "dir") extra.push(bases[j] + "/" + items[i].name);
+      }
+    }
+    fillSections(extra);
+    if (origSection) $("fSection").value = origSection;
+  });
+}
+
+/* ---------- 编号自动分配 ---------- */
+function nextCode() {
+  return Promise.all([
+    api(repoPath("docs/buffer/pending") + "?ref=" + encodeURIComponent(cfg.branch)).catch(function () { return []; }),
+    api(repoPath("docs/buffer/public") + "?ref=" + encodeURIComponent(cfg.branch)).catch(function () { return []; })
+  ]).then(function (res) {
+    var max = 0, i, j, items, m;
+    for (j = 0; j < res.length; j++) {
+      items = Array.isArray(res[j]) ? res[j] : [];
+      for (i = 0; i < items.length; i++) {
+        m = String(items[i].name || "").match(/^(\d{3})-/);
+        if (m) { var n = parseInt(m[1], 10); if (n > max) max = n; }
+      }
+    }
+    return ("000" + (max + 1)).slice(-3);
+  });
+}
+
+/* ---------- 目标路径同步 ---------- */
+function syncTarget() {
+  var sec = $("fSection").value, slug = $("fSlug").value.trim(), base;
+  if (editingPath) return;                       /* 覆盖缓冲稿：路径固定 */
+  if (mode === "edit" && srcRel) {
+    base = srcRel.split("/").pop();
+    $("fTarget").value = (sec === origSection)
+      ? srcRel
+      : (sec + "/" + base);
+    return;
+  }
+  if (sec && slug) $("fTarget").value = sec + "/" + slug + ".md";
+}
+
+/* ---------- Markdown 预览（够用的最小实现） ---------- */
 function inline(s) {
   s = escHtml(s);
   s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2">');
@@ -300,7 +416,7 @@ function renderPreview() {
     '<p style="color:#666d78">正文写点什么，这里会实时显示。</p>';
 }
 
-/* 图片上传 */
+/* ---------- 图片上传 ---------- */
 function sanitizeName(name) {
   var base = String(name).replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9._-]+/g, "-")
     .replace(/-{2,}/g, "-").replace(/^-|-$/g, "");
@@ -342,7 +458,7 @@ function handleFiles(files) {
        .catch(function (e) { show("err", "上传失败：" + e.message); });
 }
 
-/* 保存 */
+/* ---------- 保存 ---------- */
 function save() {
   hide();
   if (!token) { show("err", "请先在「设置」里填写访问令牌。"); return; }
@@ -359,12 +475,13 @@ function save() {
 
   var fm = ["---", "title: " + title, "submitter: " + who, "submitted: " + date];
   if (target) fm.push("target: " + target);
+  if (mode === "edit" && srcRel) fm.push("revises: " + srcRel);
   fm.push("tags:", "  - 待审", "---", "");
   var content = fm.join("\n") + "# " + title + "\n\n" + body + "\n";
 
   var path = editingPath || ("docs/buffer/pending/" + code + "-" + slug + ".md");
   var reqBody = {
-    message: (editingPath ? "cms: 更新缓冲稿 " : "cms: 新建缓冲稿 ") + code + "-" + slug,
+    message: (editingPath ? "cms: 更新缓冲稿 " : (mode === "edit" ? "cms: 修改稿 " : "cms: 新建缓冲稿 ")) + code + "-" + slug,
     content: b64encode(content),
     branch: cfg.branch
   };
@@ -373,11 +490,17 @@ function save() {
   var btn = $("btnSave");
   btn.disabled = true;
   show("info", "正在提交…");
+  localStorage.setItem(WHO_KEY, who);
+  if ($("fSection").value) localStorage.setItem(SEC_KEY, $("fSection").value);
   api(repoPath(path), { method: "PUT", body: reqBody }).then(function () {
-    show("ok", "已提交：" + path + " —— 等管理员标记，不用再做什么。");
+    show("ok", "已提交：" + path + " —— 等管理者标记，不用再做什么.");
     editingPath = null; editingSha = null;
-    $("modeTxt").textContent = "新建";
     loadList();
+    if (mode === "edit") {
+      setTimeout(function () { resetForm(); }, 1200);
+    } else {
+      nextCode().then(function (c) { $("fCode").value = c; });
+    }
   }).catch(function (e) {
     if (e.status === 422) show("err", "文件已存在，或者令牌没有写权限。换个编号，或去「缓冲稿列表」点开改。");
     else if (e.status === 401) show("err", "令牌无效或已过期，去「设置」重新填。");
@@ -385,7 +508,7 @@ function save() {
   }).then(function () { btn.disabled = false; });
 }
 
-/* 列表 / 载入 */
+/* ---------- 列表 / 载入 ---------- */
 function loadList() {
   if (!token || cfg.owner === "YOURNAME") {
     $("list").innerHTML = '<li><span style="color:#666d78">连接后才能读取。</span></li>';
@@ -402,7 +525,7 @@ function loadList() {
         return;
       }
       $("list").innerHTML = files.map(function (f) {
-        return '<li><b>' + f.name.slice(0, 3) + '</b><span>' + escHtml(f.name) + "</span>"
+        return '<li><b>' + escHtml(f.name.slice(0, 3)) + '</b><span>' + escHtml(f.name) + "</span>"
              + '<button class="btn sm" type="button" data-p="' + escHtml(f.path) + '">打开</button></li>';
       }).join("");
     })
@@ -411,38 +534,133 @@ function loadList() {
       $("list").innerHTML = '<li><span style="color:#c05a52">读取失败：' + escHtml(e.message) + "</span></li>";
     });
 }
+function parseFrontMatter(text) {
+  var fm = {}, body = text;
+  if (text.indexOf("---") === 0) {
+    var end = text.indexOf("\n---", 3);
+    if (end > 0) {
+      text.slice(3, end).split("\n").forEach(function (ln) {
+        var i = ln.indexOf(":");
+        if (i > 0) fm[ln.slice(0, i).trim()] = ln.slice(i + 1).trim();
+      });
+      body = text.slice(end + 4);
+    }
+  }
+  body = body.replace(/^\s*#\s+.*\n/, "").replace(/^\s+/, "");
+  return { fm: fm, body: body.replace(/\s+$/, "") };
+}
 function openFile(path) {
   hide();
   api(repoPath(path) + "?ref=" + encodeURIComponent(cfg.branch)).then(function (data) {
-    var text = b64decode(data.content), fm = {}, body = text;
-    if (text.indexOf("---") === 0) {
-      var end = text.indexOf("\n---", 3);
-      if (end > 0) {
-        text.slice(3, end).split("\n").forEach(function (ln) {
-          var i = ln.indexOf(":");
-          if (i > 0) fm[ln.slice(0, i).trim()] = ln.slice(i + 1).trim();
-        });
-        body = text.slice(end + 4);
-      }
-    }
-    body = body.replace(/^\s*#\s+.*\n/, "").replace(/^\s+/, "");
+    var text = b64decode(data.content);
+    var p = parseFrontMatter(text);
     var name = path.split("/").pop().replace(/\.md$/, "");
-    $("fCode").value = fm.code || name.slice(0, 3);
-    $("fSlug").value = fm.name_en || name.replace(/^\d+-/, "");
-    $("fTitle").value = fm.title || "";
-    $("fWho").value = fm.submitter || "";
-    $("fDate").value = fm.submitted || "";
-    $("fTarget").value = fm.target || "";
-    $("fBody").value = body.replace(/\s+$/, "");
+    $("fCode").value = p.fm.code || name.slice(0, 3);
+    $("fSlug").value = p.fm.name_en || name.replace(/^\d+-/, "");
+    $("fTitle").value = p.fm.title || "";
+    $("fWho").value = p.fm.submitter || $("fWho").value;
+    $("fDate").value = p.fm.submitted || "";
+    $("fTarget").value = p.fm.target || "";
+    $("fBody").value = p.body;
     editingPath = path; editingSha = data.sha;
-    $("modeTxt").textContent = "修改中 · " + name;
+    mode = "new"; srcRel = null; origSection = null;
+    $("modeTxt").textContent = "覆盖缓冲稿 · " + name;
+    setBanner("edit", "正在改一份<b>已经在缓冲区里</b>的稿件（<code class='inline'>" + escHtml(path) + "</code>）。提交会覆盖它。");
     renderPreview();
     show("info", "已载入 " + name + "。改完点提交会覆盖这一份。");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }).catch(function (e) { show("err", "打开失败：" + e.message); });
 }
 
-/* 设置 / 说明 */
+/* ---------- 从内容页跳进来的编辑流程 ---------- */
+function slugForSource(rel) {
+  var seg = rel.split("/");
+  var folder = seg.length >= 3 ? seg[seg.length - 2] : "doc";
+  var base = seg[seg.length - 1].replace(/\.md$/i, "");
+  var ascii = base.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").toLowerCase();
+  var s = "edit-" + (folder.replace(/[^a-z0-9-]+/gi, "-").toLowerCase() || "doc");
+  if (ascii) s += "-" + ascii;
+  return s.replace(/-{2,}/g, "-").replace(/^-|-$/g, "").slice(0, 48);
+}
+function loadSource(rel) {
+  show("info", "正在读取原文…");
+  return api(repoPath("docs/" + rel) + "?ref=" + encodeURIComponent(cfg.branch)).then(function (data) {
+    var text = b64decode(data.content);
+    var p = parseFrontMatter(text);
+    var base = rel.split("/").pop().replace(/\.md$/, "");
+    mode = "edit"; srcRel = rel;
+    origSection = rel.replace(/\/[^/]+$/, "");
+    if ($("fSection").querySelector('option[value="' + origSection.replace(/"/g, '\\"') + '"]')) {
+      $("fSection").value = origSection;
+    }
+    $("fTitle").value = p.fm.title || base;
+    $("fSlug").value = slugForSource(rel);
+    $("fWho").value = p.fm.submitter || localStorage.getItem(WHO_KEY) || "";
+    $("fDate").value = new Date().toISOString().slice(0, 10);
+    $("fTarget").value = rel;
+    $("fBody").value = p.body;
+    $("modeTxt").textContent = "修改 · " + base;
+    setBanner("edit",
+      "正在为《<b>" + escHtml(p.fm.title || base) + "</b>》起草修改稿。" +
+      "提交后这份稿进 <code class='inline'>buffer/pending/</code>，<b>原文不受影响</b>，" +
+      "管理者审核通过后才并入 <code class='inline'>" + escHtml(rel) + "</code>。");
+    renderPreview();
+    hide();
+    return nextCode().then(function (c) { $("fCode").value = c; });
+  }).catch(function (e) {
+    show("err", "读取原文失败：" + e.message);
+  });
+}
+
+function resetForm() {
+  mode = "new"; srcRel = null; origSection = null;
+  editingPath = null; editingSha = null;
+  ["fSlug", "fTitle", "fTarget", "fBody"].forEach(function (id) { $(id).value = ""; });
+  $("fWho").value = localStorage.getItem(WHO_KEY) || "";
+  $("fDate").value = new Date().toISOString().slice(0, 10);
+  $("modeTxt").textContent = "新建";
+  setBanner(null);
+  hide(); renderPreview();
+  return nextCode().then(function (c) { $("fCode").value = c; });
+}
+
+function param(name) {
+  var m = new RegExp("[?&]" + name + "=([^&]*)").exec(window.location.search);
+  return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : "";
+}
+
+function boot() {
+  fillSections(null);
+  $("fWho").value = localStorage.getItem(WHO_KEY) || "";
+  $("fDate").value = new Date().toISOString().slice(0, 10);
+  renderPreview();
+
+  var src = param("src");
+  var wantSection = param("section");
+  if (wantSection) {
+    var opt = $("fSection").querySelector('option[value="' + wantSection.replace(/"/g, '\\"') + '"]');
+    if (!opt) {
+      var o = document.createElement("option");
+      o.value = wantSection; o.textContent = wantSection;
+      $("fSection").appendChild(o);
+    }
+    $("fSection").value = wantSection;
+  }
+
+  verify().then(function (ok) {
+    loadList();
+    if (!ok) {
+      if (src) show("err", "先补全上面的设置（令牌），再回内容页点一次「编辑此条目」。");
+      return;
+    }
+    return refreshSections().then(function () {
+      if (src) return loadSource(src);
+      return nextCode().then(function (c) { $("fCode").value = c; });
+    });
+  });
+}
+
+/* ---------- 设置 / 说明 ---------- */
 function openModal(html) { $("modal").innerHTML = html; $("ov").className = "ov on"; }
 function closeModal() { $("ov").className = "ov"; }
 
@@ -470,7 +688,7 @@ function showCfg() {
     localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
     localStorage.setItem(TOKEN_KEY, token);
     closeModal();
-    verify().then(function () { loadList(); });
+    verify().then(function () { loadList(); refreshSections(); });
   };
   $("cCancel").onclick = closeModal;
 }
@@ -478,32 +696,39 @@ function showCfg() {
 function showHelp() {
   openModal(
     '<h3>填写说明</h3>' +
-    '<div class="f"><label>第一步：拿一个访问令牌</label>' +
+    '<div class="f"><label>第一步：拿一个访问令牌（只做一次）</label>' +
     '<div style="font-size:12.5px;color:var(--ink2);line-height:1.9">' +
     '打开 <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" style="color:#e6cf9a">github.com/settings/personal-access-tokens/new</a><br>' +
     'Repository access 选 <b>Only select repositories</b> → 勾 <code class="inline">14thSecretary</code><br>' +
     'Permissions → Repository permissions → <b>Contents</b> 设为 <b>Read and write</b><br>' +
     'Generate token，复制那串 <code class="inline">github_pat_…</code>，粘到「设置」里。' +
-    '<br><br>只需做一次。令牌存在本机浏览器，换电脑要重填。</div></div>' +
-    '<div class="f"><label>第二步：写稿</label>' +
+    '<br><br>令牌存在本机浏览器，换电脑要重填。</div></div>' +
+    '<div class="f"><label>两种进入方式</label>' +
     '<div style="font-size:12.5px;color:var(--ink2);line-height:1.9">' +
-    '编号三位数顺延；英文短名随便起（只用于文件名，不显示）；正文直接写，右边实时预览。<br>' +
-    '图片直接拖到虚线框里，会自动传进仓库并插到光标处。' +
-    '<br><br>点「提交缓冲稿」就完事了 —— 内容进 <code class="inline">buffer/pending/</code>，剩下的等管理员标记。</div></div>' +
+    '<b>① 改已有条目</b> —— 在站上翻到那一页，点标题下面的「编辑此条目」。' +
+    '这里会自动把原文拉进来，你改完提交，<b>原文不受影响</b>，改动进缓冲区等审核。<br>' +
+    '<b>② 新建条目</b> —— 直接开这个页面，或从板块落地页点「在此分区新建条目」。' +
+    '选好分区，标题和英文短名填上，「拟并入位置」会自动算出来。</div></div>' +
+    '<div class="f"><label>填写要点</label>' +
+    '<div style="font-size:12.5px;color:var(--ink2);line-height:1.9">' +
+    '编号三位数，已自动取下一个可用号；英文短名只用于文件名，页面不显示；' +
+    '提交人写你的代号，会显示在公示里。<br>' +
+    '图片直接拖到虚线框里，自动传进仓库并插到光标处。' +
+    '<br><br>点「提交缓冲稿」就完事了 —— 内容进 <code class="inline">buffer/pending/</code>，剩下的等管理者标记。</div></div>' +
     '<div style="display:flex"><button class="btn primary" type="button" id="hOk">知道了</button></div>'
   );
   $("hOk").onclick = closeModal;
 }
 
-/* 绑定 */
+/* ---------- 绑定 ---------- */
 $("fBody").addEventListener("input", renderPreview);
-$("btnSave").addEventListener("click", save);
-$("btnNew").addEventListener("click", function () {
-  editingPath = null; editingSha = null;
-  ["fCode", "fSlug", "fTitle", "fTarget", "fBody"].forEach(function (id) { $(id).value = ""; });
-  $("modeTxt").textContent = "新建";
-  hide(); renderPreview();
+$("fSlug").addEventListener("input", syncTarget);
+$("fSection").addEventListener("change", function () {
+  localStorage.setItem(SEC_KEY, $("fSection").value);
+  syncTarget();
 });
+$("btnSave").addEventListener("click", save);
+$("btnNew").addEventListener("click", function () { resetForm(); });
 $("btnReload").addEventListener("click", loadList);
 $("btnCfg").addEventListener("click", showCfg);
 $("btnHelp").addEventListener("click", showHelp);
@@ -532,9 +757,7 @@ drop.addEventListener("drop", function (ev) {
 document.addEventListener("dragover", function (ev) { ev.preventDefault(); });
 document.addEventListener("drop", function (ev) { ev.preventDefault(); });
 
-$("fDate").value = new Date().toISOString().slice(0, 10);
-renderPreview();
-verify().then(function () { loadList(); });
+boot();
 </script>
 </body>
 </html>
