@@ -24,6 +24,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # enablement: true 会用工作流自带的 GITHUB_TOKEN（已授予 pages: write）
+      # 自动把仓库的 Pages 建起来，省掉去 Settings → Pages 手点那一步。
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
