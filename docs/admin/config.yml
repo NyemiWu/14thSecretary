@@ -1,0 +1,89 @@
+# ============================================================
+# 14thSecretary · 内容后台（Decap CMS）
+# 改这个文件不需要重新构建站点 —— admin/config.yml 是静态文件，
+# 但改动要 commit 推上去才生效。
+#
+# 三处占位必须换掉（见 docs/buffer/cms.md 的配置步骤）：
+#   backend.repo      仓库全名
+#   backend.base_url  OAuth 代理地址
+#   site_url / display_url / logo_url / public_folder
+# ============================================================
+
+backend:
+  name: github
+  repo: YOURNAME/14thSecretary
+  branch: main
+  base_url: https://YOUR-PROXY.workers.dev
+  auth_endpoint: auth
+  commit_messages:
+    create: "cms: 新建缓冲稿 {{slug}}"
+    update: "cms: 更新缓冲稿 {{slug}}"
+    delete: "cms: 删除缓冲稿 {{slug}}"
+
+# 站点信息
+site_url: https://YOURNAME.github.io/14thSecretary/
+display_url: https://YOURNAME.github.io/14thSecretary/
+logo_url: https://YOURNAME.github.io/14thSecretary/assets/sigil.svg
+locale: zh_Hans
+
+# 图片：上传后直接提交进仓库，不放外部图床
+media_folder: docs/assets/uploads
+public_folder: /14thSecretary/assets/uploads
+
+# 直接 commit 到 main。如果以后给 main 开了「必须走 PR」的分支保护，
+# 这里要改成 editorial_workflow，否则保存会报权限错误。
+publish_mode: simple
+
+collections:
+  - name: pending
+    label: 缓冲稿
+    label_singular: 缓冲稿
+    description: 新内容一律先写在这里。管理者标记通过后才会进入公示。
+    folder: docs/buffer/pending
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{fields.code}}-{{fields.name_en}}"
+    identifier_field: title
+    summary: "{{fields.code}} · {{title}}"
+    sortable_fields: [code, title]
+    view_filters:
+      - label: 只看未标记的
+        field: code
+        pattern: ".*"
+    fields:
+      - name: code
+        label: 稿件编号
+        widget: string
+        hint: 三位数字，顺延不重复。例：012
+        pattern: ['^[0-9]{3}$', '必须是三位数字，比如 012']
+      - name: name_en
+        label: 英文短名
+        widget: string
+        hint: 全小写英文，短横线连接。例：ember-pact。只用于文件名和网址，不显示在页面上
+        pattern: ['^[a-z0-9]+(-[a-z0-9]+)*$', '只能用小写字母、数字和短横线']
+      - name: title
+        label: 标题
+        widget: string
+      - name: submitter
+        label: 提交人
+        widget: string
+        hint: 你的代号
+      - name: submitted
+        label: 提交日期
+        widget: datetime
+        date_format: YYYY-MM-DD
+        time_format: false
+        format: YYYY-MM-DD
+      - name: target
+        label: 拟并入的位置
+        widget: string
+        hint: 例：text/canon/xxx.md 或 interactive/tools/xxx.md
+      - name: tags
+        label: 标签
+        widget: hidden
+        default: ['待审']
+      - name: body
+        label: 正文
+        widget: markdown
+        hint: 结构照 docs/buffer/entries.md 的模板写

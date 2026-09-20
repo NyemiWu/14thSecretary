@@ -116,6 +116,9 @@ python scripts/gen_board.py
 
 ## 几个说明
 
+**成员不写 Markdown 的话走 [内容后台](cms.md)。** 表单式界面，图片拖拽上传，
+保存即提交一份缓冲稿，不用碰语法。配好之后成员只需要点一个链接。
+
 **待审稿不上线。** `mkdocs.yml` 里 `draft_docs: buffer/pending/` 的语义是
 「只在 `mkdocs serve` 本地预览时构建，`mkdocs build` 不发布」。
 所以提交人能本地看渲染效果，但没过审的内容不会上线、搜不到。

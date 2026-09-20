@@ -119,7 +119,8 @@ def render(today, repo_url):
     o.append("    由 `scripts/gen_board.py` 扫描 `buffer/pending/` 与 `buffer/public/` 生成。")
     o.append("    稿件一动就跑一次：`python scripts/gen_board.py`")
     o.append("")
-    o.append("    流程见 [缓冲流程](rules.md)。")
+    o.append("    成员投稿走 [内容后台](cms.md)（表单式，不用写 Markdown），")
+    o.append("    或者直接往 `buffer/pending/` 放文件。流程见 [缓冲流程](rules.md)。")
     o.append("")
     o.append("**截至 %s** —— 公示中 **%d** · 待审 **%d**"
              % (today.isoformat(), len(pub), len(pend)))

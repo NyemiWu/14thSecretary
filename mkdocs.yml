@@ -128,6 +128,7 @@ nav:
 
   - 缓冲分区:
       - buffer/index.md
-      - 流程: buffer/rules.md
+      - 缓冲流程: buffer/rules.md
+      - 内容后台: buffer/cms.md
       - 编辑规范: buffer/style-guide.md
       - 条目模板: buffer/entries.md
